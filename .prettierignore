@@ -1,0 +1,16 @@
+dist
+node_modules
+src-tauri
+docs
+plans
+.claude
+.github
+propuesta.md
+README.md
+package-lock.json
+coverage
+reports
+CLAUDE.md
+.serena
+.stryker-tmp
+.playwright-mcp

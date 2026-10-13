@@ -1,0 +1,218 @@
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+h1 {
+  font-size: var(--font-size-xl);
+}
+
+h2 {
+  font-size: var(--font-size-lg);
+}
+
+h3 {
+  font-size: var(--font-size-base);
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+:focus-visible {
+  outline: var(--border-width-lg) solid var(--color-primary);
+  outline-offset: var(--outline-offset-focus);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.field__label {
+  font-weight: var(--font-weight-bold);
+}
+
+.field__hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.field__error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.field__input {
+  box-sizing: border-box;
+  min-height: var(--size-touch-target-min);
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width-sm) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.field__input[aria-invalid="true"] {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 var(--border-width-sm) var(--color-error);
+}
+
+textarea.field__input {
+  min-height: var(--size-textarea-min-height);
+  resize: vertical;
+}
+
+.btn {
+  min-height: var(--size-touch-target-min);
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-clay);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+.btn:hover:not(:disabled) {
+  background-color: var(--color-bg-elevated);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(var(--border-width-sm));
+}
+
+.btn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.btn--danger {
+  background-color: var(--color-error);
+  color: var(--color-bg);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: var(--color-error-hover);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-clay);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.row > .btn {
+  flex: 1 1 auto;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background-color: var(--color-bg-elevated);
+}
+
+.app__brand {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.app__main {
+  padding: var(--space-md);
+}
+
+.app__main:focus {
+  outline: none;
+}
+
+.panel,
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: var(--size-panel-max-width);
+}
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: var(--border-width-sm) solid var(--color-border);
+  border-left-width: var(--border-width-lg);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.banner--error {
+  border-color: var(--color-error);
+}
+
+.banner--warning {
+  border-color: var(--color-conflict-marker);
+  background-color: var(--color-conflict-bg);
+}
+
+.banner--success {
+  border-color: var(--color-success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
+
+.banner > .btn {
+  align-self: flex-start;
+}

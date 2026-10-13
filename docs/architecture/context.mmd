@@ -1,0 +1,13 @@
+flowchart TB
+  user([Usuario])
+  subgraph sistema[dakedaduck svn - Tauri 2]
+    ui[Frontend Vue 3]
+    core[Backend Rust]
+  end
+  svn[svn.exe SlikSVN]
+  cfg[(config.json)]
+
+  user --> ui
+  ui -->|commands tipados| core
+  core -->|Command sin shell| svn
+  core --> cfg

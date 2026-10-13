@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "mutate": [
+    "src/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.d.ts",
+    "!src/main.ts"
+  ],
+  "reporters": ["clear-text", "html"],
+  "coverageAnalysis": "perTest",
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 0
+  },
+  "ignorePatterns": [
+    "src-tauri",
+    "coverage",
+    "reports",
+    "dist",
+    "tests/e2e",
+    ".stryker-tmp"
+  ]
+}

@@ -1,0 +1,40 @@
+/* CSS no admite var() en media queries: unico archivo con breakpoints literales (sm 640px, md 768px, lg 1024px) */
+@media (min-width: 640px) {
+  .row {
+    flex-wrap: nowrap;
+  }
+
+  .field {
+    flex: 1 1 0;
+  }
+
+  .row > .btn {
+    flex: none;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: var(--space-lg);
+  }
+
+  .app__header {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .app__main {
+    padding: var(--space-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .panel,
+  .onboarding {
+    margin-inline: auto;
+  }
+}

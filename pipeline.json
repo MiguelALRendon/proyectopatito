@@ -1,0 +1,104 @@
+{
+  "stages": [
+    {
+      "id": "build",
+      "order": 1,
+      "cmd": "npx vue-tsc --noEmit",
+      "tier": "local",
+      "blocking": "hard"
+    },
+    {
+      "id": "rust-check",
+      "cmd": "cargo check --manifest-path src-tauri/Cargo.toml",
+      "tier": "local",
+      "blocking": "hard",
+      "order": 2
+    },
+    {
+      "id": "rust-test",
+      "cmd": "cargo test --manifest-path src-tauri/Cargo.toml",
+      "tier": "local",
+      "blocking": "hard",
+      "requiresTesting": true,
+      "order": 3
+    },
+    {
+      "id": "format",
+      "order": 4,
+      "cmd": "npx prettier --check .",
+      "tier": "local",
+      "blocking": "hard"
+    },
+    {
+      "id": "theme-check",
+      "order": 5,
+      "internal": "style-check",
+      "tier": "local",
+      "blocking": "hard",
+      "requiresStyle": true
+    },
+    {
+      "id": "gherkin",
+      "order": 6,
+      "internal": "gherkin-check",
+      "tier": "local",
+      "blocking": "hard"
+    },
+    {
+      "id": "arch",
+      "order": 7,
+      "cmd": "npx dependency-cruiser --validate src",
+      "tier": "local",
+      "blocking": "hard",
+      "enabled": false
+    },
+    {
+      "id": "unit",
+      "order": 8,
+      "cmd": "npx vitest run --coverage",
+      "tier": "local",
+      "blocking": "hard",
+      "requiresTesting": true
+    },
+    {
+      "id": "integration",
+      "order": 9,
+      "cmd": "npx vitest run tests/integration",
+      "tier": "ci",
+      "blocking": "hard",
+      "enabled": false
+    },
+    {
+      "id": "bdd",
+      "order": 10,
+      "cmd": "npx cucumber-js",
+      "tier": "ci",
+      "blocking": "hard",
+      "requiresBdd": true
+    },
+    {
+      "id": "e2e",
+      "order": 11,
+      "cmd": "npx playwright test",
+      "tier": "ci",
+      "blocking": "hard",
+      "enabled": false
+    },
+    {
+      "id": "mutation",
+      "order": 12,
+      "cmd": "npx stryker run",
+      "tier": "local",
+      "blocking": "hard",
+      "requiresTesting": true
+    },
+    {
+      "id": "docdrift",
+      "order": 13,
+      "internal": "docdrift-check",
+      "tier": "ci",
+      "blocking": "soft",
+      "enabled": false
+    }
+  ]
+}

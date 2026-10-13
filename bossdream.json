@@ -1,0 +1,69 @@
+{
+  "codeExtensions": [
+    ".css",
+    ".scss",
+    ".sql",
+    ".ps1",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".vue",
+    ".rs"
+  ],
+  "planLock": {
+    "enabled": true,
+    "requirePaths": [
+      "src-tauri/src/svn/**",
+      "src-tauri/src/app/**",
+      "src-tauri/src/commands/**",
+      "src/stores/**",
+      "src/services/**"
+    ],
+    "exemptPaths": [
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "scratch/**",
+      "plans/**",
+      "**/*.md",
+      "**/*.feature"
+    ],
+    "exemptModes": ["spike", "explore", "bugfix", "chore", "implement"],
+    "nonEditingModes": ["plan", "document", "review"]
+  },
+  "testing": {
+    "enabled": true,
+    "bdd": false,
+    "project": "src-tauri/tests",
+    "coverage": "changed",
+    "exemptions": [
+      "accesores-simples",
+      "contenedores-de-datos",
+      "constructores-triviales",
+      "catalogos-repetidos",
+      "mapeos-1a1",
+      "autogenerado",
+      "cableado-configuracion",
+      "presentacion-ui"
+    ]
+  },
+  "style": {
+    "enabled": true,
+    "themeSource": "src/styles/tokens.css",
+    "vendorExempt": ["coverage/*", "reports/*", "src/styles/responsive.css"],
+    "exemptions": ["0", "porcentajes", "viewport", "grid-fr", "keywords"]
+  },
+  "qa": {
+    "mode": "costoso"
+  },
+  "models": {
+    "plan": "opus",
+    "code": "sonnet",
+    "audit": "haiku",
+    "quick": "haiku"
+  },
+  "implementation": {
+    "autoChainIncrements": true
+  }
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<info>
+<entry
+   kind="dir"
+   path="."
+   revision="1">
+<url>file:///C:/svnfx/repo</url>
+<relative-url>^/</relative-url>
+<repository>
+<root>file:///C:/svnfx/repo</root>
+<uuid>ca20c8f3-7403-a840-a9c6-16502c791e89</uuid>
+</repository>
+<wc-info>
+<wcroot-abspath>C:/svnfx/wc</wcroot-abspath>
+<schedule>normal</schedule>
+<depth>infinity</depth>
+</wc-info>
+<commit
+   revision="1">
+<author>alice</author>
+<date>2026-10-13T14:28:19.895092Z</date>
+</commit>
+</entry>
+</info>
