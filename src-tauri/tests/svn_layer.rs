@@ -1,13 +1,17 @@
 #![cfg(windows)]
 
+mod common;
+
 use std::ffi::OsString;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
+
+use common::FakeSvn;
 
 use dakedaduck_svn_lib::app::svn_locator::{
-    LocatorError, MIN_VERSION, SvnVersion, locate, locate_in, parse_version,
+    LocatorError, MIN_VERSION, SvnVersion, locate, locate_in, parse_version, search_dirs,
 };
 use dakedaduck_svn_lib::svn::error::{
     CODE_AUTH_REQUIRED, Captured, SvnError, SvnErrorKind, extract_codes, redact_command,
@@ -388,4 +392,83 @@ fn run_options_debug_never_prints_the_password() {
         ..RunOptions::default()
     };
     assert!(!format!("{options:?}").contains("s3cret"));
+}
+
+#[test]
+fn svn_error_keeps_stdout_exit_code_and_a_fresh_timestamp() {
+    let before = SystemTime::now();
+    let captured = Captured {
+        stdout: "salida".into(),
+        stderr: "svn: E170001: x".into(),
+        exit_code: Some(1),
+    };
+    let error = SvnError::from_process(&os_args(&["update"]), captured);
+    assert_eq!(error.stdout, "salida");
+    assert_eq!(error.exit_code, Some(1));
+    assert!(error.timestamp >= before && error.timestamp <= SystemTime::now());
+}
+
+#[test]
+fn locate_in_reports_too_old_when_the_only_candidate_is_old() {
+    let old = TempDir::new().unwrap();
+    let old_exe = FakeSvn::with_version("1.9.7").build(old.path());
+    let found = SvnVersion {
+        major: 1,
+        minor: 9,
+        patch: 7,
+    };
+    assert_eq!(
+        locate_in(None, &[old.path().to_path_buf()]),
+        Err(LocatorError::TooOld {
+            path: old_exe,
+            found,
+            required: MIN_VERSION
+        })
+    );
+}
+
+#[test]
+fn locate_in_ignores_an_old_client_when_a_usable_one_follows() {
+    let (old, current) = (TempDir::new().unwrap(), TempDir::new().unwrap());
+    FakeSvn::with_version("1.9.7").build(old.path());
+    let current_exe = FakeSvn::with_version("1.14.2").build(current.path());
+    let dirs = [old.path().to_path_buf(), current.path().to_path_buf()];
+    assert_eq!(locate_in(None, &dirs).unwrap().path, current_exe);
+}
+
+#[test]
+fn locate_in_returns_the_first_usable_candidate_in_list_order() {
+    let (first, second) = (TempDir::new().unwrap(), TempDir::new().unwrap());
+    let first_exe = FakeSvn::with_version("1.12.0").build(first.path());
+    FakeSvn::with_version("1.14.2").build(second.path());
+    let dirs = [first.path().to_path_buf(), second.path().to_path_buf()];
+    assert_eq!(locate_in(None, &dirs).unwrap().path, first_exe);
+}
+
+#[test]
+fn locate_in_prefers_the_manual_path_over_every_search_directory() {
+    let (manual_dir, listed) = (TempDir::new().unwrap(), TempDir::new().unwrap());
+    let manual = FakeSvn::with_version("1.11.0").build(manual_dir.path());
+    FakeSvn::with_version("1.14.2").build(listed.path());
+    let found = locate_in(Some(&manual), &[listed.path().to_path_buf()]).unwrap();
+    assert_eq!(found.path, manual);
+}
+
+#[test]
+fn search_dirs_lists_path_first_then_tortoise_slik_and_apache() {
+    let path = std::env::join_paths([r"C:\a", r"C:\b"]).unwrap();
+    let dirs = search_dirs(Some(&path), Some(Path::new(r"C:\PF")));
+    let expected = [
+        r"C:\a",
+        r"C:\b",
+        r"C:\PF\TortoiseSVN\bin",
+        r"C:\PF\SlikSvn\bin",
+        r"C:\PF\Apache Subversion\bin",
+    ];
+    assert_eq!(dirs, expected.map(PathBuf::from));
+}
+
+#[test]
+fn search_dirs_is_empty_without_path_and_program_files() {
+    assert!(search_dirs(None, None).is_empty());
 }

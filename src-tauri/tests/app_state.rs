@@ -10,7 +10,7 @@ use std::process::Command;
 use std::sync::Arc;
 use std::time::Duration;
 
-use common::TestRepo;
+use common::{FakeSvn, TestRepo};
 use dakedaduck_svn_lib::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, UpdateArgs};
 use dakedaduck_svn_lib::app::error::{CommandError, CommandErrorKind};
 use dakedaduck_svn_lib::app::operations::{OperationError, OperationId};
@@ -537,4 +537,184 @@ fn tokio_test_block<F: std::future::Future>(future: F) -> F::Output {
         .build()
         .unwrap()
         .block_on(future)
+}
+
+const CAPABILITIES_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/capabilities");
+const AUTH_FAILURE_STDERR: &str = "svn: E170001: Authorization failed
+";
+const MALFORMED_XML: &str = "<info><entry";
+const CURRENT_VERSION: &str = "1.14.2";
+
+fn escaping_path() -> String {
+    r"..\fuera".into()
+}
+
+fn adopt_fake_svn(state: &AppState, fake: &FakeSvn) -> TempDir {
+    let dir = TempDir::new().unwrap();
+    let detection = state.svn_set_path(&fake.build(dir.path()));
+    assert!(detection.binary.is_some(), "{:?}", detection.error);
+    dir
+}
+
+#[tokio::test]
+async fn start_checkout_rejects_a_destination_outside_the_workspace_without_launching() {
+    let state = state_with_workspace(&sandbox());
+    let (sinks, mut receiver) = sinks();
+    let repo = TestRepo::create();
+    let args = checkout_args(&repo, &escaping_path());
+    assert_eq!(
+        kind_of(state.start_checkout(args, sinks)),
+        CommandErrorKind::InvalidPath
+    );
+    assert!(receiver.try_recv().is_err());
+}
+
+#[tokio::test]
+async fn start_commit_rejects_a_path_outside_the_workspace_without_launching() {
+    let state = state_with_workspace(&sandbox());
+    let (sinks, mut receiver) = sinks();
+    let args = CommitArgs {
+        path: escaping_path(),
+        message: "m".into(),
+        username: None,
+        password: None,
+    };
+    assert_eq!(
+        kind_of(state.start_commit(args, sinks)),
+        CommandErrorKind::InvalidPath
+    );
+    assert!(receiver.try_recv().is_err());
+}
+
+#[tokio::test]
+async fn start_cleanup_rejects_a_path_outside_the_workspace_without_launching() {
+    let state = state_with_workspace(&sandbox());
+    let (sinks, mut receiver) = sinks();
+    let args = CleanupArgs {
+        path: escaping_path(),
+    };
+    assert_eq!(
+        kind_of(state.start_cleanup(args, sinks)),
+        CommandErrorKind::InvalidPath
+    );
+    assert!(receiver.try_recv().is_err());
+}
+
+#[tokio::test]
+async fn start_update_rejects_a_password_without_a_username() {
+    let state = state_with_workspace(&sandbox());
+    let (sinks, mut receiver) = sinks();
+    let args = UpdateArgs {
+        path: ".".into(),
+        revision: None,
+        ignore_externals: false,
+        username: None,
+        password: Some("s3cret".into()),
+    };
+    let error = state.start_update(args, sinks).unwrap_err();
+    assert_eq!(error.kind, CommandErrorKind::InvalidPath);
+    assert!(!serde_json::to_string(&error).unwrap().contains("s3cret"));
+    assert!(receiver.try_recv().is_err());
+}
+
+#[tokio::test]
+async fn working_copy_command_reports_no_svn_when_the_configured_client_is_gone() {
+    let sandbox = sandbox();
+    let config = AppConfig {
+        svn_path: Some(PathBuf::from(r"C:\no\existe\svn.exe")),
+        ..AppConfig::default()
+    };
+    sandbox.store.save(&config).unwrap();
+    let state = state_with_workspace(&sandbox);
+    assert_eq!(kind_of(state.wc_info(".").await), CommandErrorKind::NoSvn);
+}
+
+#[test]
+fn svn_set_path_reports_a_save_failure_but_keeps_the_adopted_binary() {
+    let dir = TempDir::new().unwrap();
+    let blocker = dir.path().join("bloqueo");
+    fs::write(&blocker, "no soy una carpeta").unwrap();
+    let store = ConfigStore {
+        path: blocker.join(CONFIG_FILE_NAME),
+    };
+    let state = AppState::new(store);
+    let detection = state.svn_set_path(&TestRepo::create().svn.path);
+    assert!(detection.binary.is_some());
+    let error = detection
+        .error
+        .expect("el fallo de guardado debe informarse");
+    assert!(
+        error.starts_with("no se pudo guardar la configuración"),
+        "{error}"
+    );
+}
+
+#[tokio::test]
+async fn failed_operation_emits_done_with_an_error_result() {
+    let state = state_with_workspace(&sandbox());
+    let (sinks, mut receiver) = sinks();
+    let args = CheckoutArgs {
+        url: "file:///C:/no/existe/repo".into(),
+        ..checkout_args(&TestRepo::create(), "copia")
+    };
+    state.start_checkout(args, sinks).unwrap();
+    match finished(&mut receiver).await {
+        OperationResult::Err(error) => assert_eq!(error.kind, CommandErrorKind::SvnFailed),
+        other => panic!("se esperaba un error, llegó {other:?}"),
+    }
+}
+
+#[tokio::test]
+async fn retrying_with_wrong_credentials_reports_auth_required_again() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    let fake = FakeSvn {
+        stderr: AUTH_FAILURE_STDERR,
+        exit_code: 1,
+        ..FakeSvn::with_version(CURRENT_VERSION)
+    };
+    let _fake_dir = adopt_fake_svn(&state, &fake);
+    for password in ["primera", "segunda"] {
+        let (sinks, mut receiver) = sinks();
+        let args = CheckoutArgs {
+            username: Some("alice".into()),
+            password: Some(password.into()),
+            ..checkout_args(&TestRepo::create(), "copia")
+        };
+        state.start_checkout(args, sinks).unwrap();
+        match finished(&mut receiver).await {
+            OperationResult::Err(error) => {
+                assert_eq!(error.kind, CommandErrorKind::AuthRequired);
+                assert!(!serde_json::to_string(&error).unwrap().contains(password));
+            }
+            other => panic!("se esperaba AuthRequired, llegó {other:?}"),
+        }
+    }
+}
+
+#[tokio::test]
+async fn malformed_svn_xml_is_reported_as_parse_failed() {
+    let state = state_with_workspace(&sandbox());
+    let fake = FakeSvn {
+        stdout: MALFORMED_XML,
+        ..FakeSvn::with_version(CURRENT_VERSION)
+    };
+    let _fake_dir = adopt_fake_svn(&state, &fake);
+    assert_eq!(
+        kind_of(state.wc_info(".").await),
+        CommandErrorKind::ParseFailed
+    );
+}
+
+#[test]
+fn the_main_window_capabilities_grant_only_core_and_dialog_defaults() {
+    let files: Vec<_> = fs::read_dir(CAPABILITIES_DIR).unwrap().collect();
+    assert_eq!(files.len(), 1, "solo debe existir una capability");
+    let path = files[0].as_ref().unwrap().path();
+    let capability: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+    assert_eq!(
+        capability["permissions"],
+        serde_json::json!(["core:default", "dialog:default"])
+    );
 }

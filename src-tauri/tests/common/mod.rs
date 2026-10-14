@@ -57,3 +57,44 @@ fn file_url(repo_path: &Path) -> String {
     let encoded = utf8_percent_encode(&slashed, &URL_SAFE);
     format!("{FILE_URL_PREFIX}{encoded}")
 }
+
+const FAKE_SVN_EXE: &str = "svn.exe";
+const FAKE_SVN_SOURCE: &str = "fake_svn.rs";
+
+pub struct FakeSvn {
+    pub version: &'static str,
+    pub stdout: &'static str,
+    pub stderr: &'static str,
+    pub exit_code: i32,
+}
+
+impl FakeSvn {
+    pub fn with_version(version: &'static str) -> Self {
+        Self {
+            version,
+            stdout: "",
+            stderr: "",
+            exit_code: 0,
+        }
+    }
+
+    pub fn build(&self, dir: &Path) -> std::path::PathBuf {
+        let source = dir.join(FAKE_SVN_SOURCE);
+        let program = format!(
+            "fn main() {{ if std::env::args().any(|a| a == \"--version\") {{ println!(\"{{}}\", {:?}); return; }} \
+             let mut sink = String::new(); let _ = std::io::Read::read_to_string(&mut std::io::stdin(), &mut sink); \
+             print!(\"{{}}\", {:?}); eprint!(\"{{}}\", {:?}); std::process::exit({}); }}",
+            self.version, self.stdout, self.stderr, self.exit_code
+        );
+        std::fs::write(&source, program).unwrap();
+        let output = dir.join(FAKE_SVN_EXE);
+        let status = Command::new("rustc")
+            .arg(&source)
+            .arg("-o")
+            .arg(&output)
+            .status()
+            .expect("se necesita rustc para compilar el svn.exe falso");
+        assert!(status.success(), "no se pudo compilar el svn.exe falso");
+        output
+    }
+}

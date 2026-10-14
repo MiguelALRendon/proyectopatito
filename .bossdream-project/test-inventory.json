@@ -1,0 +1,2076 @@
+{
+  "behavior": "Fase 1 de dakedaduck svn: Workspace Root seguro (ScopedPath/resolve/revalidate), localización de svn.exe >= 1.10, lectura tipada (info/status), operaciones checkout/update/commit/cleanup con progreso, cancelación, serialización por copia de trabajo y marca de cleanup, errores SVN normalizados sin contraseñas, credenciales por stdin, y shell Vue (stores Pinia + servicio tauri.ts) que consume esas operaciones",
+  "rules": [
+    "Workspace::new rechaza una raíz inexistente (RootInvalid)",
+    "Workspace::new rechaza una raíz que no es un directorio (RootInvalid)",
+    "resolve rechaza '..' al inicio de la ruta (ParentTraversal)",
+    "resolve rechaza '..' oculto en medio de la ruta (ParentTraversal)",
+    "resolve rechaza el prefijo de namespace de dispositivo (DeviceOrReservedPath)",
+    "resolve rechaza el prefijo verbatim (DeviceOrReservedPath)",
+    "resolve rechaza nombres reservados de Windows (CON, PRN, AUX, NUL, COM1-9, LPT1-9) en cualquier combinación de mayúsculas y extensión",
+    "resolve rechaza un nombre reservado anidado en cualquier componente de la ruta",
+    "resolve acepta COM0 y COM10 porque no son nombres reservados",
+    "resolve rechaza una ruta absoluta fuera del Workspace Root (OutsideWorkspace)",
+    "resolve rechaza una carpeta hermana con prefijo de nombre similar (SVN2 frente a SVN)",
+    "resolve rechaza una junction que escapa del Workspace Root (OutsideWorkspace)",
+    "resolve rechaza un symlink que escapa del Workspace Root (OutsideWorkspace)",
+    "resolve devuelve DestinationExists si el destino existe y allow_overwrite es falso",
+    "resolve trata la raíz misma como destino existente cuando allow_overwrite es falso",
+    "resolve acepta un destino existente cuando allow_overwrite es verdadero",
+    "La comparación de contención ignora mayúsculas y minúsculas",
+    "revalidate rechaza un destino sustituido por una junction que escapa (TOCTOU)",
+    "resolve canonicaliza el ancestro existente más profundo para destinos que aún no existen",
+    "extract_codes devuelve vacío para stderr vacío",
+    "extract_codes ignora líneas sin el prefijo 'svn: '",
+    "extract_codes rechaza códigos mal formados (longitud, minúscula o no numérico)",
+    "extract_codes conserva en orden todos los códigos de un error encadenado",
+    "SvnErrorKind::from_codes devuelve Other sin códigos",
+    "SvnErrorKind::from_codes devuelve Other para códigos no reconocidos",
+    "SvnErrorKind::from_codes usa el primer código reconocido de una cadena",
+    "SvnErrorKind::from_codes mapea E170001, E230001, E155036 y E155004 a su variante tipada",
+    "SvnError normaliza por código conservando exit y comando sin contraseña",
+    "SvnError conserva stdout y timestamp del proceso fallido",
+    "redact_command oculta el valor que sigue a --password",
+    "redact_command oculta el valor de --password=valor",
+    "redact_command tolera --password como último argumento",
+    "redact_command no toca --password-from-stdin ni el argumento siguiente",
+    "redact_command deja intactos los argumentos sin contraseña",
+    "SvnError y Password nunca exponen la contraseña en command ni en Debug",
+    "RunOptions nunca imprime la contraseña en Debug",
+    "decode_stderr devuelve vacío para bytes vacíos",
+    "decode_stderr cae a Latin-1 cuando el UTF-8 es inválido",
+    "decode_stderr conserva UTF-8 válido intacto",
+    "SvnRunner::run reporta el fallo de spawn de un binario inexistente",
+    "SvnRunner::run mata el proceso colgado y devuelve TimedOut al exceder el timeout",
+    "SvnRunner::run mata el proceso y devuelve Cancelled al recibir la cancelación",
+    "SvnRunner::run entrega la contraseña por stdin y no por argv",
+    "SvnRunner::run agrega --password-from-stdin solo cuando hay contraseña",
+    "SvnRunner::run agrega --non-interactive como último argumento",
+    "SvnRunner::run emite cada línea de stdout al canal de progreso y devuelve la salida completa",
+    "SvnRunner::run conserva los códigos E###### reales de svn y el exit code",
+    "parse_version rechaza texto vacío o no numérico",
+    "parse_version rechaza versiones incompletas o con más de tres partes",
+    "parse_version ignora sufijo de proveedor y espacios",
+    "El orden de versiones es numérico, no textual",
+    "locate_in devuelve NotFound si no hay svn.exe en los directorios",
+    "locate_in devuelve Invalid si la ruta manual no existe",
+    "locate_in devuelve Invalid si el binario manual no imprime una versión",
+    "locate_in rechaza un cliente anterior a 1.10 (TooOld)",
+    "locate_in acepta un cliente manual en exactamente la versión mínima",
+    "locate_in omite directorios inutilizables y encuentra el cliente real",
+    "locate_in abandona un cliente manual que no responde dentro del timeout de sondeo",
+    "locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache",
+    "locate_in reporta TooOld solo si ningún candidato de la lista es utilizable",
+    "InfoRequest termina con el terminador de peg para que '@' en la ruta sea literal",
+    "StatusRequest agrega --show-updates solo en modo remoto",
+    "UpdateRequest y CleanupRequest terminan con la ruta con terminador de peg",
+    "CheckoutRequest pone el destino al final sin terminador de peg y agrega -r, --depth, --ignore-externals y --username",
+    "UpdateRequest agrega -r, --ignore-externals y --username cuando se piden",
+    "CommitRequest lee el mensaje desde archivo (-F) con --encoding UTF-8 y nunca por argv",
+    "MessageFile normaliza los finales de línea a LF",
+    "MessageFile se elimina del disco al soltarse",
+    "is_safe_checkout_url acepta http, https, svn, svn+ssh y file con usuario sin contraseña",
+    "is_safe_checkout_url rechaza opciones, esquemas no permitidos, URL sin esquema y credenciales incrustadas",
+    "Un mensaje de commit con unicode y finales de línea mezclados llega íntegro al log",
+    "commit sin cambios devuelve revisión None",
+    "parse_progress_line lee las columnas de acción de update (A, U, D, C, G y propiedades)",
+    "parse_progress_line lee los verbos de commit y quita CRLF",
+    "parse_progress_line cae a Other para texto no reconocido",
+    "parse_progress_line conserva letras de acción desconocidas como item Other",
+    "parse_progress_line lee las frases de revisión",
+    "last_revision toma la última línea de revisión o None",
+    "parse_progress_line reconoce las acciones E, R y B y los verbos Deleting y Replacing",
+    "parse_info rechaza entrada vacía",
+    "parse_info rechaza texto que no es XML",
+    "parse_info rechaza XML truncado",
+    "parse_info reporta MissingEntry para un info vacío",
+    "parse_info lee tipo, revisión, raíz del repositorio y autor de una copia de trabajo",
+    "wc_info devuelve un resultado tipado de una copia de trabajo real con tildes y '@' en la ruta",
+    "info sobre un directorio que no es copia de trabajo reporta el código de error de svn con kind Other",
+    "parse_status rechaza entrada vacía o truncada",
+    "parse_status acepta un target sin cambios",
+    "parse_status conserva valores item desconocidos en lugar de fallar",
+    "parse_status mapea la revisión negativa de los añadidos a None",
+    "parse_status lee todas las entradas del fixture local",
+    "parse_status lee cambios remotos y la revisión against",
+    "StatusItem mapea todos los valores conocidos de svn",
+    "NodeKind cae a Unknown para valores desconocidos",
+    "wc_status ve archivos sin versionar, añadidos y modificados de una copia real",
+    "wc_status remoto reporta un archivo agregado por otra copia de trabajo",
+    "StatusItem se serializa como string plano",
+    "StatusItem hace round-trip por su forma de texto",
+    "OperationManager asigna ids únicos y cancel solo alcanza operaciones vivas",
+    "Una cancelación previa a la espera queda guardada y despierta la operación",
+    "OperationManager serializa operaciones sobre la misma copia sin distinguir mayúsculas",
+    "OperationManager deja correr en paralelo copias de trabajo distintas",
+    "La marca de cleanup se lleva por copia sin distinguir mayúsculas",
+    "Una operación espera mientras otra mantiene la copia de trabajo",
+    "Dos updates simultáneos de la misma copia terminan ambos con éxito",
+    "Una operación en cola cancelada devuelve Cancelled sin marcar cleanup",
+    "Una operación cancelada marca la copia como requiere cleanup y cleanup la limpia",
+    "Una operación interrumpida por timeout marca la copia como requiere cleanup",
+    "Un cleanup fallido no limpia la marca de cleanup",
+    "Un fallo de svn distinto de cancelación o timeout no marca cleanup",
+    "Las operaciones revalidan el destino tras adquirir el lock y rechazan una copia sustituida por una junction que escapa",
+    "checkout rechaza URLs inseguras antes de tocar svn",
+    "checkout en un repositorio vacío crea la copia y devuelve la revisión 0",
+    "update emite progreso por ítem y devuelve la nueva revisión",
+    "update fuera de una copia de trabajo reporta el fallo de svn",
+    "Una operación terminada libera su manejador de cancelación",
+    "op_cancel devuelve false para operaciones desconocidas",
+    "AppState sin workspace devuelve NoWorkspace al operar sobre una copia",
+    "workspace_set rechaza un directorio inexistente y conserva el workspace anterior",
+    "El Workspace Root persiste entre ejecuciones",
+    "El Workspace Root persistido se descarta al arrancar si la carpeta ya no existe",
+    "wc_info rechaza una ruta fuera del workspace antes de llamar a svn",
+    "wc_status rechaza una ruta con '..' antes de llamar a svn",
+    "start_update rechaza una ruta inválida de forma síncrona sin lanzar la operación",
+    "start_checkout rechaza un destino fuera del workspace antes de lanzar la operación",
+    "start_commit rechaza una ruta fuera del workspace antes de lanzar la operación",
+    "start_cleanup rechaza una ruta fuera del workspace antes de lanzar la operación",
+    "start_checkout rechaza un destino existente con DestinationExists antes de lanzar",
+    "start_checkout rechaza una URL insegura de forma síncrona sin filtrar la contraseña",
+    "start_checkout y start_commit rechazan una contraseña sin usuario (InvalidPath)",
+    "start_update rechaza una contraseña sin usuario (InvalidPath)",
+    "svn_set_path rechaza un binario inválido y no lo persiste",
+    "svn_set_path rechaza cualquier archivo que no sea svn.exe",
+    "svn_detect y svn_set_path encuentran el cliente real y persisten una ruta válida",
+    "Una configuración ilegible nunca se sobrescribe",
+    "Un comando de copia de trabajo sin svn utilizable devuelve NoSvn",
+    "svn_set_path informa el fallo de guardado sin perder el binario adoptado",
+    "Una operación fallida emite svn://done con OperationResult::Err",
+    "El ciclo checkout, commit, info, status y cleanup funciona de punta a punta con rutas con ñ, '@' y espacios",
+    "wc_cleanup ejecuta svn cleanup sobre la copia y emite Ok sin revisión",
+    "wc_cleanup libera una copia realmente bloqueada (E155004) por un svn terminado a la fuerza",
+    "Cada SvnErrorKind se mapea a su CommandErrorKind",
+    "Cancelled y TimedOut se mapean a sus CommandErrorKind",
+    "Los mensajes de certificado no confiable, copia antigua y copia bloqueada guían al usuario",
+    "CommandError conserva los códigos y recorta el detalle a 2000 caracteres",
+    "CommandError no tiene detalle cuando stderr está en blanco",
+    "WorkspaceError y LocatorError se mapean a CommandErrorKind específicos",
+    "InvalidUrl se mapea a InvalidPath con mensaje sobre la URL",
+    "Un fallo de parseo de XML se mapea a ParseFailed",
+    "ConfigStore::load devuelve la configuración por defecto si el archivo no existe",
+    "ConfigStore::load pone en cuarentena el JSON corrupto en lugar de perderlo",
+    "ConfigStore::load tolera campos ausentes y desconocidos",
+    "El archivo de configuración nunca contiene claves de credenciales",
+    "ConfigStore::save crea los directorios padre y hace round-trip sin residuos temporales",
+    "El frontend no tiene permisos fs ni shell: capabilities solo core:default y dialog:default",
+    "Solo services/tauri.ts invoca commands, escucha eventos y abre el diálogo",
+    "Las pruebas de integración crean un repositorio real con svnadmin create y file:/// y reutilizan el cliente localizado",
+    "normalizeError conserva un error de backend bien formado",
+    "normalizeError convierte un kind desconocido en io",
+    "normalizeError envuelve strings, Error y null como io",
+    "normalizeError usa codes y detail por defecto cuando el backend los tipa mal",
+    "normalizeError no confía en un kind conocido cuyo message no es string",
+    "Los wrappers de commands pasan argumentos con los nombres de los parámetros Rust",
+    "wcStatus pide estado local salvo que se pida remoto",
+    "Un invoke rechazado se normaliza a CommandError",
+    "pickDirectory devuelve la carpeta elegida y normaliza los fallos del diálogo",
+    "runOperation entrega el progreso en orden y resuelve con el resultado de svn://done",
+    "runOperation guarda los eventos que llegan antes de conocer el id de la operación",
+    "runOperation ignora eventos de otras operaciones",
+    "runOperation devuelve los errores del backend reportados por svn://done",
+    "runOperation normaliza un start que falla y deja de escuchar",
+    "isValidFolderName rechaza vacío, '.', '..' y caracteres inválidos de Windows",
+    "isValidFolderName acepta nombres con tildes, espacios, '@' y punto inicial",
+    "itemLabel traduce los estados de svn con su tono",
+    "itemLabel muestra los estados desconocidos tal cual en tono neutral",
+    "errorGuidance guía los kinds que requieren decisión del usuario",
+    "errorGuidance no tiene guía para kinds genéricos",
+    "formatProgressLine formatea ítems, revisiones y texto plano",
+    "formatProgressLine cae a la acción cruda sin traducción",
+    "formatDate formatea fechas ISO en español",
+    "formatDate devuelve el texto original si no es fecha",
+    "project.open carga info y status de la copia abierta",
+    "project.refresh falla: limpia datos y muestra el error",
+    "project.refresh no hace nada sin copia abierta",
+    "project.open restaura la copia anterior si abrir otra ruta falla",
+    "project.open sin copia previa deja path e info nulos si falla",
+    "El borrador de commit se conserva tras un commit fallido y se limpia tras uno exitoso",
+    "El borrador de commit se descarta al abrir otra copia de trabajo",
+    "update, commit y cleanup se ignoran sin copia de trabajo abierta",
+    "No se inicia una segunda operación mientras hay una en curso",
+    "El log de progreso conserva solo las últimas 100 líneas",
+    "Un rechazo inesperado del servicio se muestra como error y libera el store",
+    "Una operación fallida no refresca info ni status",
+    "Un resultado cancelled se trata como cancelación (no error) y ofrece cleanup",
+    "Una copia bloqueada ofrece cleanup y tras un cleanup exitoso se oculta",
+    "Un update exitoso refresca info y status",
+    "commit envía mensaje y usuario pero nunca contraseña",
+    "Tras un checkout exitoso el store pasa a la copia recién creada",
+    "Un error auth_required se reintenta con las credenciales ingresadas y la contraseña nunca se guarda en el store",
+    "retryWithCredentials no hace nada sin operación que reintentar",
+    "cancel no hace nada antes de que el backend asigne el id de operación",
+    "cancel pide al backend cancelar la operación en curso por id",
+    "Si la solicitud de cancelar falla se muestra el error",
+    "workspace store no está onboarded antes de cargar",
+    "workspace.load conserva el error y marca isLoaded aunque falle",
+    "workspace store no está onboarded sin svn aunque la raíz esté definida",
+    "workspace.setRoot informa el error del backend y conserva la raíz anterior",
+    "workspace store queda onboarded cuando hay raíz y svn y se limpian errores previos",
+    "useConfirm muestra el título dado mientras está pendiente y restablece el predeterminado al resolver",
+    "resolveConfirm sin pregunta pendiente se ignora",
+    "Una nueva confirmación cancela la anterior (resuelve false)",
+    "useConfirm muestra mensaje y etiqueta personalizada mientras está pendiente y los restablece",
+    "useConfirm usa la etiqueta por defecto y resuelve true al aceptar",
+    "usePersistedPreference devuelve el valor por defecto si no hay nada guardado",
+    "usePersistedPreference devuelve el valor por defecto si el texto guardado no valida",
+    "usePersistedPreference sobrevive a un storage que lanza al leer",
+    "usePersistedPreference sobrevive a un storage que lanza al escribir y conserva el valor en memoria",
+    "usePersistedPreference escribe cada cambio de forma síncrona",
+    "usePersistedPreference restaura un valor guardado válido",
+    "useTheme ignora un valor guardado inválido y sigue al sistema",
+    "useTheme sigue la preferencia clara del sistema cuando no hay nada guardado",
+    "useTheme aplica el tema guardado sobre la preferencia del sistema",
+    "useTheme alterna desde el tema resuelto, lo persiste y lo aplica"
+  ],
+  "flows": [
+    {
+      "nombre": "ciclo-checkout-modificar-update-commit",
+      "estados": [
+        "sin_copia",
+        "copia_limpia",
+        "copia_modificada",
+        "copia_desactualizada",
+        "copia_en_conflicto"
+      ],
+      "transiciones_validas": [
+        "sin_copia->copia_limpia",
+        "copia_limpia->copia_modificada",
+        "copia_modificada->copia_limpia",
+        "copia_limpia->copia_desactualizada",
+        "copia_desactualizada->copia_limpia",
+        "copia_modificada->copia_en_conflicto"
+      ],
+      "transiciones_invalidas": [
+        "sin_copia->copia_modificada",
+        "sin_copia->copia_desactualizada",
+        "copia_en_conflicto->copia_limpia"
+      ],
+      "dead_ends": [
+        "copia_en_conflicto"
+      ],
+      "retries": [],
+      "rollbacks": []
+    },
+    {
+      "nombre": "operacion-larga-cancelacion-cleanup",
+      "estados": [
+        "en_cola",
+        "en_ejecucion",
+        "completada",
+        "cancelada_en_cola",
+        "cancelada_en_ejecucion",
+        "tiempo_agotado",
+        "wc_requiere_cleanup",
+        "wc_operable"
+      ],
+      "transiciones_validas": [
+        "en_cola->en_ejecucion",
+        "en_cola->cancelada_en_cola",
+        "en_ejecucion->completada",
+        "en_ejecucion->cancelada_en_ejecucion",
+        "en_ejecucion->tiempo_agotado",
+        "cancelada_en_ejecucion->wc_requiere_cleanup",
+        "tiempo_agotado->wc_requiere_cleanup",
+        "wc_requiere_cleanup->wc_operable"
+      ],
+      "transiciones_invalidas": [
+        "completada->cancelada_en_ejecucion",
+        "cancelada_en_cola->wc_requiere_cleanup"
+      ],
+      "dead_ends": [
+        "completada",
+        "cancelada_en_cola",
+        "wc_operable"
+      ],
+      "retries": [],
+      "rollbacks": [
+        "wc_requiere_cleanup->wc_operable mediante svn cleanup (wc_cleanup limpia la marca solo si svn cleanup termina bien)"
+      ]
+    },
+    {
+      "nombre": "autenticacion-reintento-credenciales",
+      "estados": [
+        "operacion_en_curso",
+        "auth_required",
+        "reintento_con_credenciales",
+        "completada"
+      ],
+      "transiciones_validas": [
+        "operacion_en_curso->auth_required",
+        "auth_required->reintento_con_credenciales",
+        "reintento_con_credenciales->completada",
+        "reintento_con_credenciales->auth_required"
+      ],
+      "transiciones_invalidas": [
+        "auth_required->completada",
+        "operacion_en_curso->reintento_con_credenciales"
+      ],
+      "dead_ends": [
+        "completada"
+      ],
+      "retries": [
+        "auth_required->reintento_con_credenciales (project.retryWithCredentials reejecuta la última submission con las credenciales nuevas)"
+      ],
+      "rollbacks": []
+    },
+    {
+      "nombre": "workspace-resolve-revalidate",
+      "estados": [
+        "ruta_solicitada",
+        "ruta_resuelta",
+        "ruta_revalidada",
+        "ruta_rechazada"
+      ],
+      "transiciones_validas": [
+        "ruta_solicitada->ruta_resuelta",
+        "ruta_resuelta->ruta_revalidada",
+        "ruta_solicitada->ruta_rechazada",
+        "ruta_resuelta->ruta_rechazada"
+      ],
+      "transiciones_invalidas": [
+        "ruta_solicitada->ruta_revalidada",
+        "ruta_rechazada->ruta_resuelta"
+      ],
+      "dead_ends": [
+        "ruta_rechazada",
+        "ruta_revalidada"
+      ],
+      "retries": [],
+      "rollbacks": []
+    },
+    {
+      "nombre": "workspace-root-persistente",
+      "estados": [
+        "sin_workspace",
+        "workspace_fijado",
+        "workspace_restaurado"
+      ],
+      "transiciones_validas": [
+        "sin_workspace->workspace_fijado",
+        "workspace_fijado->workspace_restaurado",
+        "workspace_fijado->sin_workspace"
+      ],
+      "transiciones_invalidas": [
+        "sin_workspace->workspace_restaurado"
+      ],
+      "dead_ends": [],
+      "retries": [],
+      "rollbacks": [
+        "workspace_set conserva el workspace anterior si el nuevo es inválido o si la configuración no se pudo leer"
+      ]
+    },
+    {
+      "nombre": "deteccion-svn",
+      "estados": [
+        "svn_sin_detectar",
+        "svn_valido",
+        "svn_invalido",
+        "svn_demasiado_antiguo"
+      ],
+      "transiciones_validas": [
+        "svn_sin_detectar->svn_valido",
+        "svn_sin_detectar->svn_invalido",
+        "svn_sin_detectar->svn_demasiado_antiguo"
+      ],
+      "transiciones_invalidas": [
+        "svn_demasiado_antiguo->svn_valido sin cambiar de binario"
+      ],
+      "dead_ends": [],
+      "retries": [
+        "svn_invalido->svn_sin_detectar (el usuario fija otra ruta con svn_set_path o reintenta svn_detect)"
+      ],
+      "rollbacks": [
+        "svn_set_path no persiste la ruta si la validación falla"
+      ]
+    }
+  ],
+  "happy_paths": [
+    "sin_copia->copia_limpia->copia_modificada->copia_limpia (checkout, añadir archivo, commit con revisión 1) en svn_operations.rs y app_state.rs",
+    "copia_limpia->copia_desactualizada->copia_limpia (otra copia confirma, status remoto lo ve, update trae el archivo con progreso y revisión 1)",
+    "cancelar un update -> wc_requiere_cleanup -> wc_cleanup -> wc_operable",
+    "auth_required -> reintento con usuario y contraseña -> completada, sin guardar la contraseña",
+    "workspace_set -> reinicio -> mismo Workspace Root restaurado",
+    "svn_detect localiza el cliente real y svn_set_path persiste su ruta",
+    "commit con mensaje unicode y finales de línea mezclados llega íntegro al log"
+  ],
+  "negative_paths": [
+    "Rutas con '..', namespaces de dispositivo, nombres reservados, hermanas con prefijo similar y junctions que escapan: rechazadas por resolve",
+    "Destino existente sin allow_overwrite: DestinationExists (workspace.rs y start_checkout)",
+    "Copia sustituida por una junction que escapa tras resolve: revalidate/update la rechazan (TOCTOU)",
+    "URL de checkout con opción (--config-dir=x), esquema ftp, sin esquema o con contraseña incrustada: rechazada antes de tocar svn",
+    "Contraseña sin usuario en checkout o commit: InvalidPath",
+    "svn_set_path con binario inexistente, calc.bat o directorio llamado svn.exe: rechazado y no persistido",
+    "svn anterior a 1.10 o que imprime basura: TooOld/Invalid",
+    "Update fuera de una copia de trabajo: fallo de svn normalizado",
+    "XML de info/status vacío, truncado o basura: ParseError",
+    "Configuración corrupta: cuarentena json.bad; configuración ilegible: nunca se sobrescribe",
+    "Operación en cola cancelada: Cancelled sin marcar cleanup",
+    "Operación cancelada en ejecución: Cancelled y WC marcada para cleanup",
+    "Estados E170001/E230001/E155036/E155004 mapeados con mensaje guiado (solo con stderr sintético, no con svn real)"
+  ],
+  "boundaries": [
+    "COM0 y COM10 aceptados; COM1-9, COM¹/², LPT9.log, 'con ' y 'nul.txt' rechazados",
+    "Raíz del workspace como destino sin allow_overwrite: DestinationExists",
+    "Versión 1.9.7 rechazada, 1.10.0 aceptada exactamente en el mínimo; '1.14' y '1.14.2.1' inválidas",
+    "Códigos de error de 7 caracteres exactos (E12, e170001, E17000x y E1700011 rechazados)",
+    "detail de CommandError recortado a 2000 caracteres",
+    "Log de progreso del store limitado a 100 líneas",
+    "Checkout de repo vacío devuelve revisión 0; commit sin cambios devuelve revisión None",
+    "Rutas con ñ, '@' y espacios con terminador de peg en info/status/update/cleanup",
+    "Contraseña como último argumento de redact_command"
+  ],
+  "dependencies": [
+    "svn.exe (SlikSVN 1.14.2 en C:/Program Files/SlikSvn/bin; mínimo 1.10) lanzado por SvnRunner",
+    "svnadmin.exe (solo pruebas de integración, repos file:///)",
+    "Tauri 2 runtime: invoke, eventos svn://progress y svn://done, tauri-plugin-dialog",
+    "Sistema de archivos: config.json en app_config_dir, archivo temporal de mensaje de commit, junctions/symlinks",
+    "Servidor Subversion remoto con autenticación/TLS (no cubierto por ninguna prueba; solo stderr sintético)"
+  ],
+  "tests": [
+    {
+      "nombre": "new_rejects_missing_root",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::new",
+      "cubre": "Workspace::new rechaza una raíz inexistente (RootInvalid)"
+    },
+    {
+      "nombre": "new_rejects_file_as_root",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::new",
+      "cubre": "Workspace::new rechaza una raíz que no es un directorio (RootInvalid)"
+    },
+    {
+      "nombre": "resolve_rejects_leading_parent_dir",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza '..' al inicio de la ruta (ParentTraversal)"
+    },
+    {
+      "nombre": "resolve_rejects_leading_parent_dir",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "ruta_solicitada->ruta_rechazada"
+    },
+    {
+      "nombre": "resolve_rejects_parent_dir_hidden_in_the_middle",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza '..' oculto en medio de la ruta (ParentTraversal)"
+    },
+    {
+      "nombre": "resolve_rejects_device_namespace_prefix",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza el prefijo de namespace de dispositivo (DeviceOrReservedPath)"
+    },
+    {
+      "nombre": "resolve_rejects_verbatim_prefix",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza el prefijo verbatim (DeviceOrReservedPath)"
+    },
+    {
+      "nombre": "resolve_rejects_reserved_names_in_any_case_and_extension",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza nombres reservados de Windows (CON, PRN, AUX, NUL, COM1-9, LPT1-9) en cualquier combinación de mayúsculas y extensión"
+    },
+    {
+      "nombre": "resolve_rejects_reserved_name_nested_in_path",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza un nombre reservado anidado en cualquier componente de la ruta"
+    },
+    {
+      "nombre": "resolve_accepts_com0_and_com10_which_are_not_reserved",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve acepta COM0 y COM10 porque no son nombres reservados"
+    },
+    {
+      "nombre": "resolve_rejects_absolute_path_outside_root",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza una ruta absoluta fuera del Workspace Root (OutsideWorkspace)"
+    },
+    {
+      "nombre": "resolve_rejects_sibling_folder_sharing_root_name_prefix",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza una carpeta hermana con prefijo de nombre similar (SVN2 frente a SVN)"
+    },
+    {
+      "nombre": "resolve_rejects_junction_that_escapes_the_root",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza una junction que escapa del Workspace Root (OutsideWorkspace)"
+    },
+    {
+      "nombre": "resolve_rejects_junction_that_escapes_the_root",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "ruta_solicitada->ruta_rechazada"
+    },
+    {
+      "nombre": "resolve_rejects_existing_destination_without_overwrite",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve devuelve DestinationExists si el destino existe y allow_overwrite es falso"
+    },
+    {
+      "nombre": "resolve_rejects_root_itself_without_overwrite",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve trata la raíz misma como destino existente cuando allow_overwrite es falso"
+    },
+    {
+      "nombre": "resolve_accepts_existing_destination_with_explicit_overwrite",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve acepta un destino existente cuando allow_overwrite es verdadero"
+    },
+    {
+      "nombre": "resolve_accepts_existing_destination_with_explicit_overwrite",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "ruta_solicitada->ruta_resuelta"
+    },
+    {
+      "nombre": "resolve_accepts_root_written_in_uppercase",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "La comparación de contención ignora mayúsculas y minúsculas"
+    },
+    {
+      "nombre": "revalidate_rejects_destination_swapped_for_escaping_junction",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::revalidate",
+      "cubre": "revalidate rechaza un destino sustituido por una junction que escapa (TOCTOU)",
+      "transicion_relacionada": "ruta_resuelta->ruta_rechazada"
+    },
+    {
+      "nombre": "resolve_returns_scoped_path_inside_root_for_new_nested_destination",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve canonicaliza el ancestro existente más profundo para destinos que aún no existen"
+    },
+    {
+      "nombre": "resolve_returns_scoped_path_inside_root_for_new_nested_destination",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "ruta_solicitada->ruta_resuelta"
+    },
+    {
+      "nombre": "resolve_returns_scoped_path_inside_root_for_new_nested_destination",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::revalidate",
+      "cubre": "ruta_resuelta->ruta_revalidada"
+    },
+    {
+      "nombre": "extract_codes_returns_nothing_for_empty_stderr",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "extract_codes",
+      "cubre": "extract_codes devuelve vacío para stderr vacío"
+    },
+    {
+      "nombre": "extract_codes_ignores_lines_without_svn_prefix",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "extract_codes",
+      "cubre": "extract_codes ignora líneas sin el prefijo 'svn: '"
+    },
+    {
+      "nombre": "extract_codes_rejects_malformed_codes",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "extract_codes",
+      "cubre": "extract_codes rechaza códigos mal formados (longitud, minúscula o no numérico)"
+    },
+    {
+      "nombre": "extract_codes_keeps_every_code_of_a_chained_error_in_order",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "extract_codes",
+      "cubre": "extract_codes conserva en orden todos los códigos de un error encadenado"
+    },
+    {
+      "nombre": "kind_is_other_for_empty_codes",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnErrorKind::from_codes",
+      "cubre": "SvnErrorKind::from_codes devuelve Other sin códigos"
+    },
+    {
+      "nombre": "kind_is_other_for_unrecognized_codes",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnErrorKind::from_codes",
+      "cubre": "SvnErrorKind::from_codes devuelve Other para códigos no reconocidos"
+    },
+    {
+      "nombre": "kind_uses_the_first_recognized_code_in_a_chain",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnErrorKind::from_codes",
+      "cubre": "SvnErrorKind::from_codes usa el primer código reconocido de una cadena"
+    },
+    {
+      "nombre": "kind_maps_each_known_code",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnErrorKind::from_codes",
+      "cubre": "SvnErrorKind::from_codes mapea E170001, E230001, E155036 y E155004 a su variante tipada"
+    },
+    {
+      "nombre": "redact_hides_the_value_after_password_flag",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "redact_command",
+      "cubre": "redact_command oculta el valor que sigue a --password"
+    },
+    {
+      "nombre": "redact_hides_the_value_of_password_equals_form",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "redact_command",
+      "cubre": "redact_command oculta el valor de --password=valor"
+    },
+    {
+      "nombre": "redact_survives_password_flag_as_last_argument",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "redact_command",
+      "cubre": "redact_command tolera --password como último argumento"
+    },
+    {
+      "nombre": "redact_leaves_password_from_stdin_flag_and_next_argument_alone",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "redact_command",
+      "cubre": "redact_command no toca --password-from-stdin ni el argumento siguiente"
+    },
+    {
+      "nombre": "redact_keeps_arguments_untouched_without_password",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "redact_command",
+      "cubre": "redact_command deja intactos los argumentos sin contraseña"
+    },
+    {
+      "nombre": "error_from_process_normalizes_auth_failure_without_leaking_password",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnError::from_process",
+      "cubre": "SvnError normaliza por código conservando exit y comando sin contraseña",
+      "transicion_relacionada": "operacion_en_curso->auth_required"
+    },
+    {
+      "nombre": "decode_stderr_returns_empty_for_empty_bytes",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "decode_stderr",
+      "cubre": "decode_stderr devuelve vacío para bytes vacíos"
+    },
+    {
+      "nombre": "decode_stderr_falls_back_to_latin1_for_invalid_utf8",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "decode_stderr",
+      "cubre": "decode_stderr cae a Latin-1 cuando el UTF-8 es inválido"
+    },
+    {
+      "nombre": "decode_stderr_keeps_valid_utf8_intact",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "decode_stderr",
+      "cubre": "decode_stderr conserva UTF-8 válido intacto"
+    },
+    {
+      "nombre": "run_reports_spawn_failure_for_missing_binary",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run reporta el fallo de spawn de un binario inexistente"
+    },
+    {
+      "nombre": "run_times_out_and_kills_a_hanging_process",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run mata el proceso colgado y devuelve TimedOut al exceder el timeout",
+      "transicion_relacionada": "en_ejecucion->tiempo_agotado"
+    },
+    {
+      "nombre": "run_cancels_when_notified_before_the_timeout",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run mata el proceso y devuelve Cancelled al recibir la cancelación",
+      "transicion_relacionada": "en_ejecucion->cancelada_en_ejecucion"
+    },
+    {
+      "nombre": "run_surfaces_real_svn_error_codes_for_a_missing_repository",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run conserva los códigos E###### reales de svn y el exit code"
+    },
+    {
+      "nombre": "run_sends_the_password_through_stdin_not_argv",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run entrega la contraseña por stdin y no por argv"
+    },
+    {
+      "nombre": "run_appends_non_interactive_as_the_last_argument",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run agrega --non-interactive como último argumento"
+    },
+    {
+      "nombre": "run_adds_password_from_stdin_flag_only_when_a_password_is_given",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run agrega --password-from-stdin solo cuando hay contraseña"
+    },
+    {
+      "nombre": "run_options_debug_never_prints_the_password",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "RunOptions::fmt",
+      "cubre": "RunOptions nunca imprime la contraseña en Debug"
+    },
+    {
+      "nombre": "parse_version_rejects_empty_and_non_numeric_text",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "parse_version",
+      "cubre": "parse_version rechaza texto vacío o no numérico"
+    },
+    {
+      "nombre": "parse_version_rejects_incomplete_or_overlong_versions",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "parse_version",
+      "cubre": "parse_version rechaza versiones incompletas o con más de tres partes"
+    },
+    {
+      "nombre": "parse_version_ignores_vendor_suffix_and_whitespace",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "parse_version",
+      "cubre": "parse_version ignora sufijo de proveedor y espacios"
+    },
+    {
+      "nombre": "version_order_is_numeric_not_textual",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnVersion::cmp",
+      "cubre": "El orden de versiones es numérico, no textual"
+    },
+    {
+      "nombre": "locate_in_reports_not_found_for_empty_or_svnless_directories",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in devuelve NotFound si no hay svn.exe en los directorios"
+    },
+    {
+      "nombre": "locate_in_reports_invalid_for_a_missing_manual_path",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in devuelve Invalid si la ruta manual no existe"
+    },
+    {
+      "nombre": "locate_in_reports_invalid_when_manual_binary_prints_garbage",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in devuelve Invalid si el binario manual no imprime una versión"
+    },
+    {
+      "nombre": "locate_in_rejects_a_client_older_than_1_10",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in rechaza un cliente anterior a 1.10 (TooOld)",
+      "transicion_relacionada": "svn_sin_detectar->svn_demasiado_antiguo"
+    },
+    {
+      "nombre": "locate_in_accepts_a_manual_client_at_exactly_the_minimum_version",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in acepta un cliente manual en exactamente la versión mínima"
+    },
+    {
+      "nombre": "locate_in_skips_unusable_directories_and_finds_the_real_client",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in omite directorios inutilizables y encuentra el cliente real"
+    },
+    {
+      "nombre": "locate_in_gives_up_on_a_manual_client_that_hangs",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in abandona un cliente manual que no responde dentro del timeout de sondeo"
+    },
+    {
+      "nombre": "info_xml_of_fresh_repo_contains_info_element",
+      "archivo": "src-tauri/tests/svn_smoke.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "Las pruebas de integración crean un repositorio real con svnadmin create y file:/// y reutilizan el cliente localizado"
+    },
+    {
+      "nombre": "parse_info_rejects_empty_input",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_info",
+      "cubre": "parse_info rechaza entrada vacía"
+    },
+    {
+      "nombre": "parse_info_rejects_non_xml_garbage",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_info",
+      "cubre": "parse_info rechaza texto que no es XML"
+    },
+    {
+      "nombre": "parse_info_rejects_truncated_xml",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_info",
+      "cubre": "parse_info rechaza XML truncado"
+    },
+    {
+      "nombre": "parse_info_reports_missing_entry_for_empty_info_element",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_info",
+      "cubre": "parse_info reporta MissingEntry para un info vacío"
+    },
+    {
+      "nombre": "parse_info_reads_the_working_copy_fixture",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_info",
+      "cubre": "parse_info lee tipo, revisión, raíz del repositorio y autor de una copia de trabajo"
+    },
+    {
+      "nombre": "info_reads_a_working_copy_whose_path_has_accents_and_an_at_sign",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "SvnClient::info",
+      "cubre": "wc_info devuelve un resultado tipado de una copia de trabajo real con tildes y '@' en la ruta"
+    },
+    {
+      "nombre": "info_on_a_plain_directory_reports_not_a_working_copy",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "SvnClient::info",
+      "cubre": "info sobre un directorio que no es copia de trabajo reporta el código de error de svn con kind Other"
+    },
+    {
+      "nombre": "parse_status_rejects_empty_and_truncated_input",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_status",
+      "cubre": "parse_status rechaza entrada vacía o truncada"
+    },
+    {
+      "nombre": "parse_status_accepts_a_target_without_changes",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_status",
+      "cubre": "parse_status acepta un target sin cambios"
+    },
+    {
+      "nombre": "parse_status_keeps_unknown_item_values_instead_of_failing",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_status",
+      "cubre": "parse_status conserva valores item desconocidos en lugar de fallar"
+    },
+    {
+      "nombre": "parse_status_maps_negative_revision_of_added_files_to_none",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_status",
+      "cubre": "parse_status mapea la revisión negativa de los añadidos a None"
+    },
+    {
+      "nombre": "parse_status_reads_every_entry_of_the_local_fixture",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_status",
+      "cubre": "parse_status lee todas las entradas del fixture local"
+    },
+    {
+      "nombre": "parse_status_reads_remote_changes_and_against_revision",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "parse_status",
+      "cubre": "parse_status lee cambios remotos y la revisión against"
+    },
+    {
+      "nombre": "status_item_maps_every_known_svn_value",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "StatusItem::from",
+      "cubre": "StatusItem mapea todos los valores conocidos de svn"
+    },
+    {
+      "nombre": "node_kind_falls_back_to_unknown",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "NodeKind::from",
+      "cubre": "NodeKind cae a Unknown para valores desconocidos"
+    },
+    {
+      "nombre": "info_args_end_with_peg_terminator_so_at_signs_in_paths_are_literal",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "InfoRequest::args",
+      "cubre": "InfoRequest termina con el terminador de peg para que '@' en la ruta sea literal"
+    },
+    {
+      "nombre": "status_args_include_show_updates_only_when_remote",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "StatusRequest::args",
+      "cubre": "StatusRequest agrega --show-updates solo en modo remoto"
+    },
+    {
+      "nombre": "status_sees_unversioned_then_added_then_modified_files",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "SvnClient::status",
+      "cubre": "wc_status ve archivos sin versionar, añadidos y modificados de una copia real"
+    },
+    {
+      "nombre": "status_sees_unversioned_then_added_then_modified_files",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "SvnClient::status",
+      "cubre": "copia_limpia->copia_modificada"
+    },
+    {
+      "nombre": "remote_status_reports_a_file_added_by_another_working_copy",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "SvnClient::status",
+      "cubre": "wc_status remoto reporta un archivo agregado por otra copia de trabajo"
+    },
+    {
+      "nombre": "remote_status_reports_a_file_added_by_another_working_copy",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "SvnClient::status",
+      "cubre": "copia_limpia->copia_desactualizada"
+    },
+    {
+      "nombre": "status_item_serializes_known_and_unknown_values_as_plain_strings",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "StatusItem::serialize",
+      "cubre": "StatusItem se serializa como string plano"
+    },
+    {
+      "nombre": "status_item_round_trips_through_its_text_form",
+      "archivo": "src-tauri/tests/svn_read.rs",
+      "metodo": "StatusItem::as_str",
+      "cubre": "StatusItem hace round-trip por su forma de texto"
+    },
+    {
+      "nombre": "progress_line_reads_update_columns",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line lee las columnas de acción de update (A, U, D, C, G y propiedades)"
+    },
+    {
+      "nombre": "progress_line_reads_commit_verbs_and_strips_crlf",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line lee los verbos de commit y quita CRLF"
+    },
+    {
+      "nombre": "progress_line_falls_back_to_other_for_unrecognized_text",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line cae a Other para texto no reconocido"
+    },
+    {
+      "nombre": "progress_line_keeps_unknown_action_letters_as_other_items",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line conserva letras de acción desconocidas como item Other"
+    },
+    {
+      "nombre": "progress_line_reads_revision_sentences",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line lee las frases de revisión"
+    },
+    {
+      "nombre": "last_revision_takes_the_final_revision_line_or_none",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "last_revision",
+      "cubre": "last_revision toma la última línea de revisión o None"
+    },
+    {
+      "nombre": "checkout_args_put_destination_last_and_without_peg_terminator",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "CheckoutRequest::args",
+      "cubre": "CheckoutRequest pone el destino al final sin terminador de peg y agrega -r, --depth, --ignore-externals y --username"
+    },
+    {
+      "nombre": "update_and_cleanup_args_end_with_peg_safe_target",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "UpdateRequest::args",
+      "cubre": "UpdateRequest y CleanupRequest terminan con la ruta con terminador de peg"
+    },
+    {
+      "nombre": "commit_args_read_the_message_from_a_file_instead_of_argv",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "CommitRequest::args",
+      "cubre": "CommitRequest lee el mensaje desde archivo (-F) con --encoding UTF-8 y nunca por argv"
+    },
+    {
+      "nombre": "message_file_normalizes_line_endings_and_is_removed_on_drop",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "MessageFile::create",
+      "cubre": "MessageFile normaliza los finales de línea a LF"
+    },
+    {
+      "nombre": "message_file_normalizes_line_endings_and_is_removed_on_drop",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "MessageFile::drop",
+      "cubre": "MessageFile se elimina del disco al soltarse"
+    },
+    {
+      "nombre": "manager_ids_are_unique_and_cancel_only_reaches_live_operations",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "OperationManager::cancel",
+      "cubre": "OperationManager asigna ids únicos y cancel solo alcanza operaciones vivas"
+    },
+    {
+      "nombre": "manager_cancel_before_waiting_still_wakes_the_operation",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "OperationManager::cancel",
+      "cubre": "Una cancelación previa a la espera queda guardada y despierta la operación"
+    },
+    {
+      "nombre": "manager_serializes_the_same_working_copy_ignoring_case",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "OperationManager::lock_working_copy",
+      "cubre": "OperationManager serializa operaciones sobre la misma copia sin distinguir mayúsculas",
+      "transicion_relacionada": "en_cola->en_ejecucion"
+    },
+    {
+      "nombre": "manager_lets_different_working_copies_run_in_parallel",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "OperationManager::lock_working_copy",
+      "cubre": "OperationManager deja correr en paralelo copias de trabajo distintas"
+    },
+    {
+      "nombre": "manager_tracks_cleanup_flag_per_working_copy_ignoring_case",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "OperationManager::mark_needs_cleanup",
+      "cubre": "La marca de cleanup se lleva por copia sin distinguir mayúsculas",
+      "transicion_relacionada": "cancelada_en_ejecucion->wc_requiere_cleanup"
+    },
+    {
+      "nombre": "update_rejects_a_working_copy_swapped_for_an_escaping_junction",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Las operaciones revalidan el destino tras adquirir el lock y rechazan una copia sustituida por una junction que escapa"
+    },
+    {
+      "nombre": "update_rejects_a_working_copy_swapped_for_an_escaping_junction",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "ruta_resuelta->ruta_rechazada"
+    },
+    {
+      "nombre": "cancelled_update_marks_the_working_copy_and_cleanup_clears_it",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Una operación cancelada marca la copia como requiere cleanup y cleanup la limpia"
+    },
+    {
+      "nombre": "cancelled_update_marks_the_working_copy_and_cleanup_clears_it",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "en_ejecucion->cancelada_en_ejecucion"
+    },
+    {
+      "nombre": "cancelled_update_marks_the_working_copy_and_cleanup_clears_it",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "cancelada_en_ejecucion->wc_requiere_cleanup"
+    },
+    {
+      "nombre": "cancelled_update_marks_the_working_copy_and_cleanup_clears_it",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::cleanup",
+      "cubre": "wc_requiere_cleanup->wc_operable"
+    },
+    {
+      "nombre": "update_outside_a_working_copy_reports_the_svn_failure",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "update fuera de una copia de trabajo reporta el fallo de svn"
+    },
+    {
+      "nombre": "commit_with_nothing_to_commit_returns_no_revision",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::commit",
+      "cubre": "commit sin cambios devuelve revisión None"
+    },
+    {
+      "nombre": "commit_message_with_unicode_and_mixed_line_endings_reaches_the_log_intact",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::commit",
+      "cubre": "Un mensaje de commit con unicode y finales de línea mezclados llega íntegro al log"
+    },
+    {
+      "nombre": "commit_message_with_unicode_and_mixed_line_endings_reaches_the_log_intact",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::commit",
+      "cubre": "copia_modificada->copia_limpia"
+    },
+    {
+      "nombre": "two_simultaneous_updates_of_the_same_working_copy_both_succeed",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Dos updates simultáneos de la misma copia terminan ambos con éxito"
+    },
+    {
+      "nombre": "two_simultaneous_updates_of_the_same_working_copy_both_succeed",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "en_cola->en_ejecucion"
+    },
+    {
+      "nombre": "update_streams_progress_events_and_returns_the_new_revision",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "update emite progreso por ítem y devuelve la nueva revisión"
+    },
+    {
+      "nombre": "update_streams_progress_events_and_returns_the_new_revision",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "en_ejecucion->completada"
+    },
+    {
+      "nombre": "update_streams_progress_events_and_returns_the_new_revision",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "copia_desactualizada->copia_limpia"
+    },
+    {
+      "nombre": "runner_streams_stdout_lines_and_still_returns_the_full_output",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "SvnRunner::run",
+      "cubre": "SvnRunner::run emite cada línea de stdout al canal de progreso y devuelve la salida completa"
+    },
+    {
+      "nombre": "checkout_into_a_fresh_working_copy_reports_revision_zero",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::checkout",
+      "cubre": "checkout en un repositorio vacío crea la copia y devuelve la revisión 0"
+    },
+    {
+      "nombre": "checkout_into_a_fresh_working_copy_reports_revision_zero",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::checkout",
+      "cubre": "sin_copia->copia_limpia"
+    },
+    {
+      "nombre": "operation_waits_while_another_operation_holds_the_working_copy",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Una operación espera mientras otra mantiene la copia de trabajo"
+    },
+    {
+      "nombre": "operation_waits_while_another_operation_holds_the_working_copy",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "en_cola->en_ejecucion"
+    },
+    {
+      "nombre": "queued_operation_cancelled_while_waiting_returns_cancelled_without_marking_cleanup",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Una operación en cola cancelada devuelve Cancelled sin marcar cleanup"
+    },
+    {
+      "nombre": "queued_operation_cancelled_while_waiting_returns_cancelled_without_marking_cleanup",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "en_cola->cancelada_en_cola"
+    },
+    {
+      "nombre": "checkout_rejects_unsafe_urls_before_touching_svn",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::checkout",
+      "cubre": "checkout rechaza URLs inseguras antes de tocar svn"
+    },
+    {
+      "nombre": "checkout_rejects_unsafe_urls_before_touching_svn",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "is_safe_checkout_url",
+      "cubre": "is_safe_checkout_url rechaza opciones, esquemas no permitidos, URL sin esquema y credenciales incrustadas"
+    },
+    {
+      "nombre": "safe_checkout_url_accepts_known_schemes_and_user_without_password",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "is_safe_checkout_url",
+      "cubre": "is_safe_checkout_url acepta http, https, svn, svn+ssh y file con usuario sin contraseña"
+    },
+    {
+      "nombre": "config_load_returns_default_when_the_file_is_missing",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "ConfigStore::load",
+      "cubre": "ConfigStore::load devuelve la configuración por defecto si el archivo no existe"
+    },
+    {
+      "nombre": "config_load_quarantines_corrupt_json_instead_of_losing_it",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "ConfigStore::load",
+      "cubre": "ConfigStore::load pone en cuarentena el JSON corrupto en lugar de perderlo"
+    },
+    {
+      "nombre": "config_load_tolerates_missing_and_unknown_fields",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "ConfigStore::load",
+      "cubre": "ConfigStore::load tolera campos ausentes y desconocidos"
+    },
+    {
+      "nombre": "config_file_never_contains_credentials_keys",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "ConfigStore::save",
+      "cubre": "El archivo de configuración nunca contiene claves de credenciales"
+    },
+    {
+      "nombre": "config_save_creates_parent_directories_and_round_trips_without_leftovers",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "ConfigStore::save",
+      "cubre": "ConfigStore::save crea los directorios padre y hace round-trip sin residuos temporales"
+    },
+    {
+      "nombre": "every_svn_error_kind_maps_to_its_command_error_kind",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(SvnError)",
+      "cubre": "Cada SvnErrorKind se mapea a su CommandErrorKind",
+      "transicion_relacionada": "operacion_en_curso->auth_required"
+    },
+    {
+      "nombre": "interrupted_svn_errors_map_to_cancelled_and_timed_out",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(SvnError)",
+      "cubre": "Cancelled y TimedOut se mapean a sus CommandErrorKind"
+    },
+    {
+      "nombre": "untrusted_certificate_and_old_working_copy_messages_guide_the_user",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(SvnError)",
+      "cubre": "Los mensajes de certificado no confiable, copia antigua y copia bloqueada guían al usuario"
+    },
+    {
+      "nombre": "command_error_keeps_codes_and_trims_long_stderr_detail",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(SvnError)",
+      "cubre": "CommandError conserva los códigos y recorta el detalle a 2000 caracteres"
+    },
+    {
+      "nombre": "command_error_has_no_detail_for_blank_stderr",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(SvnError)",
+      "cubre": "CommandError no tiene detalle cuando stderr está en blanco"
+    },
+    {
+      "nombre": "redacted_command_and_password_debug_never_expose_the_secret",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "SvnError::from_process",
+      "cubre": "SvnError y Password nunca exponen la contraseña en command ni en Debug"
+    },
+    {
+      "nombre": "workspace_and_locator_errors_map_to_specific_kinds",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(WorkspaceError)",
+      "cubre": "WorkspaceError y LocatorError se mapean a CommandErrorKind específicos"
+    },
+    {
+      "nombre": "invalid_url_operation_error_maps_to_invalid_path",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(OperationError)",
+      "cubre": "InvalidUrl se mapea a InvalidPath con mensaje sobre la URL"
+    },
+    {
+      "nombre": "state_without_workspace_has_none_and_rejects_working_copy_paths",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::wc_info",
+      "cubre": "AppState sin workspace devuelve NoWorkspace al operar sobre una copia"
+    },
+    {
+      "nombre": "workspace_set_rejects_a_missing_directory_and_keeps_the_previous_one",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::workspace_set",
+      "cubre": "workspace_set rechaza un directorio inexistente y conserva el workspace anterior"
+    },
+    {
+      "nombre": "workspace_survives_a_restart_and_is_dropped_if_the_folder_disappears",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::new",
+      "cubre": "El Workspace Root persiste entre ejecuciones"
+    },
+    {
+      "nombre": "workspace_survives_a_restart_and_is_dropped_if_the_folder_disappears",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::new",
+      "cubre": "El Workspace Root persistido se descarta al arrancar si la carpeta ya no existe"
+    },
+    {
+      "nombre": "workspace_survives_a_restart_and_is_dropped_if_the_folder_disappears",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::workspace_set",
+      "cubre": "sin_workspace->workspace_fijado"
+    },
+    {
+      "nombre": "workspace_survives_a_restart_and_is_dropped_if_the_folder_disappears",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::new",
+      "cubre": "workspace_fijado->workspace_restaurado"
+    },
+    {
+      "nombre": "workspace_survives_a_restart_and_is_dropped_if_the_folder_disappears",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::new",
+      "cubre": "workspace_fijado->sin_workspace"
+    },
+    {
+      "nombre": "working_copy_paths_outside_the_workspace_are_rejected_before_any_svn_call",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::wc_info",
+      "cubre": "wc_info rechaza una ruta fuera del workspace antes de llamar a svn"
+    },
+    {
+      "nombre": "working_copy_paths_outside_the_workspace_are_rejected_before_any_svn_call",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::wc_status",
+      "cubre": "wc_status rechaza una ruta con '..' antes de llamar a svn"
+    },
+    {
+      "nombre": "svn_set_path_rejects_an_invalid_binary_and_does_not_persist_it",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::svn_set_path",
+      "cubre": "svn_set_path rechaza un binario inválido y no lo persiste"
+    },
+    {
+      "nombre": "svn_set_path_rejects_an_invalid_binary_and_does_not_persist_it",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::svn_set_path",
+      "cubre": "svn_sin_detectar->svn_invalido"
+    },
+    {
+      "nombre": "svn_set_path_refuses_any_file_that_is_not_svn_exe",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::svn_set_path",
+      "cubre": "svn_set_path rechaza cualquier archivo que no sea svn.exe"
+    },
+    {
+      "nombre": "svn_detect_and_set_path_find_the_real_client_and_persist_a_valid_path",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::svn_detect",
+      "cubre": "svn_detect y svn_set_path encuentran el cliente real y persisten una ruta válida"
+    },
+    {
+      "nombre": "svn_detect_and_set_path_find_the_real_client_and_persist_a_valid_path",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::svn_detect",
+      "cubre": "svn_sin_detectar->svn_valido"
+    },
+    {
+      "nombre": "op_cancel_reports_false_for_unknown_operations",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::op_cancel",
+      "cubre": "op_cancel devuelve false para operaciones desconocidas"
+    },
+    {
+      "nombre": "start_operations_reject_bad_paths_synchronously_without_launching",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_update",
+      "cubre": "start_update rechaza una ruta inválida de forma síncrona sin lanzar la operación"
+    },
+    {
+      "nombre": "checkout_with_an_unsafe_url_is_rejected_synchronously_without_leaking_the_secret",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "start_checkout rechaza una URL insegura de forma síncrona sin filtrar la contraseña"
+    },
+    {
+      "nombre": "operations_reject_a_password_without_a_username",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "start_checkout y start_commit rechazan una contraseña sin usuario (InvalidPath)"
+    },
+    {
+      "nombre": "config_that_could_not_be_read_is_never_overwritten_after_the_lock_is_released",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::workspace_set",
+      "cubre": "Una configuración ilegible nunca se sobrescribe"
+    },
+    {
+      "nombre": "finished_operations_release_their_cancellation_handle",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "Una operación terminada libera su manejador de cancelación"
+    },
+    {
+      "nombre": "checkout_existing_destination_is_rejected_before_launching",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "start_checkout rechaza un destino existente con DestinationExists antes de lanzar"
+    },
+    {
+      "nombre": "full_cycle_checkout_commit_update_status_info_and_cleanup_through_the_state",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "El ciclo checkout, commit, info, status y cleanup funciona de punta a punta con rutas con ñ, '@' y espacios"
+    },
+    {
+      "nombre": "full_cycle_checkout_commit_update_status_info_and_cleanup_through_the_state",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_cleanup",
+      "cubre": "wc_cleanup ejecuta svn cleanup sobre la copia y emite Ok sin revisión"
+    },
+    {
+      "nombre": "full_cycle_checkout_commit_update_status_info_and_cleanup_through_the_state",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "sin_copia->copia_limpia"
+    },
+    {
+      "nombre": "full_cycle_checkout_commit_update_status_info_and_cleanup_through_the_state",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_commit",
+      "cubre": "copia_modificada->copia_limpia"
+    },
+    {
+      "nombre": "normalizeError > keeps a well formed backend error",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "normalizeError",
+      "cubre": "normalizeError conserva un error de backend bien formado"
+    },
+    {
+      "nombre": "normalizeError > turns an unknown kind into an io error",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "normalizeError",
+      "cubre": "normalizeError convierte un kind desconocido en io"
+    },
+    {
+      "nombre": "normalizeError > wraps strings, Error instances and null",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "normalizeError",
+      "cubre": "normalizeError envuelve strings, Error y null como io"
+    },
+    {
+      "nombre": "normalizeError > defaults codes and detail when the backend mistypes them",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "normalizeError",
+      "cubre": "normalizeError usa codes y detail por defecto cuando el backend los tipa mal"
+    },
+    {
+      "nombre": "normalizeError > does not trust a known kind whose message is not a string",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "normalizeError",
+      "cubre": "normalizeError no confía en un kind conocido cuyo message no es string"
+    },
+    {
+      "nombre": "command wrappers > passes arguments named like the Rust parameters",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "workspaceSet",
+      "cubre": "Los wrappers de commands pasan argumentos con los nombres de los parámetros Rust"
+    },
+    {
+      "nombre": "command wrappers > asks for local status unless remote is requested",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "wcStatus",
+      "cubre": "wcStatus pide estado local salvo que se pida remoto"
+    },
+    {
+      "nombre": "command wrappers > normalizes a rejected invoke into a CommandError",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "call",
+      "cubre": "Un invoke rechazado se normaliza a CommandError"
+    },
+    {
+      "nombre": "command wrappers > returns the picked folder and normalizes dialog failures",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "pickDirectory",
+      "cubre": "pickDirectory devuelve la carpeta elegida y normaliza los fallos del diálogo"
+    },
+    {
+      "nombre": "runOperation > delivers progress in order and resolves with the done result",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "runOperation",
+      "cubre": "runOperation entrega el progreso en orden y resuelve con el resultado de svn://done"
+    },
+    {
+      "nombre": "runOperation > buffers events that arrive before the operation id is known",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "OperationSession.push",
+      "cubre": "runOperation guarda los eventos que llegan antes de conocer el id de la operación"
+    },
+    {
+      "nombre": "runOperation > ignores progress and done events of other operations",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "OperationSession.dispatch",
+      "cubre": "runOperation ignora eventos de otras operaciones"
+    },
+    {
+      "nombre": "runOperation > returns backend errors reported through the done event",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "runOperation",
+      "cubre": "runOperation devuelve los errores del backend reportados por svn://done"
+    },
+    {
+      "nombre": "runOperation > normalizes a failing start and still stops listening",
+      "archivo": "src/services/tauri.test.ts",
+      "metodo": "runOperation",
+      "cubre": "runOperation normaliza un start que falla y deja de escuchar"
+    },
+    {
+      "nombre": "isValidFolderName > rejects (each)",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "isValidFolderName",
+      "cubre": "isValidFolderName rechaza vacío, '.', '..' y caracteres inválidos de Windows"
+    },
+    {
+      "nombre": "isValidFolderName > accepts (each)",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "isValidFolderName",
+      "cubre": "isValidFolderName acepta nombres con tildes, espacios, '@' y punto inicial"
+    },
+    {
+      "nombre": "itemLabel > translates known svn items with a tone",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "itemLabel",
+      "cubre": "itemLabel traduce los estados de svn con su tono"
+    },
+    {
+      "nombre": "itemLabel > has a Spanish label and tone for every svn item",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "itemLabel",
+      "cubre": "itemLabel traduce los estados de svn con su tono"
+    },
+    {
+      "nombre": "itemLabel > shows unknown items as they come, neutral",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "itemLabel",
+      "cubre": "itemLabel muestra los estados desconocidos tal cual en tono neutral"
+    },
+    {
+      "nombre": "errorGuidance > guides the kinds that need a user decision",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "errorGuidance",
+      "cubre": "errorGuidance guía los kinds que requieren decisión del usuario"
+    },
+    {
+      "nombre": "errorGuidance > has no guidance for generic kinds",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "errorGuidance",
+      "cubre": "errorGuidance no tiene guía para kinds genéricos"
+    },
+    {
+      "nombre": "formatProgressLine > formats items, revisions and plain text",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "formatProgressLine",
+      "cubre": "formatProgressLine formatea ítems, revisiones y texto plano"
+    },
+    {
+      "nombre": "formatProgressLine > falls back to the raw action when it has no translation",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "formatProgressLine",
+      "cubre": "formatProgressLine cae a la acción cruda sin traducción"
+    },
+    {
+      "nombre": "formatDate > formats a valid ISO date in Spanish",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "formatDate",
+      "cubre": "formatDate formatea fechas ISO en español"
+    },
+    {
+      "nombre": "formatDate > returns the original text when it is not a date",
+      "archivo": "src/utils/svnLabels.test.ts",
+      "metodo": "formatDate",
+      "cubre": "formatDate devuelve el texto original si no es fecha"
+    },
+    {
+      "nombre": "open and refresh > loads info and status of the opened working copy",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.open",
+      "cubre": "project.open carga info y status de la copia abierta"
+    },
+    {
+      "nombre": "open and refresh > clears the data and shows the error when refresh fails",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.refresh",
+      "cubre": "project.refresh falla: limpia datos y muestra el error"
+    },
+    {
+      "nombre": "open and refresh > refresh does nothing without an open working copy",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.refresh",
+      "cubre": "project.refresh no hace nada sin copia abierta"
+    },
+    {
+      "nombre": "open failure and commit draft > restores the previous working copy when opening another path fails",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.open",
+      "cubre": "project.open restaura la copia anterior si abrir otra ruta falla"
+    },
+    {
+      "nombre": "open failure and commit draft > keeps no active path when the very first open fails",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.open",
+      "cubre": "project.open sin copia previa deja path e info nulos si falla"
+    },
+    {
+      "nombre": "open failure and commit draft > keeps the commit draft after a failed commit and clears it after a successful one",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.commit",
+      "cubre": "El borrador de commit se conserva tras un commit fallido y se limpia tras uno exitoso"
+    },
+    {
+      "nombre": "open failure and commit draft > drops the draft when another working copy is opened",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.open",
+      "cubre": "El borrador de commit se descarta al abrir otra copia de trabajo"
+    },
+    {
+      "nombre": "operations > ignores update, commit and cleanup when no working copy is open",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.update",
+      "cubre": "update, commit y cleanup se ignoran sin copia de trabajo abierta"
+    },
+    {
+      "nombre": "operations > refuses to start a second operation while one is running",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.execute",
+      "cubre": "No se inicia una segunda operación mientras hay una en curso"
+    },
+    {
+      "nombre": "operations > keeps only the most recent progress lines",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.pushProgress",
+      "cubre": "El log de progreso conserva solo las últimas 100 líneas"
+    },
+    {
+      "nombre": "operations > shows an unexpected rejection of the service as an error and frees the store",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.execute",
+      "cubre": "Un rechazo inesperado del servicio se muestra como error y libera el store"
+    },
+    {
+      "nombre": "operations > does not refresh after a failed operation",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.submit",
+      "cubre": "Una operación fallida no refresca info ni status"
+    },
+    {
+      "nombre": "operations > treats a cancelled result as cancellation, not as an error, and offers cleanup",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.applyResult",
+      "cubre": "Un resultado cancelled se trata como cancelación (no error) y ofrece cleanup"
+    },
+    {
+      "nombre": "operations > offers cleanup for a locked working copy and hides it after a clean run",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.canCleanup",
+      "cubre": "Una copia bloqueada ofrece cleanup y tras un cleanup exitoso se oculta"
+    },
+    {
+      "nombre": "operations > refreshes info and status after a successful update",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.update",
+      "cubre": "Un update exitoso refresca info y status"
+    },
+    {
+      "nombre": "operations > sends the commit message and username but never a password",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.commit",
+      "cubre": "commit envía mensaje y usuario pero nunca contraseña"
+    },
+    {
+      "nombre": "operations > switches to the checked out working copy after a successful checkout",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.checkout",
+      "cubre": "Tras un checkout exitoso el store pasa a la copia recién creada"
+    },
+    {
+      "nombre": "credentials > retries the failed operation with the typed credentials and never stores the password",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.retryWithCredentials",
+      "cubre": "Un error auth_required se reintenta con las credenciales ingresadas y la contraseña nunca se guarda en el store"
+    },
+    {
+      "nombre": "credentials > retries the failed operation with the typed credentials and never stores the password",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.update",
+      "cubre": "operacion_en_curso->auth_required"
+    },
+    {
+      "nombre": "credentials > retries the failed operation with the typed credentials and never stores the password",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.retryWithCredentials",
+      "cubre": "auth_required->reintento_con_credenciales"
+    },
+    {
+      "nombre": "credentials > retries the failed operation with the typed credentials and never stores the password",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.retryWithCredentials",
+      "cubre": "reintento_con_credenciales->completada"
+    },
+    {
+      "nombre": "credentials > does nothing when there is nothing to retry",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.retryWithCredentials",
+      "cubre": "retryWithCredentials no hace nada sin operación que reintentar"
+    },
+    {
+      "nombre": "cancel > does nothing before the backend assigned an operation id",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.cancel",
+      "cubre": "cancel no hace nada antes de que el backend asigne el id de operación"
+    },
+    {
+      "nombre": "cancel > asks the backend to cancel the running operation by id",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.cancel",
+      "cubre": "cancel pide al backend cancelar la operación en curso por id"
+    },
+    {
+      "nombre": "cancel > shows the error when the cancel request itself fails",
+      "archivo": "src/stores/project.test.ts",
+      "metodo": "useProjectStore.cancel",
+      "cubre": "Si la solicitud de cancelar falla se muestra el error"
+    },
+    {
+      "nombre": "workspace store > is not onboarded before loading anything",
+      "archivo": "src/stores/workspace.test.ts",
+      "metodo": "useWorkspaceStore.isOnboarded",
+      "cubre": "workspace store no está onboarded antes de cargar"
+    },
+    {
+      "nombre": "workspace store > keeps the error and still marks itself loaded when loading fails",
+      "archivo": "src/stores/workspace.test.ts",
+      "metodo": "useWorkspaceStore.load",
+      "cubre": "workspace.load conserva el error y marca isLoaded aunque falle"
+    },
+    {
+      "nombre": "workspace store > is not onboarded when svn is missing even if the root is set",
+      "archivo": "src/stores/workspace.test.ts",
+      "metodo": "useWorkspaceStore.isOnboarded",
+      "cubre": "workspace store no está onboarded sin svn aunque la raíz esté definida"
+    },
+    {
+      "nombre": "workspace store > setRoot reports the backend error and keeps the previous root",
+      "archivo": "src/stores/workspace.test.ts",
+      "metodo": "useWorkspaceStore.setRoot",
+      "cubre": "workspace.setRoot informa el error del backend y conserva la raíz anterior"
+    },
+    {
+      "nombre": "workspace store > becomes onboarded once root and svn are available and clears old errors",
+      "archivo": "src/stores/workspace.test.ts",
+      "metodo": "useWorkspaceStore.setRoot",
+      "cubre": "workspace store queda onboarded cuando hay raíz y svn y se limpian errores previos"
+    },
+    {
+      "nombre": "useConfirm > shows the given title while pending and restores the default after",
+      "archivo": "src/composables/useConfirm.test.ts",
+      "metodo": "confirm",
+      "cubre": "useConfirm muestra el título dado mientras está pendiente y restablece el predeterminado al resolver"
+    },
+    {
+      "nombre": "useConfirm > ignores a resolution when nothing is pending",
+      "archivo": "src/composables/useConfirm.test.ts",
+      "metodo": "resolveConfirm",
+      "cubre": "resolveConfirm sin pregunta pendiente se ignora"
+    },
+    {
+      "nombre": "useConfirm > cancels the previous question when a new one arrives",
+      "archivo": "src/composables/useConfirm.test.ts",
+      "metodo": "confirm",
+      "cubre": "Una nueva confirmación cancela la anterior (resuelve false)"
+    },
+    {
+      "nombre": "useConfirm > shows the message and custom label while pending, then resets them",
+      "archivo": "src/composables/useConfirm.test.ts",
+      "metodo": "confirm",
+      "cubre": "useConfirm muestra mensaje y etiqueta personalizada mientras está pendiente y los restablece"
+    },
+    {
+      "nombre": "useConfirm > uses the default label when none is given and resolves true on accept",
+      "archivo": "src/composables/useConfirm.test.ts",
+      "metodo": "confirm",
+      "cubre": "useConfirm usa la etiqueta por defecto y resuelve true al aceptar"
+    },
+    {
+      "nombre": "usePersistedPreference > returns the default when nothing is stored",
+      "archivo": "src/composables/usePersistedPreference.test.ts",
+      "metodo": "usePersistedPreference",
+      "cubre": "usePersistedPreference devuelve el valor por defecto si no hay nada guardado"
+    },
+    {
+      "nombre": "usePersistedPreference > returns the default when the stored text fails validation",
+      "archivo": "src/composables/usePersistedPreference.test.ts",
+      "metodo": "usePersistedPreference",
+      "cubre": "usePersistedPreference devuelve el valor por defecto si el texto guardado no valida"
+    },
+    {
+      "nombre": "usePersistedPreference > survives a storage that throws on read",
+      "archivo": "src/composables/usePersistedPreference.test.ts",
+      "metodo": "usePersistedPreference",
+      "cubre": "usePersistedPreference sobrevive a un storage que lanza al leer"
+    },
+    {
+      "nombre": "usePersistedPreference > survives a storage that throws on write and keeps the in-memory value",
+      "archivo": "src/composables/usePersistedPreference.test.ts",
+      "metodo": "usePersistedPreference",
+      "cubre": "usePersistedPreference sobrevive a un storage que lanza al escribir y conserva el valor en memoria"
+    },
+    {
+      "nombre": "usePersistedPreference > writes every change synchronously",
+      "archivo": "src/composables/usePersistedPreference.test.ts",
+      "metodo": "usePersistedPreference",
+      "cubre": "usePersistedPreference escribe cada cambio de forma síncrona"
+    },
+    {
+      "nombre": "usePersistedPreference > restores a previously stored valid value",
+      "archivo": "src/composables/usePersistedPreference.test.ts",
+      "metodo": "usePersistedPreference",
+      "cubre": "usePersistedPreference restaura un valor guardado válido"
+    },
+    {
+      "nombre": "useTheme > ignores an invalid stored value and follows the system",
+      "archivo": "src/composables/useTheme.test.ts",
+      "metodo": "useTheme",
+      "cubre": "useTheme ignora un valor guardado inválido y sigue al sistema"
+    },
+    {
+      "nombre": "useTheme > follows the system light preference when nothing is stored",
+      "archivo": "src/composables/useTheme.test.ts",
+      "metodo": "useTheme",
+      "cubre": "useTheme sigue la preferencia clara del sistema cuando no hay nada guardado"
+    },
+    {
+      "nombre": "useTheme > applies the stored theme on load, over the system preference",
+      "archivo": "src/composables/useTheme.test.ts",
+      "metodo": "useTheme",
+      "cubre": "useTheme aplica el tema guardado sobre la preferencia del sistema"
+    },
+    {
+      "nombre": "useTheme > toggles from the resolved theme, persists it and applies it",
+      "archivo": "src/composables/useTheme.test.ts",
+      "metodo": "useTheme.toggleTheme",
+      "cubre": "useTheme alterna desde el tema resuelto, lo persiste y lo aplica"
+    },
+    {
+      "nombre": "resolve_rejects_symlink_that_escapes_the_root",
+      "archivo": "src-tauri/tests/workspace.rs",
+      "metodo": "Workspace::resolve",
+      "cubre": "resolve rechaza un symlink que escapa del Workspace Root (OutsideWorkspace)"
+    },
+    {
+      "nombre": "svn_error_keeps_stdout_exit_code_and_a_fresh_timestamp",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "SvnError::from_process",
+      "cubre": "SvnError conserva stdout y timestamp del proceso fallido"
+    },
+    {
+      "nombre": "locate_in_returns_the_first_usable_candidate_in_list_order",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache"
+    },
+    {
+      "nombre": "locate_in_prefers_the_manual_path_over_every_search_directory",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache"
+    },
+    {
+      "nombre": "locate_in_ignores_an_old_client_when_a_usable_one_follows",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in reporta TooOld solo si ningún candidato de la lista es utilizable"
+    },
+    {
+      "nombre": "locate_in_reports_too_old_when_the_only_candidate_is_old",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "locate_in reporta TooOld solo si ningún candidato de la lista es utilizable"
+    },
+    {
+      "nombre": "update_args_include_revision_externals_and_username_when_requested",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "UpdateRequest::args",
+      "cubre": "UpdateRequest agrega -r, --ignore-externals y --username cuando se piden"
+    },
+    {
+      "nombre": "progress_line_reads_existed_replaced_and_broken_columns",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line reconoce las acciones E, R y B y los verbos Deleting y Replacing"
+    },
+    {
+      "nombre": "progress_line_reads_the_deleting_and_replacing_commit_verbs",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "parse_progress_line",
+      "cubre": "parse_progress_line reconoce las acciones E, R y B y los verbos Deleting y Replacing"
+    },
+    {
+      "nombre": "update_that_times_out_marks_the_working_copy_for_cleanup",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Una operación interrumpida por timeout marca la copia como requiere cleanup"
+    },
+    {
+      "nombre": "failed_cleanup_keeps_the_cleanup_mark",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::cleanup",
+      "cubre": "Un cleanup fallido no limpia la marca de cleanup"
+    },
+    {
+      "nombre": "svn_failure_that_is_neither_cancel_nor_timeout_does_not_mark_cleanup",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "Un fallo de svn distinto de cancelación o timeout no marca cleanup"
+    },
+    {
+      "nombre": "start_checkout_rejects_a_destination_outside_the_workspace_without_launching",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "start_checkout rechaza un destino fuera del workspace antes de lanzar la operación"
+    },
+    {
+      "nombre": "start_commit_rejects_a_path_outside_the_workspace_without_launching",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_commit",
+      "cubre": "start_commit rechaza una ruta fuera del workspace antes de lanzar la operación"
+    },
+    {
+      "nombre": "start_cleanup_rejects_a_path_outside_the_workspace_without_launching",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_cleanup",
+      "cubre": "start_cleanup rechaza una ruta fuera del workspace antes de lanzar la operación"
+    },
+    {
+      "nombre": "start_update_rejects_a_password_without_a_username",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_update",
+      "cubre": "start_update rechaza una contraseña sin usuario (InvalidPath)"
+    },
+    {
+      "nombre": "working_copy_command_reports_no_svn_when_the_configured_client_is_gone",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::wc_info",
+      "cubre": "Un comando de copia de trabajo sin svn utilizable devuelve NoSvn"
+    },
+    {
+      "nombre": "svn_set_path_reports_a_save_failure_but_keeps_the_adopted_binary",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::svn_set_path",
+      "cubre": "svn_set_path informa el fallo de guardado sin perder el binario adoptado"
+    },
+    {
+      "nombre": "failed_operation_emits_done_with_an_error_result",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "Una operación fallida emite svn://done con OperationResult::Err"
+    },
+    {
+      "nombre": "commit_killed_midway_leaves_the_copy_locked_until_cleanup_frees_it",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::cleanup",
+      "cubre": "wc_cleanup libera una copia realmente bloqueada (E155004) por un svn terminado a la fuerza"
+    },
+    {
+      "nombre": "malformed_svn_xml_is_reported_as_parse_failed",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "CommandError::from(SvnClientError)",
+      "cubre": "Un fallo de parseo de XML se mapea a ParseFailed"
+    },
+    {
+      "nombre": "the_main_window_capabilities_grant_only_core_and_dialog_defaults",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "capabilities/default.json",
+      "cubre": "El frontend no tiene permisos fs ni shell: capabilities solo core:default y dialog:default"
+    },
+    {
+      "nombre": "frontend boundary > keeps every other source file free of @tauri-apps imports",
+      "archivo": "src/services/boundary.test.ts",
+      "metodo": "import.meta.glob src",
+      "cubre": "Solo services/tauri.ts invoca commands, escucha eventos y abre el diálogo"
+    },
+    {
+      "nombre": "update_over_a_locally_edited_line_leaves_the_file_conflicted",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "copia_modificada->copia_en_conflicto",
+      "transicion_relacionada": "copia_modificada->copia_en_conflicto"
+    },
+    {
+      "nombre": "update_that_exceeds_the_timeout_reports_timed_out",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "en_ejecucion->tiempo_agotado",
+      "transicion_relacionada": "en_ejecucion->tiempo_agotado"
+    },
+    {
+      "nombre": "update_that_times_out_marks_the_working_copy_for_cleanup",
+      "archivo": "src-tauri/tests/svn_operations.rs",
+      "metodo": "Operations::update",
+      "cubre": "tiempo_agotado->wc_requiere_cleanup",
+      "transicion_relacionada": "tiempo_agotado->wc_requiere_cleanup"
+    },
+    {
+      "nombre": "retrying_with_wrong_credentials_reports_auth_required_again",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout",
+      "cubre": "reintento_con_credenciales->auth_required",
+      "transicion_relacionada": "reintento_con_credenciales->auth_required"
+    },
+    {
+      "nombre": "locate_in_reports_too_old_when_the_only_candidate_is_old",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "locate_in",
+      "cubre": "svn_sin_detectar->svn_demasiado_antiguo",
+      "transicion_relacionada": "svn_sin_detectar->svn_demasiado_antiguo"
+    },
+    {
+      "nombre": "search_dirs_lists_path_first_then_tortoise_slik_and_apache",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "search_dirs",
+      "cubre": "locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache"
+    },
+    {
+      "nombre": "search_dirs_is_empty_without_path_and_program_files",
+      "archivo": "src-tauri/tests/svn_layer.rs",
+      "metodo": "search_dirs",
+      "cubre": "locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache"
+    }
+  ],
+  "evidence": "Leído el código de producción (src-tauri/src/app/{workspace,operations,state,error,args,svn_locator}.rs, svn/{runner,error,commands,client,parsers,progress,message_file}.rs, config/mod.rs, commands/mod.rs; src/services/tauri.ts, src/stores/{project,workspace}.ts, src/utils/svnLabels.ts, src/composables/*.ts) y los 13 archivos de prueba; las pruebas NO fueron ejecutadas por este agente (conteos 132/80 vienen del invocador, no verificados; no existe .bossdream-project/smoker-log.json). Verificado: workspace resolve/revalidate con junction real en src-tauri/tests/workspace.rs:172-181 y 227-237 y a nivel de operación en svn_operations.rs:356-377; cancelación+cleanup con svn real en svn_operations.rs:380-394 (Cancelled, needs_cleanup true, luego cleanup lo limpia), cancelación en cola sin marca en svn_operations.rs:512-524, serialización por copia (ignorando mayúsculas) en svn_operations.rs:315-331 y paralelismo en 334-343; kill por timeout y por cancelación en svn_layer.rs:184-216 (con powershell, no svn); contraseña por stdin y bandera --password-from-stdin en svn_layer.rs:234-244 y 368-382 (con powershell/cmd, no svn); ciclo checkout->add->commit (rev 1)->info->status vacío->cleanup en app_state.rs:479-529 y commit unicode en svn_operations.rs:422-431; update con progreso y revisión 1 en svn_operations.rs:447-466; status local/remoto reales en svn_read.rs:250-296; reintento con credenciales sin persistir la contraseña en src/stores/project.test.ts:254-267; buffer de eventos tempranos y filtrado por id en src/services/tauri.test.ts:169-200. HUECOS REALES sin prueba (quedan en rules/transiciones sin test): (1) en_ejecucion->tiempo_agotado y tiempo_agotado->wc_requiere_cleanup: el timeout solo se prueba en el runner (svn_layer.rs:184), no que Operations marque cleanup (OPERATION_TIMEOUT 1h fija en operations.rs:24); (2) copia_modificada->copia_en_conflicto: el plan 4.4 prometía prueba de conflicto y no existe ninguna; (3) reintento_con_credenciales->auth_required (credenciales erróneas) y E170001/E230001/E155036/E155004 nunca producidos por svn real (repos file:///, solo stderr sintético en app_state.rs:162-177); (4) svn_sin_detectar->svn_demasiado_antiguo solo a nivel locate_in (svn_layer.rs:319), no vía AppState; (5) start_checkout/start_commit/start_cleanup con ruta fuera del workspace y start_update con contraseña sin usuario (app_state.rs:361-420 solo cubre update con '..', checkout/commit con password sin user); (6) cleanup de una copia realmente bloqueada (E155004), cleanup fallido y fallo de svn distinto no marcan/limpian la marca; (7) UpdateRequest con -r/--ignore-externals/--username (solo se prueba con valores por defecto); (8) acciones E/R/B y verbos Deleting/Replacing de progress.rs:9-14,40-52; (9) SvnError stdout/timestamp, symlink que escapa, orden de búsqueda de locate (default_search_dirs), NoSvn end-to-end, ParseFailed, OperationResult::Err en svn://done y fallo de guardado en adopt_svn; (10) CA-11: capabilities/default.json:7-8 (solo core:default y dialog:default) y 'solo services/tauri.ts toca invoke' se verifican leyendo el archivo, sin prueba automatizada; las vistas .vue (ProjectPanel, OnboardingView) no tienen pruebas de componente (presentación exenta según plan 6.6, validada manualmente en 6.7). CA-18 (cargo check/test, npm test/build) no se verificó aquí.",
+  "mocks_riesgosos": [
+    {
+      "razon": "src/stores/project.test.ts:4-14 mockea runOperation, wcInfo, wcStatus, svnCheckout, wcUpdate, wcCommit, wcCleanup y opCancel: el store nunca se prueba con el flujo real de eventos svn://progress y svn://done; ese cableado solo se verifica en tauri.test.ts con listen/invoke simulados, así que un desajuste de nombres de evento o de payload con el backend Rust pasaría en verde."
+    },
+    {
+      "razon": "src-tauri/tests/svn_layer.rs:34-46, 233-256, 367-382 y svn_operations.rs:469-484 usan powershell.exe, cmd.exe y .bat falsos como sustitutos de svn.exe: la entrega de contraseña por stdin, --password-from-stdin y --non-interactive y el kill por timeout/cancelación nunca se validan contra svn 1.14.2 real (el plan.md:161 deja como supuesto sin verificar la combinación --password-from-stdin + --non-interactive)."
+    },
+    {
+      "razon": "Todos los repos de integración son file:/// sin autenticación ni TLS: los tipos AuthRequired, UntrustedCertificate, WorkingCopyTooOld y WorkingCopyLocked se prueban solo con stderr sintético (app_state.rs:162-177, svn_layer.rs:93-104); si el texto real de svn 1.14 cambia, ninguna prueba lo detectaría."
+    },
+    {
+      "razon": "Los clientes de versión falsos en svn_layer.rs:319-343 (echo 1.9.7 / 1.10.0 en .bat) validan el parseo pero no la salida real de 'svn --version --quiet' de clientes antiguos."
+    }
+  ],
+  "assertions_debiles": [
+    {
+      "ubicacion": "src-tauri/tests/app_state.rs:479-529",
+      "razon": "El nombre dice checkout_commit_update_status_info_and_cleanup pero la prueba nunca ejecuta start_update; el ciclo del CA-7/CA-8 vía AppState queda sin update real, y el cleanup se corre sobre una copia sana (no prueba liberar un lock)."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_operations.rs:434-444",
+      "razon": "two_simultaneous_updates solo afirma que ambos devuelven revisión 0; no observa orden ni exclusión, así que pasaría igual sin lock por copia (la serialización la prueban solo los tests de OperationManager con rutas sintéticas y operation_waits_while_another_operation_holds_the_working_copy)."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_operations.rs:397-407",
+      "razon": "update_outside_a_working_copy solo verifica svn_kind().is_some(); no fija el kind ni que needs_cleanup sea falso."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_operations.rs:229-253",
+      "razon": "checkout_args usa contains() por bandera: no verifica adyacencia ni orden (-r 4, --depth immediates, --username alice) ni que la URL vaya antes del destino."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_operations.rs:269-281",
+      "razon": "commit_args usa contains(): no verifica que --encoding UTF-8 y -F estén emparejados con su valor."
+    },
+    {
+      "ubicacion": "src-tauri/tests/app_state.rs:376 y 392",
+      "razon": "receiver.try_recv().is_err() inmediato no prueba que no se lanzó una operación (un done tardío aún no habría llegado); lo que prueba el rechazo síncrono es el Err devuelto."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_layer.rs:228",
+      "razon": "assert!(!error.codes.is_empty()) no fija qué código real devuelve svn para un repo inexistente."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_layer.rs:180",
+      "razon": "run_reports_spawn_failure solo exige stderr no vacío, no su contenido."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_read.rs:84 y 97-98",
+      "razon": "parse_info_rejects_truncated_xml y parse_status_rejects_empty_and_truncated_input solo usan is_err(), sin fijar la variante de ParseError."
+    },
+    {
+      "ubicacion": "src-tauri/tests/svn_smoke.rs:21",
+      "razon": "contains(\"<info>\") es una verificación laxa del XML devuelto; solo sirve como humo del helper de repo."
+    }
+  ]
+}

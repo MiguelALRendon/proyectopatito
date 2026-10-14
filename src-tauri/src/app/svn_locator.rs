@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsStr;
 use std::fmt;
 use std::io::Read;
 use std::os::windows::process::CommandExt;
@@ -115,14 +116,17 @@ pub fn locate_in(
 }
 
 fn default_search_dirs() -> Vec<PathBuf> {
-    let path_dirs = env::var_os(PATH_VAR)
-        .map(|value| env::split_paths(&value).collect::<Vec<_>>())
-        .unwrap_or_default();
+    let path = env::var_os(PATH_VAR);
     let program_files = env::var_os(PROGRAM_FILES_VAR).map(PathBuf::from);
+    search_dirs(path.as_deref(), program_files.as_deref())
+}
+
+pub fn search_dirs(path: Option<&OsStr>, program_files: Option<&Path>) -> Vec<PathBuf> {
+    let path_dirs = path.map(env::split_paths).into_iter().flatten();
     let known = program_files
         .into_iter()
         .flat_map(|root| KNOWN_INSTALL_DIRS.map(|dir| root.join(dir)));
-    path_dirs.into_iter().chain(known).collect()
+    path_dirs.chain(known).collect()
 }
 
 fn probe(path: &Path) -> Result<SvnBinary, ProbeFailure> {

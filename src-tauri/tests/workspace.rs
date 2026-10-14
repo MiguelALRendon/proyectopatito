@@ -252,3 +252,17 @@ fn resolve_returns_scoped_path_inside_root_for_new_nested_destination() {
     assert_eq!(scoped.as_path(), expected);
     assert!(fixture.workspace.revalidate(&scoped).is_ok());
 }
+
+#[test]
+fn resolve_rejects_symlink_that_escapes_the_root() {
+    let fixture = fixture();
+    let outside = fixture.parent.join("fuera");
+    fs::create_dir(&outside).unwrap();
+    let link = fixture.workspace.root().as_path().join("escape");
+    std::os::windows::fs::symlink_dir(&outside, &link)
+        .expect("se requiere el Modo de desarrollador de Windows para crear symlinks");
+    assert!(matches!(
+        resolve_new(&fixture, r"escape\archivo"),
+        Err(WorkspaceError::OutsideWorkspace)
+    ));
+}

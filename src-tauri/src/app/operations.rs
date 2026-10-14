@@ -132,6 +132,7 @@ pub struct Operations {
     workspace: Workspace,
     client: SvnClient,
     manager: Arc<OperationManager>,
+    timeout: Duration,
 }
 
 impl Operations {
@@ -140,7 +141,12 @@ impl Operations {
             workspace,
             client,
             manager,
+            timeout: OPERATION_TIMEOUT,
         }
+    }
+
+    pub fn with_timeout(self, timeout: Duration) -> Self {
+        Self { timeout, ..self }
     }
 
     pub fn client(&self) -> &SvnClient {
@@ -282,7 +288,7 @@ impl Operations {
         progress: Option<UnboundedSender<String>>,
     ) -> RunOptions {
         RunOptions {
-            timeout: OPERATION_TIMEOUT,
+            timeout: self.timeout,
             password: ctx.password.clone(),
             cancel: self.manager.cancel_signal(ctx.id),
             progress,

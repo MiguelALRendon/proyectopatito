@@ -17,10 +17,12 @@ use dakedaduck_svn_lib::app::operations::{
 use dakedaduck_svn_lib::app::workspace::{ScopedPath, Workspace, WorkspaceError};
 use dakedaduck_svn_lib::svn::client::SvnClient;
 use dakedaduck_svn_lib::svn::commands::{
-    CheckoutRequest, CleanupRequest, CommitRequest, Depth, UpdateRequest, is_safe_checkout_url,
+    CheckoutRequest, CleanupRequest, CommitRequest, Depth, StatusRequest, UpdateRequest,
+    is_safe_checkout_url,
 };
 use dakedaduck_svn_lib::svn::error::SvnErrorKind;
 use dakedaduck_svn_lib::svn::message_file::MessageFile;
+use dakedaduck_svn_lib::svn::models::StatusItem;
 use dakedaduck_svn_lib::svn::progress::{
     ProgressAction, ProgressEvent, last_revision, parse_progress_line,
 };
@@ -31,6 +33,11 @@ const WC_NAME: &str = "copia ñ@dir";
 const LOCK_WAIT_PROOF: Duration = Duration::from_secs(1);
 const LOCK_PROBE: Duration = Duration::from_millis(150);
 const UNICODE_MESSAGE: &str = "ñandú ¿qué? 日本語 ✔";
+const TINY_TIMEOUT: Duration = Duration::from_millis(1);
+const KILL_AFTER: Duration = Duration::from_secs(2);
+const STALLING_HOOK: &str = "@echo off
+ping -n 9 127.0.0.1 >nul
+";
 
 struct Env {
     _root: TempDir,
@@ -557,4 +564,183 @@ fn safe_checkout_url_accepts_known_schemes_and_user_without_password() {
     ] {
         assert!(is_safe_checkout_url(url), "{url}");
     }
+}
+
+#[test]
+fn update_args_include_revision_externals_and_username_when_requested() {
+    let request = UpdateRequest {
+        target: PathBuf::from(r"C:\w\a"),
+        revision: Some(4),
+        ignore_externals: true,
+        username: Some("alice".into()),
+    };
+    let args = request.args();
+    for flag in ["-r", "4", "--ignore-externals", "--username", "alice"] {
+        assert!(args.contains(&OsString::from(flag)), "falta {flag}");
+    }
+}
+
+#[test]
+fn update_args_omit_optional_flags_when_nothing_is_requested() {
+    let request = UpdateRequest {
+        target: PathBuf::from(r"C:\w\a"),
+        ..update_request()
+    };
+    assert_eq!(request.args(), os_args(&["update", r"C:\w\a@"]));
+}
+
+#[test]
+fn progress_line_reads_existed_replaced_and_broken_columns() {
+    for (line, expected) in [
+        ("E    a.txt", ProgressAction::Existed),
+        ("R    a.txt", ProgressAction::Replaced),
+        ("B    a.txt", ProgressAction::Broken),
+    ] {
+        let event = parse_progress_line(line);
+        assert_eq!(
+            event,
+            ProgressEvent::Item {
+                action: expected,
+                path: "a.txt".into()
+            },
+            "{line}"
+        );
+    }
+}
+
+#[test]
+fn progress_line_reads_the_deleting_and_replacing_commit_verbs() {
+    assert_eq!(
+        parse_progress_line("Deleting       a.txt"),
+        ProgressEvent::Item {
+            action: ProgressAction::Deleted,
+            path: "a.txt".into()
+        }
+    );
+    assert_eq!(
+        parse_progress_line("Replacing      b.txt"),
+        ProgressEvent::Item {
+            action: ProgressAction::Replaced,
+            path: "b.txt".into()
+        }
+    );
+}
+
+async fn timed_out_update(env: &Env, wc: &ScopedPath) -> OperationError {
+    env.ops
+        .clone()
+        .with_timeout(TINY_TIMEOUT)
+        .update(wc, update_request(), &env.context())
+        .await
+        .unwrap_err()
+}
+
+#[tokio::test]
+async fn update_that_exceeds_the_timeout_reports_timed_out() {
+    let env = Env::new();
+    let wc = env.checkout(WC_NAME).await;
+    let error = timed_out_update(&env, &wc).await;
+    assert_eq!(error.svn_kind(), Some(SvnErrorKind::TimedOut));
+}
+
+#[tokio::test]
+async fn update_that_times_out_marks_the_working_copy_for_cleanup() {
+    let env = Env::new();
+    let wc = env.checkout(WC_NAME).await;
+    assert!(!env.ops.manager().needs_cleanup(wc.as_path()));
+    timed_out_update(&env, &wc).await;
+    assert!(env.ops.manager().needs_cleanup(wc.as_path()));
+}
+
+#[tokio::test]
+async fn svn_failure_that_is_neither_cancel_nor_timeout_does_not_mark_cleanup() {
+    let env = Env::new();
+    let plain = env.scoped("no-es-wc");
+    fs::create_dir(plain.as_path()).unwrap();
+    let error = env
+        .ops
+        .update(&plain, update_request(), &env.context())
+        .await
+        .unwrap_err();
+    assert_eq!(error.svn_kind(), Some(SvnErrorKind::Other));
+    assert!(!env.ops.manager().needs_cleanup(plain.as_path()));
+}
+
+#[tokio::test]
+async fn failed_cleanup_keeps_the_cleanup_mark() {
+    let env = Env::new();
+    let plain = env.scoped("no-es-wc");
+    fs::create_dir(plain.as_path()).unwrap();
+    env.ops.manager().mark_needs_cleanup(plain.as_path());
+    let error = env.ops.cleanup(&plain, &env.context()).await.unwrap_err();
+    assert_eq!(error.svn_kind(), Some(SvnErrorKind::Other));
+    assert!(env.ops.manager().needs_cleanup(plain.as_path()));
+}
+
+#[tokio::test]
+async fn commit_killed_midway_leaves_the_copy_locked_until_cleanup_frees_it() {
+    let env = Env::new();
+    let wc = env.checkout(WC_NAME).await;
+    let hook = env.repo._dir.path().join("hooks").join("pre-commit.bat");
+    fs::write(hook, STALLING_HOOK).unwrap();
+    let file = wc.as_path().join("a.txt");
+    fs::write(&file, "x").unwrap();
+    env.raw_svn(&["add", &format!("{}@", file.display())]);
+    let ctx = env.context();
+    let (manager, id) = (env.ops.manager().clone(), ctx.id);
+    tokio::spawn(async move {
+        tokio::time::sleep(KILL_AFTER).await;
+        manager.cancel(id);
+    });
+    let killed = env.ops.commit(&wc, commit_request("m"), &ctx).await;
+    assert_eq!(
+        killed.unwrap_err().svn_kind(),
+        Some(SvnErrorKind::Cancelled)
+    );
+    let blocked = env.ops.update(&wc, update_request(), &env.context()).await;
+    assert_eq!(
+        blocked.unwrap_err().svn_kind(),
+        Some(SvnErrorKind::WorkingCopyLocked)
+    );
+    env.ops.cleanup(&wc, &env.context()).await.unwrap();
+    env.ops
+        .update(&wc, update_request(), &env.context())
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn update_over_a_locally_edited_line_leaves_the_file_conflicted() {
+    let env = Env::new();
+    let (mine, theirs) = (env.checkout("mia").await, env.checkout("ajena").await);
+    env.commit_file(&theirs, "f.txt", "base").await;
+    env.ops
+        .update(&mine, update_request(), &env.context())
+        .await
+        .unwrap();
+    fs::write(theirs.as_path().join("f.txt"), "linea ajena").unwrap();
+    env.ops
+        .commit(&theirs, commit_request("ajena"), &env.context())
+        .await
+        .unwrap();
+    fs::write(mine.as_path().join("f.txt"), "linea mia").unwrap();
+    env.ops
+        .update(&mine, update_request(), &env.context())
+        .await
+        .unwrap();
+    let request = StatusRequest {
+        target: mine.as_path().to_path_buf(),
+        remote: false,
+    };
+    let report = env
+        .ops
+        .client()
+        .status(&request, RunOptions::default())
+        .await
+        .unwrap();
+    let conflicted = report
+        .entries
+        .iter()
+        .any(|entry| entry.item == StatusItem::Conflicted);
+    assert!(conflicted, "{report:?}");
 }
