@@ -5,9 +5,12 @@ const workspace = useWorkspaceStore();
 </script>
 
 <template>
-  <p v-if="workspace.hasSvn" class="notice">
-    Subversion {{ workspace.svnVersion }} detectado.
-  </p>
+  <template v-if="workspace.hasSvn">
+    <p class="notice">Subversion {{ workspace.svnVersion }} detectado.</p>
+    <p v-if="workspace.svn?.error" class="banner banner--warning" role="alert">
+      {{ workspace.svn.error }}
+    </p>
+  </template>
   <div v-else class="banner banner--error" role="alert">
     <strong>Subversion no detectado</strong>
     <span>{{

@@ -115,7 +115,7 @@ pub fn locate_in(
     }
 }
 
-fn default_search_dirs() -> Vec<PathBuf> {
+pub fn default_search_dirs() -> Vec<PathBuf> {
     let path = env::var_os(PATH_VAR);
     let program_files = env::var_os(PROGRAM_FILES_VAR).map(PathBuf::from);
     search_dirs(path.as_deref(), program_files.as_deref())

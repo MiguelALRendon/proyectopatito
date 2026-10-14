@@ -147,7 +147,7 @@ tipo: new · complejidad: large
 
 ### Increment 7 (ultimo): QA Increment — cubre spec [CA-1..CA-18]
 - Pasos:
-  - [ ] 7.1 skill `qa-increment`: inventario de pruebas, QA Manager, `qa-run` en el modo de `bossdream.json > qa.mode` (`costoso`), Test Critic, re-verificación
+  - [x] 7.1 skill `qa-increment`: inventario de pruebas, QA Manager, `qa-run` en el modo de `bossdream.json > qa.mode` (`costoso`), Test Critic, re-verificación
 - Conexiones: `qa-increment`, `qa-run`, `bossdream-qa-planner`, `bossdream-qa-auditor`, `flow-test-gen` (flujo checkout→modificar→update→commit y cancelación→cleanup)
 - Pipeline del increment: `test-checks` en verde con veredicto `QA VERDICT: ACCEPTED`
 - Criterio de aceptacion: veredicto ACCEPTED sin razones abiertas

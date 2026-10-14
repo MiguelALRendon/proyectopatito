@@ -67,7 +67,7 @@ Capas Rust (dependencia unidireccional): `commands → app → svn`. `svn` no co
 
 ## 5. API Rust → Frontend (Fase 1)
 
-`workspace_get`, `workspace_set(path)`, `svn_detect()`, `svn_set_path(path)`, `wc_info(path)`, `wc_status(path, remote)`, `svn_checkout(req)`, `wc_update(req)`, `wc_commit(req)`, `op_cancel(id)`, `wc_cleanup(path)`; eventos `svn://progress`, `svn://done`. Resultados siempre tipados, nunca `stdout: string`.
+`workspace_get`, `workspace_set(path)`, `svn_detect()`, `svn_set_path(path)`, `wc_info(path)`, `wc_status(path, remote)`, `svn_checkout(req)`, `wc_update(req)`, `wc_commit(req)`, `op_cancel(id)`, `wc_cleanup(path)`, `wc_needs_cleanup(path)` (agregado en el QA: la UI solo ofrece Cleanup si el backend marcó la copia); eventos `svn://progress`, `svn://done`. Resultados siempre tipados, nunca `stdout: string`.
 
 ## 6. Persistencia
 

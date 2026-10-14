@@ -1,0 +1,23 @@
+Salida literal del agente bossdream-flow-breaker, ronda 6 (entregada a la sesión orquestadora vía SubagentHandback, 2026-10-14).
+
+Auditoría sexta de los 10 flujos de .bossdream-project/test-inventory.json contra src/stores/project.ts, src/views/ProjectPanel.vue y src/services/tauri.ts. Solo lectura.
+
+Verificación de la corrección de la ronda anterior:
+- refresh() en src/stores/project.ts (líneas 139-156): ticket = ++latestRead y descarte ticket !== latestRead en éxito y en error. Correcto.
+- Las cinco pruebas citadas existen en src/stores/project.test.ts (líneas 334, 350, 367, 382, 399).
+- ProjectPanel.vue deshabilita Refrescar (línea 188), Abrir y las acciones con project.isLocked, así que un refresh manual no puede arrancar durante un open ni durante el refresh posterior a una operación.
+- runOperation (src/services/tauri.ts, línea 256) hace await start() antes de devolver; el track de execute corre siempre antes del finally, y operation no queda colgado.
+- El panel de credenciales depende de error.kind === 'auth_required'; abrir otra copia limpia el error, así que retry no se dispara contra otra copia desde la UI.
+
+Búsqueda de carreras y estados persistentes:
+No hay estado incorrecto persistente alcanzable desde la UI. Revisado: open durante refresh manual (imposible por el bloqueo mutuo de Abrir/Refrescar); refresh manual previo a un open que falla (se descarta y restoreSnapshot restaura la copia anterior); refresh manual previo a una operación (descartado si la operación termina bien; si falla, el último refresh escribe, comportamiento esperado); isReading e isBusy se liberan en finally.
+
+Notas no bloqueantes (transitorias o documentales):
+1. flows[1] apertura-de-copia-de-trabajo: lectura_obsoleta->reposo aparece en transiciones_invalidas[] dos veces, pero su texto describe el descarte que el código y las pruebas implementan. Contradicción documental, no estado incorrecto. Propuesta: moverla a transiciones_validas con su condición. Es la única transición inválida con evidencia de ejecución; no bloquea por ser documental, pero conviene corregirla.
+2. Reabrir la misma copia limpia cleanupTarget (resetFeedback en switchTo): la oferta de Cleanup desaparece aunque el backend siga marcando la copia; se recupera en la siguiente operación que reporte bloqueo. Transitorio.
+3. Un refresh manual iniciado antes de una operación que falla puede sustituir el error de la operación por el suyo. Transitorio, se reemplaza con la siguiente lectura.
+4. Un open fallido restaura info y status previos aunque hubiera un refresh manual con datos más recientes (descartado por el ticket). Dato anterior, no incorrecto; se corrige con Refrescar.
+
+Los hallazgos ya aceptados (path B con info de A durante un refresh bajo bloqueo; workspace_restaurado sin salida declarada) siguen no bloqueantes.
+
+VERDICT: pass

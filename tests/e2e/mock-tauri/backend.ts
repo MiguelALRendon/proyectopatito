@@ -345,6 +345,8 @@ const SYNC_HANDLERS: Record<string, (args: Args) => unknown> = {
     against_revision: null,
   }),
   op_cancel: (args) => cancelOperation(Number(args?.id)),
+  wc_needs_cleanup: (args) =>
+    Boolean(findWorkingCopy(String(args?.path ?? ''))?.isLocked),
 };
 
 function withoutPassword(args: Args): Args {

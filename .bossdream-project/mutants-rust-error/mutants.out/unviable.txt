@@ -1,0 +1,6 @@
+src/svn/error.rs:35:9: replace SvnErrorKind::from_codes -> Self with Default::default()
+src/svn/error.rs:42:9: replace SvnErrorKind::from_code -> Option<Self> with Some(Default::default())
+src/svn/error.rs:90:9: replace SvnError::from_process -> Self with Default::default()
+src/svn/error.rs:96:9: replace SvnError::interrupted -> Self with Default::default()
+src/svn/error.rs:100:9: replace SvnError::spawn_failed -> Self with Default::default()
+src/svn/error.rs:112:9: replace SvnError::build -> Self with Default::default()

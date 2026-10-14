@@ -20,6 +20,14 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   const hasSvn = computed(() => svn.value?.binary != null);
   const isOnboarded = computed(() => root.value !== null && hasSvn.value);
 
+  function keepWorkingClient(
+    previous: SvnDetection | null,
+    next: SvnDetection,
+  ): SvnDetection {
+    if (next.binary || !previous?.binary) return next;
+    return { binary: previous.binary, error: next.error };
+  }
+
   async function guarded(action: () => Promise<void>): Promise<boolean> {
     error.value = null;
     try {
@@ -46,15 +54,19 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       root.value = await workspaceSet(path);
     });
 
-  const setSvnPath = (path: string) =>
-    guarded(async () => {
-      svn.value = await svnSetPath(path);
+  async function detection(
+    action: () => Promise<SvnDetection>,
+  ): Promise<boolean> {
+    const isOk = await guarded(async () => {
+      svn.value = await action();
     });
+    return isOk && svn.value?.binary != null && svn.value.error == null;
+  }
 
-  const detectSvn = () =>
-    guarded(async () => {
-      svn.value = await svnDetect();
-    });
+  const setSvnPath = (path: string) =>
+    detection(async () => keepWorkingClient(svn.value, await svnSetPath(path)));
+
+  const detectSvn = () => detection(svnDetect);
 
   return {
     root,

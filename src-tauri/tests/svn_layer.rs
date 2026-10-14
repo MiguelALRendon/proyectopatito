@@ -11,7 +11,8 @@ use std::time::{Duration, Instant, SystemTime};
 use common::FakeSvn;
 
 use dakedaduck_svn_lib::app::svn_locator::{
-    LocatorError, MIN_VERSION, SvnVersion, locate, locate_in, parse_version, search_dirs,
+    LocatorError, MIN_VERSION, SvnVersion, default_search_dirs, locate, locate_in, parse_version,
+    search_dirs,
 };
 use dakedaduck_svn_lib::svn::error::{
     CODE_AUTH_REQUIRED, Captured, SvnError, SvnErrorKind, extract_codes, redact_command,
@@ -21,7 +22,8 @@ use tempfile::TempDir;
 use tokio::sync::Notify;
 
 const POWERSHELL: &str = "powershell.exe";
-const SLEEP_SCRIPT: &str = "Start-Sleep -Seconds 30; #";
+const MARKER_DELAY_SECS: u64 = 3;
+const PROBE_DEADLINE: Duration = Duration::from_secs(8);
 const ECHO_STDIN_SCRIPT: &str = "$line = [Console]::In.ReadLine(); Write-Output $line; #";
 const SHORT_TIMEOUT: Duration = Duration::from_millis(400);
 const CANCEL_DELAY: Duration = Duration::from_millis(300);
@@ -41,6 +43,21 @@ fn powershell_runner() -> SvnRunner {
 
 fn powershell_args(script: &str) -> Vec<OsString> {
     os_args(&["-NoProfile", "-Command", script])
+}
+
+fn marker_script(marker: &Path) -> String {
+    format!(
+        "Start-Sleep -Seconds {MARKER_DELAY_SECS}; Set-Content -Path '{}' -Value x; #",
+        marker.display()
+    )
+}
+
+async fn assert_process_was_killed(marker: &Path) {
+    tokio::time::sleep(Duration::from_secs(MARKER_DELAY_SECS + 2)).await;
+    assert!(
+        !marker.exists(),
+        "el proceso sobrevivió y terminó su trabajo"
+    );
 }
 
 fn batch_file(dir: &TempDir, body: &str) -> PathBuf {
@@ -98,6 +115,8 @@ fn kind_uses_the_first_recognized_code_in_a_chain() {
 fn kind_maps_each_known_code() {
     let expected = [
         ("E170001", SvnErrorKind::AuthRequired),
+        ("E215004", SvnErrorKind::AuthRequired),
+        ("E215001", SvnErrorKind::AuthRequired),
         ("E230001", SvnErrorKind::UntrustedCertificate),
         ("E155036", SvnErrorKind::WorkingCopyTooOld),
         ("E155004", SvnErrorKind::WorkingCopyLocked),
@@ -190,13 +209,16 @@ async fn run_times_out_and_kills_a_hanging_process() {
         timeout: SHORT_TIMEOUT,
         ..RunOptions::default()
     };
+    let dir = TempDir::new().unwrap();
+    let marker = dir.path().join("vivo.txt");
     let started = Instant::now();
     let error = powershell_runner()
-        .run(&powershell_args(SLEEP_SCRIPT), options)
+        .run(&powershell_args(&marker_script(&marker)), options)
         .await
         .unwrap_err();
     assert_eq!(error.kind, SvnErrorKind::TimedOut);
     assert!(started.elapsed() < KILL_DEADLINE);
+    assert_process_was_killed(&marker).await;
 }
 
 #[tokio::test]
@@ -210,13 +232,16 @@ async fn run_cancels_when_notified_before_the_timeout() {
         tokio::time::sleep(CANCEL_DELAY).await;
         cancel.notify_one();
     });
+    let dir = TempDir::new().unwrap();
+    let marker = dir.path().join("vivo.txt");
     let started = Instant::now();
     let error = powershell_runner()
-        .run(&powershell_args(SLEEP_SCRIPT), options)
+        .run(&powershell_args(&marker_script(&marker)), options)
         .await
         .unwrap_err();
     assert_eq!(error.kind, SvnErrorKind::Cancelled);
     assert!(started.elapsed() < KILL_DEADLINE);
+    assert_process_was_killed(&marker).await;
 }
 
 #[tokio::test]
@@ -229,7 +254,7 @@ async fn run_surfaces_real_svn_error_codes_for_a_missing_repository() {
         )
         .await
         .unwrap_err();
-    assert!(!error.codes.is_empty());
+    assert_eq!(error.codes, codes(&["E170013", "E180001"]));
     assert_eq!(error.exit_code, Some(1));
     assert!(error.command.ends_with("--non-interactive"));
 }
@@ -365,7 +390,7 @@ fn locate_in_gives_up_on_a_manual_client_that_hangs() {
         locate_in(Some(&fake), &[]),
         Err(LocatorError::Invalid(fake.clone()))
     );
-    assert!(started.elapsed() < KILL_DEADLINE);
+    assert!(started.elapsed() < PROBE_DEADLINE);
 }
 
 #[tokio::test]
@@ -471,4 +496,42 @@ fn search_dirs_lists_path_first_then_tortoise_slik_and_apache() {
 #[test]
 fn search_dirs_is_empty_without_path_and_program_files() {
     assert!(search_dirs(None, None).is_empty());
+}
+
+#[test]
+fn default_search_dirs_are_built_from_the_path_and_program_files_variables() {
+    let path = std::env::var_os("PATH");
+    let program_files = std::env::var_os("ProgramFiles").map(PathBuf::from);
+    let dirs = default_search_dirs();
+    assert!(!dirs.is_empty());
+    assert_eq!(dirs, search_dirs(path.as_deref(), program_files.as_deref()));
+}
+
+#[tokio::test]
+async fn run_forces_english_output_so_progress_and_errors_can_be_parsed() {
+    let output = SvnRunner::new(PathBuf::from("cmd.exe"))
+        .run(
+            &os_args(&["/C", "echo", "%LANGUAGE%"]),
+            RunOptions::default(),
+        )
+        .await
+        .unwrap();
+    assert!(String::from_utf8_lossy(&output.stdout).starts_with("en "));
+}
+
+#[test]
+fn every_error_kind_has_its_own_readable_message() {
+    let kinds = [
+        SvnErrorKind::AuthRequired,
+        SvnErrorKind::UntrustedCertificate,
+        SvnErrorKind::WorkingCopyTooOld,
+        SvnErrorKind::WorkingCopyLocked,
+        SvnErrorKind::Cancelled,
+        SvnErrorKind::TimedOut,
+        SvnErrorKind::Other,
+    ];
+    let messages: std::collections::HashSet<String> =
+        kinds.iter().map(|kind| kind.to_string()).collect();
+    assert_eq!(messages.len(), kinds.len());
+    assert!(messages.iter().all(|message| !message.is_empty()));
 }

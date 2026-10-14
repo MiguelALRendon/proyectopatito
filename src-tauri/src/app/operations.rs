@@ -149,6 +149,10 @@ impl Operations {
         Self { timeout, ..self }
     }
 
+    pub fn timeout(&self) -> Duration {
+        self.timeout
+    }
+
     pub fn client(&self) -> &SvnClient {
         &self.client
     }

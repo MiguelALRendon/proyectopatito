@@ -98,13 +98,18 @@ fn reject_unsafe_components(path: &Path) -> Result<(), WorkspaceError> {
             Component::Prefix(prefix) if !is_plain_prefix(prefix.kind()) => {
                 return Err(WorkspaceError::DeviceOrReservedPath);
             }
-            Component::Normal(name) if is_reserved_device_name(name) => {
+            Component::Normal(name) if is_reserved_device_name(name) || is_ambiguous_name(name) => {
                 return Err(WorkspaceError::DeviceOrReservedPath);
             }
             _ => {}
         }
     }
     Ok(())
+}
+
+fn is_ambiguous_name(name: &OsStr) -> bool {
+    let name = name.to_string_lossy();
+    name.ends_with(['.', ' ']) || name.contains(':')
 }
 
 fn is_plain_prefix(kind: Prefix<'_>) -> bool {
@@ -135,6 +140,9 @@ fn canonicalize_deepest_ancestor(path: &Path) -> Result<PathBuf, WorkspaceError>
     let mut tail: Vec<&OsStr> = Vec::new();
     loop {
         match std::fs::canonicalize(ancestor) {
+            Ok(base) if !tail.is_empty() && !base.is_dir() => {
+                return Err(io::Error::from(io::ErrorKind::NotADirectory).into());
+            }
             Ok(base) => return Ok(append_tail(strip_verbatim(base), &tail)),
             Err(error) if is_missing_entry(ancestor, &error) => {
                 let (Some(name), Some(parent)) = (ancestor.file_name(), ancestor.parent()) else {

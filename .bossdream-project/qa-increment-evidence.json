@@ -1,5 +1,5 @@
 {
-  "ejecutado_en": "2026-10-14T07:33:19.4700885-06:00",
+  "ejecutado_en": "2026-10-14T14:54:05.304271-06:00",
   "test_pipeline_result": {
     "code_correctness": {
       "status": "passed"
@@ -8,27 +8,55 @@
       "status": "passed"
     },
     "flow_correctness": {
-      "status": "failed",
-      "severidad": "hard",
-      "condicion_de_bloqueo": "Missing validation coverage: resolve rechaza un symlink que escapa del Workspace Root (OutsideWorkspace); Missing validation coverage: SvnError conserva stdout y timestamp del proceso fallido; Missing validation coverage: locate busca en orden: configuraci�n manual, PATH, TortoiseSVN, SlikSVN, Apache; Missing validation coverage: locate_in reporta TooOld solo si ning�n candidato de la lista es utilizable; Missing validation coverage: UpdateRequest agrega -r, --ignore-externals y --username cuando se piden; Missing validation coverage: parse_progress_line reconoce las acciones E, R y B y los verbos Deleting y Replacing; Missing validation coverage: Una operaci�n interrumpida por timeout marca la copia como requiere cleanup; Missing validation coverage: Un cleanup fallido no limpia la marca de cleanup; Missing validation coverage: Un fallo de svn distinto de cancelaci�n o timeout no marca cleanup; Missing validation coverage: start_checkout rechaza un destino fuera del workspace antes de lanzar la operaci�n; Missing validation coverage: start_commit rechaza una ruta fuera del workspace antes de lanzar la operaci�n; Missing validation coverage: start_cleanup rechaza una ruta fuera del workspace antes de lanzar la operaci�n; Missing validation coverage: start_update rechaza una contrase�a sin usuario (InvalidPath); Missing validation coverage: Un comando de copia de trabajo sin svn utilizable devuelve NoSvn; Missing validation coverage: svn_set_path informa el fallo de guardado sin perder el binario adoptado; Missing validation coverage: Una operaci�n fallida emite svn://done con OperationResult::Err; Missing validation coverage: wc_cleanup libera una copia realmente bloqueada (E155004) por un svn terminado a la fuerza; Missing validation coverage: Un fallo de parseo de XML se mapea a ParseFailed; Missing validation coverage: El frontend no tiene permisos fs ni shell: capabilities solo core:default y dialog:default; Missing validation coverage: Solo services/tauri.ts invoca commands, escucha eventos y abre el di�logo; Missing flow transition: copia_modificada->copia_en_conflicto; Missing flow transition: en_ejecucion->tiempo_agotado; Missing flow transition: tiempo_agotado->wc_requiere_cleanup; Missing flow transition: reintento_con_credenciales->auth_required; Missing flow transition: svn_sin_detectar->svn_demasiado_antiguo",
-      "escape_hatch": null,
-      "transiciones_no_cubiertas": [
+      "status": "passed",
+      "transiciones_cubiertas": [
+        "sin_copia->copia_limpia",
+        "copia_limpia->copia_modificada",
+        "copia_modificada->copia_limpia",
+        "copia_limpia->copia_desactualizada",
+        "copia_desactualizada->copia_limpia",
         "copia_modificada->copia_en_conflicto",
+        "en_cola->en_ejecucion",
+        "en_cola->cancelada_en_cola",
+        "en_ejecucion->completada",
+        "en_ejecucion->cancelada_en_ejecucion",
         "en_ejecucion->tiempo_agotado",
+        "cancelada_en_ejecucion->wc_requiere_cleanup",
         "tiempo_agotado->wc_requiere_cleanup",
+        "wc_requiere_cleanup->wc_operable",
+        "wc_requiere_cleanup->wc_requiere_cleanup",
+        "sin_oferta->cleanup_ofrecido",
+        "sin_oferta->consultando_backend",
+        "consultando_backend->cleanup_ofrecido",
+        "consultando_backend->sin_oferta",
+        "cleanup_ofrecido->sin_oferta",
+        "operacion_en_curso->auth_required",
+        "auth_required->reintento_con_credenciales",
+        "reintento_con_credenciales->completada",
         "reintento_con_credenciales->auth_required",
-        "svn_sin_detectar->svn_demasiado_antiguo"
+        "operacion_de_red_en_curso->certificado_no_confiable",
+        "copia_formato_antiguo->error_working_copy_too_old",
+        "ruta_solicitada->ruta_resuelta",
+        "ruta_resuelta->ruta_revalidada",
+        "ruta_solicitada->ruta_rechazada",
+        "ruta_resuelta->ruta_rechazada",
+        "sin_workspace->workspace_fijado",
+        "workspace_fijado->workspace_restaurado",
+        "workspace_fijado->sin_workspace",
+        "svn_sin_detectar->svn_valido",
+        "svn_sin_detectar->svn_invalido",
+        "svn_sin_detectar->svn_demasiado_antiguo",
+        "svn_valido->svn_valido_con_aviso",
+        "reposo->abriendo",
+        "abriendo->reposo",
+        "reposo->leyendo_tras_operacion",
+        "leyendo_tras_operacion->reposo"
       ],
-      "metodos_incompletos": [
-        {
-          "metodo": "SvnRunner::run",
-          "mensaje": "tiene prueba unitaria verde, pero el flujo end-to-end en_ejecucion\u001atiempo_agotado no est� cubierto"
-        },
-        {
-          "metodo": "locate_in",
-          "mensaje": "tiene prueba unitaria verde, pero el flujo end-to-end svn_sin_detectar\u001asvn_demasiado_antiguo no est� cubierto"
-        }
-      ]
+      "flow_breaker": {
+        "status": "requires-agent",
+        "agente": "bossdream-flow-breaker",
+        "instruccion": "Invocar bossdream-flow-breaker con flows[] de este test-inventory.json."
+      }
     },
     "regression_safety": {
       "status": "skipped",
@@ -36,145 +64,68 @@
       "consumidores_externos_detectados": []
     },
     "quality_approval": {
-      "status": "failed",
-      "severidad": "hard",
-      "condicion_de_bloqueo": "una o mas etapas previas fallaron",
-      "escape_hatch": null
+      "status": "requires-agent",
+      "agente": "bossdream-qa-planner",
+      "instruccion": "Invocar el agente bossdream-qa-planner con .bossdream-project/test-inventory.json, este JSON completo de test-checks.ps1 y, si existen, hallazgos de agents/bossdream-qa-auditor.md - este script no evalua juicio semantico.",
+      "flow_breaker": {
+        "status": "requires-agent",
+        "agente": "bossdream-flow-breaker",
+        "instruccion": "Invocar bossdream-flow-breaker con flows[] de este test-inventory.json."
+      }
     }
   },
   "qa_manager_veredicto": {
-    "status": "PENDING",
-    "razones": [
-      "Missing validation coverage: resolve rechaza un symlink que escapa del Workspace Root (OutsideWorkspace)",
-      "Missing validation coverage: SvnError conserva stdout y timestamp del proceso fallido",
-      "Missing validation coverage: locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache",
-      "Missing validation coverage: locate_in reporta TooOld solo si ningún candidato de la lista es utilizable",
-      "Missing validation coverage: UpdateRequest agrega -r, --ignore-externals y --username cuando se piden",
-      "Missing validation coverage: parse_progress_line reconoce las acciones E, R y B y los verbos Deleting y Replacing",
-      "Missing validation coverage: Una operación interrumpida por timeout marca la copia como requiere cleanup",
-      "Missing validation coverage: Un cleanup fallido no limpia la marca de cleanup",
-      "Missing validation coverage: Un fallo de svn distinto de cancelación o timeout no marca cleanup",
-      "Missing validation coverage: start_checkout rechaza un destino fuera del workspace antes de lanzar la operación",
-      "Missing validation coverage: start_commit rechaza una ruta fuera del workspace antes de lanzar la operación",
-      "Missing validation coverage: start_cleanup rechaza una ruta fuera del workspace antes de lanzar la operación",
-      "Missing validation coverage: start_update rechaza una contraseña sin usuario (InvalidPath)",
-      "Missing validation coverage: Un comando de copia de trabajo sin svn utilizable devuelve NoSvn",
-      "Missing validation coverage: svn_set_path informa el fallo de guardado sin perder el binario adoptado",
-      "Missing validation coverage: Una operación fallida emite svn://done con OperationResult::Err",
-      "Missing validation coverage: wc_cleanup libera una copia realmente bloqueada (E155004) por un svn terminado a la fuerza",
-      "Missing validation coverage: Un fallo de parseo de XML se mapea a ParseFailed",
-      "Missing validation coverage: El frontend no tiene permisos fs ni shell: capabilities solo core:default y dialog:default",
-      "Missing validation coverage: Solo services/tauri.ts invoca commands, escucha eventos y abre el diálogo",
-      "Missing flow transition: copia_modificada->copia_en_conflicto",
-      "Missing flow transition: en_ejecucion->tiempo_agotado",
-      "Missing flow transition: tiempo_agotado->wc_requiere_cleanup",
-      "Missing flow transition: reintento_con_credenciales->auth_required",
-      "Missing flow transition: svn_sin_detectar->svn_demasiado_antiguo"
-    ]
+    "status": "ACCEPTED",
+    "razones": [],
+    "registro": ".bossdream-project/agent-outputs/qa-planner-round7.txt"
   },
-  "remediacion_aplicada": false,
-  "bloqueado": true,
-  "motivo_bloqueo": "Paso 3 pendiente: 25 casos obligatorios sin prueba; qa-run solo lo puede lanzar el usuario (disable-model-invocation)",
+  "flow_breaker_veredicto": {
+    "status": "pass",
+    "razones": [],
+    "registro": ".bossdream-project/agent-outputs/flow-breaker-round7.txt"
+  },
+  "verificador_cierre_veredicto": {
+    "status": "pass",
+    "razones": [],
+    "registro": ".bossdream-project/agent-outputs/endless-verifier-final.txt"
+  },
+  "remediacion_aplicada": true,
+  "detalle_remediacion": ".bossdream-project/qa-verdicts.md",
+  "regression_safety_justificacion": ".bossdream-project/qa-verdicts.md (sección Justificación de regression_safety: skipped)",
+  "bloqueado": false,
+  "motivo_bloqueo": null,
   "afirmaciones": [
     {
-      "texto": "Missing validation coverage: resolve rechaza un symlink que escapa del Workspace Root (OutsideWorkspace)",
-      "evidencia_adjunta": null
+      "texto": "QA VERDICT: ACCEPTED del bossdream-qa-planner en la ronda final (7)",
+      "evidencia_adjunta": ".bossdream-project/agent-outputs/qa-planner-round7.txt"
     },
     {
-      "texto": "Missing validation coverage: SvnError conserva stdout y timestamp del proceso fallido",
-      "evidencia_adjunta": null
+      "texto": "VERDICT: pass del bossdream-flow-breaker en la ronda final (7)",
+      "evidencia_adjunta": ".bossdream-project/agent-outputs/flow-breaker-round7.txt"
     },
     {
-      "texto": "Missing validation coverage: locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache",
-      "evidencia_adjunta": null
+      "texto": "VERDICT: pass del bossdream-endless-verifier en su segunda pasada, tras refutar y remediar CA-14",
+      "evidencia_adjunta": ".bossdream-project/agent-outputs/endless-verifier-final.txt"
     },
     {
-      "texto": "Missing validation coverage: locate_in reporta TooOld solo si ningún candidato de la lista es utilizable",
-      "evidencia_adjunta": null
+      "texto": "Historial de rechazos y bloqueos previos con su remediación (resumen del orquestador, no salida cruda)",
+      "evidencia_adjunta": ".bossdream-project/qa-verdicts.md"
     },
     {
-      "texto": "Missing validation coverage: UpdateRequest agrega -r, --ignore-externals y --username cuando se piden",
-      "evidencia_adjunta": null
+      "texto": "regression_safety skipped (el script solo detecta Stryker): Stryker frontend con 523 matados y 48 vivos, umbral break 85",
+      "evidencia_adjunta": ".bossdream-project/stryker-mutants.txt"
     },
     {
-      "texto": "Missing validation coverage: parse_progress_line reconoce las acciones E, R y B y los verbos Deleting y Replacing",
-      "evidencia_adjunta": null
+      "texto": "cargo-mutants sobre src/svn/error.rs tras el mapeo de E215004/E215001: 23 atrapados, 6 inviables, 0 vivos",
+      "evidencia_adjunta": ".bossdream-project/mutants-rust-error/mutants.out/outcomes.json"
     },
     {
-      "texto": "Missing validation coverage: Una operación interrumpida por timeout marca la copia como requiere cleanup",
-      "evidencia_adjunta": null
+      "texto": "cargo-mutants re-ejecución sobre progress.rs y error.rs: 51 atrapados, 11 inviables, 0 vivos",
+      "evidencia_adjunta": ".bossdream-project/mutants-rust-recheck/mutants.out/outcomes.json"
     },
     {
-      "texto": "Missing validation coverage: Un cleanup fallido no limpia la marca de cleanup",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: Un fallo de svn distinto de cancelación o timeout no marca cleanup",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: start_checkout rechaza un destino fuera del workspace antes de lanzar la operación",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: start_commit rechaza una ruta fuera del workspace antes de lanzar la operación",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: start_cleanup rechaza una ruta fuera del workspace antes de lanzar la operación",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: start_update rechaza una contraseña sin usuario (InvalidPath)",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: Un comando de copia de trabajo sin svn utilizable devuelve NoSvn",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: svn_set_path informa el fallo de guardado sin perder el binario adoptado",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: Una operación fallida emite svn://done con OperationResult::Err",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: wc_cleanup libera una copia realmente bloqueada (E155004) por un svn terminado a la fuerza",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: Un fallo de parseo de XML se mapea a ParseFailed",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: El frontend no tiene permisos fs ni shell: capabilities solo core:default y dialog:default",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing validation coverage: Solo services/tauri.ts invoca commands, escucha eventos y abre el diálogo",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing flow transition: copia_modificada->copia_en_conflicto",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing flow transition: en_ejecucion->tiempo_agotado",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing flow transition: tiempo_agotado->wc_requiere_cleanup",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing flow transition: reintento_con_credenciales->auth_required",
-      "evidencia_adjunta": null
-    },
-    {
-      "texto": "Missing flow transition: svn_sin_detectar->svn_demasiado_antiguo",
-      "evidencia_adjunta": null
+      "texto": "Primera pasada de cargo-mutants: 272 mutantes, 171 atrapados, 96 inviables, 5 vivos",
+      "evidencia_adjunta": ".bossdream-project/mutants-rust/mutants.out/outcomes.json"
     }
   ]
 }

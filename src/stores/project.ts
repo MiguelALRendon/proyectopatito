@@ -8,6 +8,7 @@ import {
   wcCleanup,
   wcCommit,
   wcInfo,
+  wcNeedsCleanup,
   wcStatus,
   wcUpdate,
   type CommandError,
@@ -33,6 +34,7 @@ interface WorkingCopySnapshot {
   path: string | null;
   info: InfoEntry | null;
   status: StatusReport | null;
+  cleanupTarget: string | null;
 }
 
 type StartOperation = (credentials: Credentials) => Promise<number>;
@@ -45,13 +47,15 @@ export const useProjectStore = defineStore('project', () => {
   const progressLines = ref<string[]>([]);
   const error = ref<CommandError | null>(null);
   const wasCancelled = ref(false);
+  const cleanupTarget = ref<string | null>(null);
   const commitDraft = ref('');
   let retry: ((credentials: Credentials) => Promise<void>) | null = null;
+  let latestRead = 0;
 
+  const isReading = ref(false);
   const isBusy = computed(() => operation.value !== null);
-  const canCleanup = computed(
-    () => wasCancelled.value || error.value?.kind === 'working_copy_locked',
-  );
+  const isLocked = computed(() => isBusy.value || isReading.value);
+  const canCleanup = computed(() => cleanupTarget.value !== null);
 
   function pushProgress(line: string) {
     progressLines.value = [...progressLines.value, line].slice(
@@ -62,21 +66,37 @@ export const useProjectStore = defineStore('project', () => {
   function resetFeedback() {
     error.value = null;
     wasCancelled.value = false;
+    cleanupTarget.value = null;
     progressLines.value = [];
   }
 
-  function applyResult(result: OperationResult): boolean {
+  type FailedResult = Exclude<OperationResult, { status: 'ok' }>;
+
+  async function cleanupTargetFor(
+    result: FailedResult,
+    target: string,
+  ): Promise<string | null> {
+    if (result.kind === 'working_copy_locked') return target;
+    const isMarked = await wcNeedsCleanup(target).catch(() => false);
+    return isMarked ? target : null;
+  }
+
+  async function applyResult(
+    result: OperationResult,
+    target: string,
+  ): Promise<boolean> {
     if (result.status === 'ok') return true;
     if (result.kind === 'cancelled') wasCancelled.value = true;
     else error.value = result;
+    cleanupTarget.value = await cleanupTargetFor(result, target);
     return false;
   }
 
   async function execute(
     kind: OperationKind,
+    target: string,
     start: () => Promise<number>,
   ): Promise<boolean> {
-    if (operation.value) return false;
     resetFeedback();
     operation.value = { kind, id: null };
     const track = (id: number) => {
@@ -88,7 +108,7 @@ export const useProjectStore = defineStore('project', () => {
         () => start().then(track),
         (event) => pushProgress(formatProgressLine(event)),
       );
-      return applyResult(result);
+      return await applyResult(result, target);
     } catch (raw) {
       error.value = normalizeError(raw);
       return false;
@@ -99,29 +119,51 @@ export const useProjectStore = defineStore('project', () => {
 
   interface Submission {
     kind: OperationKind;
+    target: string;
     start: StartOperation;
     credentials: Credentials;
     afterOk?: () => Promise<void>;
   }
 
   async function submit(submission: Submission): Promise<void> {
-    const { kind, start, credentials, afterOk = refresh } = submission;
-    retry = (next) => submit({ ...submission, credentials: next });
-    const isOk = await execute(kind, () => start(credentials));
-    if (isOk) await afterOk();
+    if (isLocked.value) return;
+    const { kind, target, start, credentials, afterOk = refresh } = submission;
+    const reusable = { ...submission, credentials: NO_CREDENTIALS };
+    retry = (next) => submit({ ...reusable, credentials: next });
+    const isOk = await execute(kind, target, () => start(credentials));
+    if (!isOk) return;
+    retry = null;
+    await whileReading(afterOk);
   }
 
   async function refresh(): Promise<void> {
-    if (!path.value) return;
+    const target = path.value;
+    if (!target) return;
+    const ticket = ++latestRead;
     try {
-      [info.value, status.value] = await Promise.all([
-        wcInfo(path.value),
-        wcStatus(path.value),
+      const [freshInfo, freshStatus] = await Promise.all([
+        wcInfo(target),
+        wcStatus(target),
       ]);
+      if (ticket !== latestRead) return;
+      [info.value, status.value] = [freshInfo, freshStatus];
     } catch (raw) {
+      if (ticket !== latestRead) return;
       info.value = null;
       status.value = null;
       error.value = normalizeError(raw);
+      if (error.value.kind === 'working_copy_locked') {
+        cleanupTarget.value = target;
+      }
+    }
+  }
+
+  async function whileReading(task: () => Promise<void>): Promise<void> {
+    isReading.value = true;
+    try {
+      await task();
+    } finally {
+      isReading.value = false;
     }
   }
 
@@ -129,13 +171,20 @@ export const useProjectStore = defineStore('project', () => {
     path.value = snapshot.path;
     info.value = snapshot.info;
     status.value = snapshot.status;
+    cleanupTarget.value = snapshot.cleanupTarget;
   }
 
   async function open(workingCopyPath: string): Promise<void> {
+    if (isLocked.value) return;
+    await whileReading(() => switchTo(workingCopyPath));
+  }
+
+  async function switchTo(workingCopyPath: string): Promise<void> {
     const previous = {
       path: path.value,
       info: info.value,
       status: status.value,
+      cleanupTarget: cleanupTarget.value,
     };
     resetFeedback();
     path.value = workingCopyPath;
@@ -160,6 +209,7 @@ export const useProjectStore = defineStore('project', () => {
       });
     await submit({
       kind: 'checkout',
+      target: dest,
       start,
       credentials,
       afterOk: () => {
@@ -182,7 +232,7 @@ export const useProjectStore = defineStore('project', () => {
         ignore_externals: false,
         ...creds,
       });
-    await submit({ kind: 'update', start, credentials });
+    await submit({ kind: 'update', target, start, credentials });
   }
 
   async function commit(
@@ -195,6 +245,7 @@ export const useProjectStore = defineStore('project', () => {
       wcCommit({ path: target, message, ...creds });
     await submit({
       kind: 'commit',
+      target,
       start,
       credentials: { username, password: null },
       afterOk: () => {
@@ -205,10 +256,15 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   async function cleanup(): Promise<void> {
-    const target = path.value;
+    const target = cleanupTarget.value ?? path.value;
     if (!target) return;
     const start: StartOperation = () => wcCleanup({ path: target });
-    await submit({ kind: 'cleanup', start, credentials: NO_CREDENTIALS });
+    await submit({
+      kind: 'cleanup',
+      target,
+      start,
+      credentials: NO_CREDENTIALS,
+    });
   }
 
   async function retryWithCredentials(credentials: Credentials): Promise<void> {
@@ -235,6 +291,7 @@ export const useProjectStore = defineStore('project', () => {
     wasCancelled,
     commitDraft,
     isBusy,
+    isLocked,
     canCleanup,
     open,
     refresh,

@@ -108,7 +108,7 @@ async function cancelOperation() {
     <div class="card">
       <h2>Checkout</h2>
       <CheckoutForm
-        :is-disabled="project.isBusy"
+        :is-disabled="project.isLocked"
         @submit="({ url, name }) => project.checkout(url, name)"
       />
     </div>
@@ -131,7 +131,13 @@ async function cancelOperation() {
         <button type="button" class="btn" @click="choosePath">
           Elegir carpeta
         </button>
-        <button type="submit" class="btn btn--primary">Abrir</button>
+        <button
+          type="submit"
+          class="btn btn--primary"
+          :disabled="project.isLocked"
+        >
+          Abrir
+        </button>
       </div>
       <p v-if="pickerError" class="banner banner--error" role="alert">
         {{ pickerError }}
@@ -162,7 +168,7 @@ async function cancelOperation() {
         <button
           type="button"
           class="btn btn--primary"
-          :disabled="project.isBusy"
+          :disabled="project.isLocked"
           @click="project.update()"
         >
           Actualizar
@@ -170,7 +176,7 @@ async function cancelOperation() {
         <button
           type="button"
           class="btn"
-          :disabled="project.isBusy"
+          :disabled="project.isLocked"
           @click="isCommitOpen = true"
         >
           Confirmar
@@ -178,7 +184,7 @@ async function cancelOperation() {
         <button
           type="button"
           class="btn"
-          :disabled="project.isBusy"
+          :disabled="project.isLocked"
           @click="project.refresh()"
         >
           Refrescar estado
@@ -187,7 +193,7 @@ async function cancelOperation() {
           v-if="project.canCleanup"
           type="button"
           class="btn"
-          :disabled="project.isBusy"
+          :disabled="project.isLocked"
           @click="project.cleanup()"
         >
           Cleanup
@@ -197,7 +203,10 @@ async function cancelOperation() {
     </div>
 
     <p v-if="project.wasCancelled" class="banner banner--warning" role="status">
-      La última operación fue cancelada. Ejecuta Cleanup antes de continuar.
+      La última operación fue cancelada.
+      <template v-if="project.canCleanup">
+        Ejecuta Cleanup antes de continuar.
+      </template>
     </p>
     <CommitModal
       v-if="isCommitOpen"

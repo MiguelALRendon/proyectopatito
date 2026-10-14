@@ -8,7 +8,7 @@ deciders: [usuario]
 
 ## Context and Problem Statement
 
-Todas las invocaciones de `svn.exe` llevan `--non-interactive`, así que svn nunca pregunta usuario ni contraseña. Un repositorio remoto (http, https, svn) sin credenciales en el auth cache falla con E170001. El auditor de completitud (2026-10-12) señaló que la API de Fase 1 no tenía cómo autenticarse.
+Todas las invocaciones de `svn.exe` llevan `--non-interactive`, así que svn nunca pregunta usuario ni contraseña. Un repositorio remoto (http, https, svn) sin credenciales en el auth cache falla con E170001 (svnserve) o con E215004 y E215001 (http y https, verificado contra un servidor HTTP real que responde 401 con `svn.exe` 1.14.2); el backend trata los tres códigos como autenticación requerida. El auditor de completitud (2026-10-12) señaló que la API de Fase 1 no tenía cómo autenticarse.
 
 ## Considered Options
 

@@ -1,0 +1,5 @@
+src/svn/error.rs:52:9: replace <impl fmt::Display for SvnErrorKind>::fmt -> fmt::Result with Ok(Default::default())
+src/svn/progress.rs:109:9: replace && with || in parse_update_item
+src/svn/progress.rs:108:9: replace && with || in parse_update_item
+src/svn/progress.rs:107:9: replace && with || in parse_update_item
+src/svn/progress.rs:115:25: replace || with && in parse_update_item

@@ -266,3 +266,53 @@ fn resolve_rejects_symlink_that_escapes_the_root() {
         Err(WorkspaceError::OutsideWorkspace)
     ));
 }
+
+#[test]
+fn resolve_propagates_an_io_error_for_a_name_windows_considers_invalid() {
+    let fixture = fixture();
+    assert!(matches!(
+        resolve_new(&fixture, "nombre*invalido"),
+        Err(WorkspaceError::Io(_))
+    ));
+}
+
+#[test]
+fn resolve_rejects_a_destination_below_a_regular_file() {
+    let fixture = fixture();
+    fs::write(fixture.workspace.root().as_path().join("archivo.txt"), "x").unwrap();
+    assert!(matches!(
+        resolve_new(&fixture, r"archivo.txt\hijo"),
+        Err(WorkspaceError::Io(error)) if error.kind() == std::io::ErrorKind::NotADirectory
+    ));
+}
+
+#[test]
+fn resolve_rejects_names_that_windows_normalizes_into_another_entry() {
+    let fixture = fixture();
+    for name in [r"x.", r"x ", r"sub\x.", r"a.txt:flujo", r"..."] {
+        assert!(
+            matches!(
+                resolve_new(&fixture, name),
+                Err(WorkspaceError::DeviceOrReservedPath)
+            ),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn resolve_rejects_a_drive_relative_path() {
+    let fixture = fixture();
+    assert!(matches!(
+        resolve_new(&fixture, r"C:foo"),
+        Err(WorkspaceError::OutsideWorkspace)
+    ));
+}
+
+#[test]
+fn resolve_keeps_accepting_dots_and_spaces_inside_a_name() {
+    let fixture = fixture();
+    for name in [r"copia v1.2", r"a b.txt", r".oculta"] {
+        assert!(resolve_new(&fixture, name).is_ok(), "{name}");
+    }
+}

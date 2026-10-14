@@ -10,7 +10,7 @@ use std::process::Command;
 use std::sync::Arc;
 use std::time::Duration;
 
-use common::{FakeSvn, TestRepo, TestServer};
+use common::{FakeSvn, ScriptServer, TestRepo, TestServer};
 use dakedaduck_svn_lib::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, UpdateArgs};
 use dakedaduck_svn_lib::app::error::{CommandError, CommandErrorKind};
 use dakedaduck_svn_lib::app::operations::{OperationError, OperationId};
@@ -84,6 +84,13 @@ fn checkout_args(repo: &TestRepo, dest: &str) -> CheckoutArgs {
         username: None,
         password: None,
     }
+}
+
+fn assert_never_launched(receiver: &mut UnboundedReceiver<(OperationId, OperationResult)>) {
+    assert!(matches!(
+        receiver.try_recv(),
+        Err(tokio::sync::mpsc::error::TryRecvError::Disconnected)
+    ));
 }
 
 fn kind_of(result: Result<impl std::fmt::Debug, CommandError>) -> CommandErrorKind {
@@ -373,7 +380,7 @@ async fn start_operations_reject_bad_paths_synchronously_without_launching() {
         kind_of(state.start_update(update, sinks)),
         CommandErrorKind::InvalidPath
     );
-    assert!(receiver.try_recv().is_err());
+    assert_never_launched(&mut receiver);
 }
 
 #[tokio::test]
@@ -389,7 +396,7 @@ async fn checkout_with_an_unsafe_url_is_rejected_synchronously_without_leaking_t
     let error = state.start_checkout(args, sinks).unwrap_err();
     assert_eq!(error.kind, CommandErrorKind::InvalidPath);
     assert!(!serde_json::to_string(&error).unwrap().contains("clave"));
-    assert!(receiver.try_recv().is_err());
+    assert_never_launched(&mut receiver);
 }
 
 #[tokio::test]
@@ -556,7 +563,8 @@ fn adopt_fake_svn(state: &AppState, fake: &FakeSvn) -> TempDir {
 
 #[tokio::test]
 async fn start_checkout_rejects_a_destination_outside_the_workspace_without_launching() {
-    let state = state_with_workspace(&sandbox());
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let (sinks, mut receiver) = sinks();
     let repo = TestRepo::create();
     let args = checkout_args(&repo, &escaping_path());
@@ -564,12 +572,13 @@ async fn start_checkout_rejects_a_destination_outside_the_workspace_without_laun
         kind_of(state.start_checkout(args, sinks)),
         CommandErrorKind::InvalidPath
     );
-    assert!(receiver.try_recv().is_err());
+    assert_never_launched(&mut receiver);
 }
 
 #[tokio::test]
 async fn start_commit_rejects_a_path_outside_the_workspace_without_launching() {
-    let state = state_with_workspace(&sandbox());
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let (sinks, mut receiver) = sinks();
     let args = CommitArgs {
         path: escaping_path(),
@@ -581,12 +590,13 @@ async fn start_commit_rejects_a_path_outside_the_workspace_without_launching() {
         kind_of(state.start_commit(args, sinks)),
         CommandErrorKind::InvalidPath
     );
-    assert!(receiver.try_recv().is_err());
+    assert_never_launched(&mut receiver);
 }
 
 #[tokio::test]
 async fn start_cleanup_rejects_a_path_outside_the_workspace_without_launching() {
-    let state = state_with_workspace(&sandbox());
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let (sinks, mut receiver) = sinks();
     let args = CleanupArgs {
         path: escaping_path(),
@@ -595,12 +605,13 @@ async fn start_cleanup_rejects_a_path_outside_the_workspace_without_launching() 
         kind_of(state.start_cleanup(args, sinks)),
         CommandErrorKind::InvalidPath
     );
-    assert!(receiver.try_recv().is_err());
+    assert_never_launched(&mut receiver);
 }
 
 #[tokio::test]
 async fn start_update_rejects_a_password_without_a_username() {
-    let state = state_with_workspace(&sandbox());
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let (sinks, mut receiver) = sinks();
     let args = UpdateArgs {
         path: ".".into(),
@@ -612,11 +623,11 @@ async fn start_update_rejects_a_password_without_a_username() {
     let error = state.start_update(args, sinks).unwrap_err();
     assert_eq!(error.kind, CommandErrorKind::InvalidPath);
     assert!(!serde_json::to_string(&error).unwrap().contains("s3cret"));
-    assert!(receiver.try_recv().is_err());
+    assert_never_launched(&mut receiver);
 }
 
 #[tokio::test]
-async fn working_copy_command_reports_no_svn_when_the_configured_client_is_gone() {
+async fn working_copy_command_falls_back_to_automatic_search_when_the_configured_client_is_gone() {
     let sandbox = sandbox();
     let config = AppConfig {
         svn_path: Some(PathBuf::from(r"C:\no\existe\svn.exe")),
@@ -624,7 +635,10 @@ async fn working_copy_command_reports_no_svn_when_the_configured_client_is_gone(
     };
     sandbox.store.save(&config).unwrap();
     let state = state_with_workspace(&sandbox);
-    assert_eq!(kind_of(state.wc_info(".").await), CommandErrorKind::NoSvn);
+    assert_eq!(
+        kind_of(state.wc_info(".").await),
+        CommandErrorKind::SvnFailed
+    );
 }
 
 #[test]
@@ -649,7 +663,8 @@ fn svn_set_path_reports_a_save_failure_but_keeps_the_adopted_binary() {
 
 #[tokio::test]
 async fn failed_operation_emits_done_with_an_error_result() {
-    let state = state_with_workspace(&sandbox());
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let (sinks, mut receiver) = sinks();
     let args = CheckoutArgs {
         url: "file:///C:/no/existe/repo".into(),
@@ -664,7 +679,8 @@ async fn failed_operation_emits_done_with_an_error_result() {
 
 #[tokio::test]
 async fn malformed_svn_xml_is_reported_as_parse_failed() {
-    let state = state_with_workspace(&sandbox());
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let fake = FakeSvn {
         stdout: MALFORMED_XML,
         ..FakeSvn::with_version(CURRENT_VERSION)
@@ -677,7 +693,7 @@ async fn malformed_svn_xml_is_reported_as_parse_failed() {
 }
 
 #[test]
-fn the_main_window_capabilities_grant_only_core_and_dialog_defaults() {
+fn the_main_window_capabilities_grant_only_core_default_and_the_folder_dialog() {
     let files: Vec<_> = fs::read_dir(CAPABILITIES_DIR).unwrap().collect();
     assert_eq!(files.len(), 1, "solo debe existir una capability");
     let path = files[0].as_ref().unwrap().path();
@@ -685,21 +701,19 @@ fn the_main_window_capabilities_grant_only_core_and_dialog_defaults() {
         serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
     assert_eq!(
         capability["permissions"],
-        serde_json::json!(["core:default", "dialog:default"])
+        serde_json::json!(["core:default", "dialog:allow-open"])
     );
 }
 
 const SERVER_USER: &str = "alice";
 const SERVER_PASSWORD: &str = "s3cret-real";
 
-async fn checkout_against_server(
-    server: &TestServer,
-    credentials: Option<(&str, &str)>,
-) -> OperationResult {
-    let state = state_with_workspace(&sandbox());
+async fn checkout_against_server(url: &str, credentials: Option<(&str, &str)>) -> OperationResult {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
     let (sinks, mut receiver) = sinks();
     let args = CheckoutArgs {
-        url: server.url.clone(),
+        url: url.to_string(),
         dest: "copia".into(),
         revision: None,
         depth: Depth::Infinity,
@@ -711,20 +725,20 @@ async fn checkout_against_server(
     finished(&mut receiver).await
 }
 
-fn assert_auth_required(result: OperationResult, secret: &str) {
+fn auth_error(result: OperationResult) -> CommandError {
     let OperationResult::Err(error) = result else {
         panic!("se esperaba AuthRequired");
     };
     assert_eq!(error.kind, CommandErrorKind::AuthRequired);
-    assert!(!serde_json::to_string(&error).unwrap().contains(secret));
+    error
 }
 
 #[tokio::test]
 async fn real_server_without_credentials_reports_auth_required() {
     let repo = TestRepo::create();
     let server = TestServer::start(&repo, SERVER_USER, SERVER_PASSWORD);
-    let result = checkout_against_server(&server, None).await;
-    assert_auth_required(result, SERVER_PASSWORD);
+    let result = checkout_against_server(&server.url, None).await;
+    auth_error(result);
 }
 
 #[tokio::test]
@@ -732,8 +746,9 @@ async fn real_server_with_a_wrong_password_reports_auth_required_without_leaking
     let repo = TestRepo::create();
     let server = TestServer::start(&repo, SERVER_USER, SERVER_PASSWORD);
     let wrong = ("alice", "clave-equivocada");
-    let result = checkout_against_server(&server, Some(wrong)).await;
-    assert_auth_required(result, wrong.1);
+    let result = checkout_against_server(&server.url, Some(wrong)).await;
+    let error = auth_error(result);
+    assert!(!serde_json::to_string(&error).unwrap().contains(wrong.1));
 }
 
 #[tokio::test]
@@ -741,6 +756,329 @@ async fn real_server_accepts_the_password_sent_through_stdin() {
     let repo = TestRepo::create();
     let server = TestServer::start(&repo, SERVER_USER, SERVER_PASSWORD);
     let right = (SERVER_USER, SERVER_PASSWORD);
-    let result = checkout_against_server(&server, Some(right)).await;
+    let result = checkout_against_server(&server.url, Some(right)).await;
     assert_eq!(result, OperationResult::Ok { revision: Some(0) });
+}
+
+#[tokio::test]
+async fn http_server_without_credentials_reports_auth_required() {
+    let server = ScriptServer::http_auth(SERVER_USER, SERVER_PASSWORD);
+    let result = checkout_against_server(&server.url, None).await;
+    auth_error(result);
+}
+
+#[tokio::test]
+async fn http_server_with_a_wrong_password_reports_auth_required_without_leaking_it() {
+    let server = ScriptServer::http_auth(SERVER_USER, SERVER_PASSWORD);
+    let wrong = (SERVER_USER, "clave-equivocada");
+    let result = checkout_against_server(&server.url, Some(wrong)).await;
+    let error = auth_error(result);
+    assert!(!serde_json::to_string(&error).unwrap().contains(wrong.1));
+}
+
+#[tokio::test]
+async fn http_server_accepts_the_credentials_so_the_failure_is_no_longer_authentication() {
+    let server = ScriptServer::http_auth(SERVER_USER, SERVER_PASSWORD);
+    let right = (SERVER_USER, SERVER_PASSWORD);
+    let OperationResult::Err(error) = checkout_against_server(&server.url, Some(right)).await
+    else {
+        panic!("el servidor de prueba responde 404 tras autenticar");
+    };
+    assert_ne!(error.kind, CommandErrorKind::AuthRequired);
+}
+
+struct StalledCommit {
+    _sandbox: Sandbox,
+    state: AppState,
+    id: OperationId,
+    done: UnboundedReceiver<(OperationId, OperationResult)>,
+}
+
+async fn start_stalled_commit() -> StalledCommit {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    let repo = TestRepo::create();
+    let (sinks_checkout, mut checkout_done) = sinks();
+    state
+        .start_checkout(checkout_args(&repo, "copia"), sinks_checkout)
+        .unwrap();
+    assert!(matches!(
+        finished(&mut checkout_done).await,
+        OperationResult::Ok { .. }
+    ));
+    let started = common::install_stalling_hook(&repo);
+    let file = sandbox.root.join("copia").join("a.txt");
+    fs::write(&file, "x").unwrap();
+    let added = Command::new(&repo.svn.path)
+        .arg("add")
+        .arg(format!("{}@", file.display()))
+        .output()
+        .unwrap();
+    assert!(added.status.success());
+    let (sinks_commit, done) = sinks();
+    let args = CommitArgs {
+        path: "copia".into(),
+        message: "m".into(),
+        username: None,
+        password: None,
+    };
+    let id = state.start_commit(args, sinks_commit).unwrap();
+    common::wait_for_file(&started).await;
+    StalledCommit {
+        _sandbox: sandbox,
+        state,
+        id,
+        done,
+    }
+}
+
+fn assert_cancelled(result: OperationResult) {
+    let OperationResult::Err(error) = result else {
+        panic!("se esperaba Cancelled");
+    };
+    assert_eq!(error.kind, CommandErrorKind::Cancelled);
+}
+
+#[tokio::test]
+async fn cancelling_a_running_commit_marks_the_working_copy_as_needing_cleanup() {
+    let mut run = start_stalled_commit().await;
+    assert!(!run.state.wc_needs_cleanup("copia").unwrap());
+    assert!(run.state.op_cancel(run.id));
+    assert_cancelled(finished(&mut run.done).await);
+    assert!(run.state.wc_needs_cleanup("copia").unwrap());
+}
+
+#[tokio::test]
+async fn cancelling_a_queued_update_does_not_mark_the_working_copy() {
+    let mut run = start_stalled_commit().await;
+    let (sinks_update, mut update_done) = sinks();
+    let update = UpdateArgs {
+        path: "copia".into(),
+        revision: None,
+        ignore_externals: false,
+        username: None,
+        password: None,
+    };
+    let queued = run.state.start_update(update, sinks_update).unwrap();
+    assert!(run.state.op_cancel(queued));
+    assert_cancelled(finished(&mut update_done).await);
+    assert!(!run.state.wc_needs_cleanup("copia").unwrap());
+    run.state.op_cancel(run.id);
+    finished(&mut run.done).await;
+}
+
+#[test]
+fn wc_needs_cleanup_rejects_paths_outside_the_workspace() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    assert_eq!(
+        kind_of(state.wc_needs_cleanup(r"..\fuera")),
+        CommandErrorKind::InvalidPath
+    );
+}
+
+async fn state_update_to(state: &AppState, path: &str, revision: Option<u64>) -> OperationResult {
+    let (sinks, mut done) = sinks();
+    let args = UpdateArgs {
+        path: path.into(),
+        revision,
+        ignore_externals: false,
+        username: None,
+        password: None,
+    };
+    state.start_update(args, sinks).unwrap();
+    finished(&mut done).await
+}
+
+#[tokio::test]
+async fn start_update_reaches_the_requested_revision_and_then_the_latest() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    let repo = TestRepo::create();
+    for name in ["mia", "ajena"] {
+        let (sinks, mut done) = sinks();
+        state
+            .start_checkout(checkout_args(&repo, name), sinks)
+            .unwrap();
+        finished(&mut done).await;
+    }
+    let file = sandbox.root.join("ajena").join("a.txt");
+    fs::write(&file, "uno").unwrap();
+    for args in [
+        vec!["add".to_string(), format!("{}@", file.display())],
+        vec![
+            "commit".into(),
+            "-m".into(),
+            "alta".into(),
+            sandbox.root.join("ajena").display().to_string(),
+        ],
+    ] {
+        let output = Command::new(&repo.svn.path).args(args).output().unwrap();
+        assert!(output.status.success());
+    }
+    assert_eq!(
+        state_update_to(&state, "mia", Some(0)).await,
+        OperationResult::Ok { revision: Some(0) }
+    );
+    assert_eq!(
+        state_update_to(&state, "mia", None).await,
+        OperationResult::Ok { revision: Some(1) }
+    );
+}
+
+const WC_DB_VERSION_OFFSET: std::ops::Range<usize> = 60..64;
+const OLD_WC_FORMAT: u32 = 28;
+
+async fn checked_out_with_old_format(state: &AppState, sandbox: &Sandbox) {
+    let repo = TestRepo::create();
+    let (sinks, mut done) = sinks();
+    state
+        .start_checkout(checkout_args(&repo, "vieja"), sinks)
+        .unwrap();
+    finished(&mut done).await;
+    let db = sandbox.root.join("vieja").join(".svn").join("wc.db");
+    let mut bytes = fs::read(&db).unwrap();
+    bytes[WC_DB_VERSION_OFFSET].copy_from_slice(&OLD_WC_FORMAT.to_be_bytes());
+    fs::write(db, bytes).unwrap();
+}
+
+#[tokio::test]
+async fn real_old_format_working_copy_is_reported_as_too_old_by_info_and_status() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    checked_out_with_old_format(&state, &sandbox).await;
+    assert_eq!(
+        kind_of(state.wc_info("vieja").await),
+        CommandErrorKind::WorkingCopyTooOld
+    );
+    assert_eq!(
+        kind_of(state.wc_status("vieja", false).await),
+        CommandErrorKind::WorkingCopyTooOld
+    );
+}
+
+#[tokio::test]
+async fn real_old_format_working_copy_makes_update_fail_with_the_upgrade_guidance() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    checked_out_with_old_format(&state, &sandbox).await;
+    let OperationResult::Err(error) = state_update_to(&state, "vieja", None).await else {
+        panic!("se esperaba un error");
+    };
+    assert_eq!(error.kind, CommandErrorKind::WorkingCopyTooOld);
+    assert_eq!(
+        error.codes,
+        vec!["E155036".to_string(), "E155036".to_string()]
+    );
+    assert!(error.message.contains("svn upgrade"));
+}
+
+#[tokio::test]
+async fn real_untrusted_tls_certificate_fails_with_user_guidance() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    let server = ScriptServer::tls();
+    let (sinks, mut done) = sinks();
+    let args = CheckoutArgs {
+        url: server.url.clone(),
+        dest: "copia".into(),
+        revision: None,
+        depth: Depth::Infinity,
+        ignore_externals: false,
+        username: None,
+        password: None,
+    };
+    state.start_checkout(args, sinks).unwrap();
+    let OperationResult::Err(error) = finished(&mut done).await else {
+        panic!("se esperaba un error de certificado");
+    };
+    assert_eq!(error.kind, CommandErrorKind::UntrustedCertificate);
+    assert!(error.codes.contains(&"E230001".to_string()));
+    assert!(error.message.contains("otro cliente"));
+}
+
+#[test]
+fn workspace_set_keeps_the_previous_workspace_when_the_config_cannot_be_saved() {
+    let sandbox = sandbox();
+    let state = state_with_workspace(&sandbox);
+    let before = state.workspace_get().unwrap();
+    fs::remove_file(&sandbox.store.path).unwrap();
+    fs::create_dir(&sandbox.store.path).unwrap();
+    let other = sandbox.root.parent().unwrap().join("otra");
+    fs::create_dir(&other).unwrap();
+    assert_eq!(kind_of(state.workspace_set(&other)), CommandErrorKind::Io);
+    assert_eq!(state.workspace_get().unwrap(), before);
+}
+
+#[test]
+fn svn_set_path_rejects_a_client_older_than_1_10_without_persisting_it() {
+    let sandbox = sandbox();
+    let state = AppState::new(sandbox.store.clone());
+    let dir = TempDir::new().unwrap();
+    let old = FakeSvn::with_version("1.9.7").build(dir.path());
+    let detection = state.svn_set_path(&old);
+    assert!(detection.binary.is_none());
+    assert!(detection.error.unwrap().contains("1.9.7"));
+    assert_eq!(sandbox.store.load().unwrap().svn_path, None);
+}
+
+#[tokio::test]
+async fn svn_detect_replaces_the_cached_client_when_it_disappears() {
+    let state = state_with_workspace(&sandbox());
+    let dir = TempDir::new().unwrap();
+    let fake = FakeSvn {
+        stdout: MALFORMED_XML,
+        ..FakeSvn::with_version(CURRENT_VERSION)
+    };
+    let exe = fake.build(dir.path());
+    assert!(state.svn_set_path(&exe).binary.is_some());
+    assert_eq!(
+        kind_of(state.wc_info(".").await),
+        CommandErrorKind::ParseFailed
+    );
+    fs::remove_file(&exe).unwrap();
+    let replacement = state.svn_detect().binary.unwrap();
+    assert_ne!(PathBuf::from(replacement.path), exe);
+    assert_eq!(
+        kind_of(state.wc_info(".").await),
+        CommandErrorKind::SvnFailed
+    );
+}
+
+#[test]
+fn wc_needs_cleanup_without_a_workspace_reports_no_workspace() {
+    let state = AppState::new(sandbox().store);
+    assert_eq!(
+        kind_of(state.wc_needs_cleanup("copia")),
+        CommandErrorKind::NoWorkspace
+    );
+}
+
+fn config_with_svn_path(sandbox: &Sandbox, path: PathBuf) {
+    let config = AppConfig {
+        svn_path: Some(path),
+        ..AppConfig::default()
+    };
+    sandbox.store.save(&config).unwrap();
+}
+
+#[test]
+fn svn_detect_falls_back_to_automatic_search_when_the_saved_client_is_broken() {
+    let sandbox = sandbox();
+    config_with_svn_path(&sandbox, PathBuf::from(r"C:\no\existe\svn.exe"));
+    let state = AppState::new(sandbox.store.clone());
+    let detection = state.svn_detect();
+    assert!(detection.binary.is_some(), "{:?}", detection.error);
+}
+
+#[test]
+fn svn_detect_prefers_the_saved_client_when_it_works() {
+    let sandbox = sandbox();
+    let dir = TempDir::new().unwrap();
+    let saved = FakeSvn::with_version("1.12.0").build(dir.path());
+    config_with_svn_path(&sandbox, saved.clone());
+    let state = AppState::new(sandbox.store.clone());
+    let binary = state.svn_detect().binary.unwrap();
+    assert_eq!(PathBuf::from(binary.path), saved);
+    assert_eq!(binary.version, "1.12.0");
 }

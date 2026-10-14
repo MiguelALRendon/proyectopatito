@@ -1,0 +1,22 @@
+Salida literal del agente bossdream-flow-breaker, ronda 7 (final; entregada a la sesión orquestadora vía SubagentHandback, 2026-10-14).
+
+Auditoria de flows[] (septima ronda) sobre .bossdream-project/test-inventory.json, 10 flujos.
+
+Cambio 1, src-tauri/src/svn/error.rs: `SvnErrorKind::from_code` mapea E170001, E215004 y E215001 a `AuthRequired` (lineas 42-45). Ningun estado nuevo: el flujo autenticacion-reintento-credenciales sigue cerrado.
+- E215004 o E215001 con credenciales incorrectas o ausentes: `operacion_en_curso->auth_required`. `execute` deja `error.value` con kind `auth_required`.
+- ProjectPanel.vue: el watch de `project.error?.kind` (linea 25) abre el modal. Su `@close` pone `isCredentialsOpen=false` (linea 219), pero el boton "Introducir credenciales" (linea 88) sigue visible mientras el error sea `auth_required`. Cerrar el modal no deja al usuario sin salida y se puede reintentar.
+- `submit` (project.ts 128-137) fija `retry` antes de ejecutar y solo lo limpia tras un `ok`. Un fallo de auth conserva `retry`, asi que `retryWithCredentials` reejecuta. Si el reintento vuelve a fallar con auth, `resetFeedback` pone el error a null y luego lo vuelve a fijar, el watch reabre el modal. Sin estado imposible.
+- Ninguna transicion invalida aparece como cubierta: `completada->reintento_con_credenciales` requiere `retry` a null tras el ok, y `operacion_en_curso->reintento_con_credenciales` queda bloqueada por `isLocked`.
+
+Cambio 2, src/stores/project.ts `refresh()` (139-159): solo `working_copy_locked` fija `cleanupTarget = target`; otros fallos no.
+- `target` es `path.value` capturado al inicio y el ticket descarta lecturas obsoletas antes de tocar `cleanupTarget`. Un refresh tardio de la copia A no puede asignar `cleanupTarget` a A cuando la abierta es B.
+- `switchTo` (182-194) hace `resetFeedback` (limpia `cleanupTarget`), luego refresh, y si hay error `restoreSnapshot` devuelve `cleanupTarget` al valor anterior. La copia restaurada es la abierta.
+- `execute` llama a `resetFeedback` al inicio de cada operacion, asi que el Cleanup ofrecido se limpia tras cualquier operacion nueva y tras un Cleanup exitoso.
+
+Observacion no bloqueante (no es estado imposible ni dead end): ProjectPanel.vue:188 tiene un boton de refresco manual que llama a `project.refresh()`. Si esa lectura falla con `working_copy_locked` y una lectura posterior resuelve bien, `refresh` no limpia `error` ni `cleanupTarget`. Quedan visibles el banner de bloqueo y la oferta de Cleanup hasta la siguiente operacion. Es coherente entre si y Cleanup es inocuo sobre una copia desbloqueada. Es el mismo patron que ya existia para `error` antes del cambio.
+
+Observacion menor: `retry` no se limpia al abrir otra copia (`switchTo` no lo toca). Solo seria alcanzable si un refresh devolviera `auth_required`, y `wcInfo`/`wcStatus` son lecturas locales que no contactan servidor, asi que no es alcanzable hoy.
+
+Archivos revisados: .bossdream-project/test-inventory.json (flows[] completo), src-tauri/src/svn/error.rs, src/stores/project.ts, src/views/ProjectPanel.vue.
+
+VERDICT: pass

@@ -29,6 +29,7 @@ pub fn run() {
             commands::wc_commit,
             commands::wc_cleanup,
             commands::op_cancel,
+            commands::wc_needs_cleanup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

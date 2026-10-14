@@ -1,0 +1,146 @@
+{
+  "error_kinds": [
+    "no_workspace",
+    "no_svn",
+    "outside_workspace",
+    "destination_exists",
+    "invalid_path",
+    "auth_required",
+    "untrusted_certificate",
+    "working_copy_too_old",
+    "working_copy_locked",
+    "cancelled",
+    "timed_out",
+    "svn_failed",
+    "parse_failed",
+    "io"
+  ],
+  "events": {
+    "progress_item": {
+      "id": 7,
+      "event": {
+        "kind": "item",
+        "data": {
+          "action": "added",
+          "path": "a.txt"
+        }
+      }
+    },
+    "progress_revision": {
+      "id": 7,
+      "event": {
+        "kind": "revision",
+        "data": {
+          "revision": 3
+        }
+      }
+    },
+    "progress_other": {
+      "id": 7,
+      "event": {
+        "kind": "other",
+        "data": "texto libre"
+      }
+    },
+    "done_ok": {
+      "id": 7,
+      "result": {
+        "status": "ok",
+        "revision": 3
+      }
+    },
+    "done_ok_without_revision": {
+      "id": 7,
+      "result": {
+        "status": "ok",
+        "revision": null
+      }
+    },
+    "done_err": {
+      "id": 7,
+      "result": {
+        "status": "err",
+        "kind": "auth_required",
+        "message": "Se requieren credenciales válidas.",
+        "codes": [
+          "E170013",
+          "E170001"
+        ],
+        "detail": "svn: E170001: x"
+      }
+    }
+  },
+  "requests": {
+    "checkout": {
+      "url": "https://h/r",
+      "dest": "copia",
+      "revision": 4,
+      "depth": "immediates",
+      "ignore_externals": true,
+      "username": "alice",
+      "password": "p"
+    },
+    "update": {
+      "path": "copia",
+      "revision": null,
+      "ignore_externals": false,
+      "username": null,
+      "password": null
+    },
+    "commit": {
+      "path": "copia",
+      "message": "alta",
+      "username": "alice",
+      "password": null
+    },
+    "cleanup": {
+      "path": "copia"
+    }
+  },
+  "item_actions": [
+    "added",
+    "deleted",
+    "updated",
+    "conflicted",
+    "merged",
+    "existed",
+    "replaced",
+    "broken",
+    "sending",
+    "transmitting",
+    "other"
+  ],
+  "depths": [
+    "empty",
+    "files",
+    "immediates",
+    "infinity"
+  ],
+  "ui_requests": {
+    "checkout": {
+      "url": "http://h/r",
+      "dest": "dest",
+      "revision": null,
+      "depth": "infinity",
+      "ignore_externals": false,
+      "username": "alice",
+      "password": "p"
+    },
+    "update": {
+      "path": "wc",
+      "revision": null,
+      "ignore_externals": false,
+      "username": null,
+      "password": null
+    },
+    "commit": {
+      "path": "wc",
+      "message": "alta",
+      "username": "alice",
+      "password": null
+    },
+    "cleanup": {
+      "path": "wc"
+    }
+  }
+}

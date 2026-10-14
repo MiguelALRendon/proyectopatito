@@ -1,0 +1,23 @@
+src/svn/error.rs:46:13: delete match arm CODE_UNTRUSTED_CERTIFICATE in SvnErrorKind::from_code
+src/svn/error.rs:47:13: delete match arm CODE_WORKING_COPY_TOO_OLD in SvnErrorKind::from_code
+src/svn/error.rs:48:13: delete match arm CODE_WORKING_COPY_LOCKED in SvnErrorKind::from_code
+src/svn/error.rs:56:9: replace <impl fmt::Display for SvnErrorKind>::fmt -> fmt::Result with Ok(Default::default())
+src/svn/error.rs:101:13: delete field stderr from struct Captured expression in SvnError::spawn_failed
+src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![String::new()]
+src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![]
+src/svn/error.rs:43:13: delete match arm CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE in SvnErrorKind::from_code
+src/svn/error.rs:42:9: replace SvnErrorKind::from_code -> Option<Self> with None
+src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec!["xyzzy".into()]
+src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with None
+src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with Some(String::new())
+src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with Some("xyzzy".into())
+src/svn/error.rs:135:5: replace is_error_code -> bool with false
+src/svn/error.rs:135:5: replace is_error_code -> bool with true
+src/svn/error.rs:136:9: replace && with || in is_error_code
+src/svn/error.rs:137:9: replace && with || in is_error_code
+src/svn/error.rs:135:16: replace == with != in is_error_code
+src/svn/error.rs:141:5: replace redact_command -> String with "xyzzy".into()
+src/svn/error.rs:141:5: replace redact_command -> String with String::new()
+src/svn/error.rs:150:5: replace redact_arg -> String with String::new()
+src/svn/error.rs:150:5: replace redact_arg -> String with "xyzzy".into()
+src/svn/error.rs:153:12: replace == with != in redact_arg

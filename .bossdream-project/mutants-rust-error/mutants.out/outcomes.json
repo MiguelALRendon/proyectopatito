@@ -1,0 +1,1863 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 114.4445571,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 27.3931915,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:35:9: replace SvnErrorKind::from_codes -> Self with Default::default()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_codes",
+            "return_type": "-> Self",
+            "span": {
+              "start": {
+                "line": 34,
+                "column": 5
+              },
+              "end": {
+                "line": 39,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 35,
+              "column": 9
+            },
+            "end": {
+              "line": 38,
+              "column": 36
+            }
+          },
+          "replacement": "Default::default()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__svn__error.rs_line_35_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_35_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.6219598,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:46:13: delete match arm CODE_UNTRUSTED_CERTIFICATE in SvnErrorKind::from_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_code",
+            "return_type": "-> Option<Self>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 51,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 46,
+              "column": 13
+            },
+            "end": {
+              "line": 46,
+              "column": 76
+            }
+          },
+          "replacement": "",
+          "genre": "MatchArm"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_46_col_13.log",
+      "diff_path": "diff/src__svn__error.rs_line_46_col_13.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 71.6797277,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 16.075211,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:47:13: delete match arm CODE_WORKING_COPY_TOO_OLD in SvnErrorKind::from_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_code",
+            "return_type": "-> Option<Self>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 51,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 47,
+              "column": 13
+            },
+            "end": {
+              "line": 47,
+              "column": 72
+            }
+          },
+          "replacement": "",
+          "genre": "MatchArm"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_47_col_13.log",
+      "diff_path": "diff/src__svn__error.rs_line_47_col_13.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 90.2602153,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 5.2838817,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:42:9: replace SvnErrorKind::from_code -> Option<Self> with Some(Default::default())",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_code",
+            "return_type": "-> Option<Self>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 51,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 42,
+              "column": 9
+            },
+            "end": {
+              "line": 50,
+              "column": 10
+            }
+          },
+          "replacement": "Some(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__svn__error.rs_line_42_col_9_001.log",
+      "diff_path": "diff/src__svn__error.rs_line_42_col_9_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 193.7598267,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:48:13: delete match arm CODE_WORKING_COPY_LOCKED in SvnErrorKind::from_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_code",
+            "return_type": "-> Option<Self>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 51,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 48,
+              "column": 13
+            },
+            "end": {
+              "line": 48,
+              "column": 71
+            }
+          },
+          "replacement": "",
+          "genre": "MatchArm"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_48_col_13.log",
+      "diff_path": "diff/src__svn__error.rs_line_48_col_13.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 22.2275804,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 8.2409361,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:90:9: replace SvnError::from_process -> Self with Default::default()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnError::from_process",
+            "return_type": "-> Self",
+            "span": {
+              "start": {
+                "line": 89,
+                "column": 5
+              },
+              "end": {
+                "line": 93,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 90,
+              "column": 9
+            },
+            "end": {
+              "line": 92,
+              "column": 51
+            }
+          },
+          "replacement": "Default::default()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__svn__error.rs_line_90_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_90_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.6100547,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:96:9: replace SvnError::interrupted -> Self with Default::default()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnError::interrupted",
+            "return_type": "-> Self",
+            "span": {
+              "start": {
+                "line": 95,
+                "column": 5
+              },
+              "end": {
+                "line": 97,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 96,
+              "column": 9
+            },
+            "end": {
+              "line": 96,
+              "column": 56
+            }
+          },
+          "replacement": "Default::default()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__svn__error.rs_line_96_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_96_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.2298421,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:100:9: replace SvnError::spawn_failed -> Self with Default::default()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnError::spawn_failed",
+            "return_type": "-> Self",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 5
+              },
+              "end": {
+                "line": 105,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 100,
+              "column": 9
+            },
+            "end": {
+              "line": 104,
+              "column": 71
+            }
+          },
+          "replacement": "Default::default()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__svn__error.rs_line_100_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_100_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.9182097,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:56:9: replace <impl fmt::Display for SvnErrorKind>::fmt -> fmt::Result with Ok(Default::default())",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "<impl fmt::Display for SvnErrorKind>::fmt",
+            "return_type": "-> fmt::Result",
+            "span": {
+              "start": {
+                "line": 55,
+                "column": 5
+              },
+              "end": {
+                "line": 66,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 56,
+              "column": 9
+            },
+            "end": {
+              "line": 65,
+              "column": 29
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_56_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_56_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 53.8795145,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 19.8735271,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:101:13: delete field stderr from struct Captured expression in SvnError::spawn_failed",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnError::spawn_failed",
+            "return_type": "-> Self",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 5
+              },
+              "end": {
+                "line": 105,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 101,
+              "column": 13
+            },
+            "end": {
+              "line": 101,
+              "column": 39
+            }
+          },
+          "replacement": "",
+          "genre": "StructField"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_101_col_13.log",
+      "diff_path": "diff/src__svn__error.rs_line_101_col_13.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.0223605,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 17.7482805,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:112:9: replace SvnError::build -> Self with Default::default()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnError::build",
+            "return_type": "-> Self",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 5
+              },
+              "end": {
+                "line": 121,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 112,
+              "column": 9
+            },
+            "end": {
+              "line": 120,
+              "column": 10
+            }
+          },
+          "replacement": "Default::default()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__svn__error.rs_line_112_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_112_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.6704286,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![String::new()]",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "extract_codes",
+            "return_type": "-> Vec<String>",
+            "span": {
+              "start": {
+                "line": 124,
+                "column": 1
+              },
+              "end": {
+                "line": 126,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 125,
+              "column": 5
+            },
+            "end": {
+              "line": 125,
+              "column": 57
+            }
+          },
+          "replacement": "vec![String::new()]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_125_col_5_001.log",
+      "diff_path": "diff/src__svn__error.rs_line_125_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 76.8262655,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 18.8561446,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![]",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "extract_codes",
+            "return_type": "-> Vec<String>",
+            "span": {
+              "start": {
+                "line": 124,
+                "column": 1
+              },
+              "end": {
+                "line": 126,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 125,
+              "column": 5
+            },
+            "end": {
+              "line": 125,
+              "column": 57
+            }
+          },
+          "replacement": "vec![]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_125_col_5.log",
+      "diff_path": "diff/src__svn__error.rs_line_125_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 82.8781349,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 15.9929483,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:43:13: delete match arm CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE in SvnErrorKind::from_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_code",
+            "return_type": "-> Option<Self>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 51,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 43,
+              "column": 13
+            },
+            "end": {
+              "line": 45,
+              "column": 14
+            }
+          },
+          "replacement": "",
+          "genre": "MatchArm"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_43_col_13.log",
+      "diff_path": "diff/src__svn__error.rs_line_43_col_13.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 293.4138484,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 77.3047527,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:42:9: replace SvnErrorKind::from_code -> Option<Self> with None",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "SvnErrorKind::from_code",
+            "return_type": "-> Option<Self>",
+            "span": {
+              "start": {
+                "line": 41,
+                "column": 5
+              },
+              "end": {
+                "line": 51,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 42,
+              "column": 9
+            },
+            "end": {
+              "line": 50,
+              "column": 10
+            }
+          },
+          "replacement": "None",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_42_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_42_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 296.27904,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 74.4651726,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![\"xyzzy\".into()]",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "extract_codes",
+            "return_type": "-> Vec<String>",
+            "span": {
+              "start": {
+                "line": 124,
+                "column": 1
+              },
+              "end": {
+                "line": 126,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 125,
+              "column": 5
+            },
+            "end": {
+              "line": 125,
+              "column": 57
+            }
+          },
+          "replacement": "vec![\"xyzzy\".into()]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_125_col_5_002.log",
+      "diff_path": "diff/src__svn__error.rs_line_125_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 41.2292457,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 23.635845,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with None",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "parse_code_line",
+            "return_type": "-> Option<String>",
+            "span": {
+              "start": {
+                "line": 128,
+                "column": 1
+              },
+              "end": {
+                "line": 132,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 129,
+              "column": 5
+            },
+            "end": {
+              "line": 131,
+              "column": 50
+            }
+          },
+          "replacement": "None",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_129_col_5.log",
+      "diff_path": "diff/src__svn__error.rs_line_129_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 59.4759321,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 9.9120414,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with Some(String::new())",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "parse_code_line",
+            "return_type": "-> Option<String>",
+            "span": {
+              "start": {
+                "line": 128,
+                "column": 1
+              },
+              "end": {
+                "line": 132,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 129,
+              "column": 5
+            },
+            "end": {
+              "line": 131,
+              "column": 50
+            }
+          },
+          "replacement": "Some(String::new())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_129_col_5_001.log",
+      "diff_path": "diff/src__svn__error.rs_line_129_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 62.5555955,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 9.6268526,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with Some(\"xyzzy\".into())",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "parse_code_line",
+            "return_type": "-> Option<String>",
+            "span": {
+              "start": {
+                "line": 128,
+                "column": 1
+              },
+              "end": {
+                "line": 132,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 129,
+              "column": 5
+            },
+            "end": {
+              "line": 131,
+              "column": 50
+            }
+          },
+          "replacement": "Some(\"xyzzy\".into())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_129_col_5_002.log",
+      "diff_path": "diff/src__svn__error.rs_line_129_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 63.8052559,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 8.7136671,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:135:5: replace is_error_code -> bool with false",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "is_error_code",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 134,
+                "column": 1
+              },
+              "end": {
+                "line": 138,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 135,
+              "column": 5
+            },
+            "end": {
+              "line": 137,
+              "column": 63
+            }
+          },
+          "replacement": "false",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_135_col_5_001.log",
+      "diff_path": "diff/src__svn__error.rs_line_135_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 64.0607932,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 11.5050463,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:135:5: replace is_error_code -> bool with true",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "is_error_code",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 134,
+                "column": 1
+              },
+              "end": {
+                "line": 138,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 135,
+              "column": 5
+            },
+            "end": {
+              "line": 137,
+              "column": 63
+            }
+          },
+          "replacement": "true",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_135_col_5.log",
+      "diff_path": "diff/src__svn__error.rs_line_135_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 58.4714139,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 26.9594655,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:136:9: replace && with || in is_error_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "is_error_code",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 134,
+                "column": 1
+              },
+              "end": {
+                "line": 138,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 136,
+              "column": 9
+            },
+            "end": {
+              "line": 136,
+              "column": 11
+            }
+          },
+          "replacement": "||",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_136_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_136_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 67.5615365,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 11.3892838,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:137:9: replace && with || in is_error_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "is_error_code",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 134,
+                "column": 1
+              },
+              "end": {
+                "line": 138,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 137,
+              "column": 9
+            },
+            "end": {
+              "line": 137,
+              "column": 11
+            }
+          },
+          "replacement": "||",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_137_col_9.log",
+      "diff_path": "diff/src__svn__error.rs_line_137_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 68.8046399,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 22.8775328,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:135:16: replace == with != in is_error_code",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "is_error_code",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 134,
+                "column": 1
+              },
+              "end": {
+                "line": 138,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 135,
+              "column": 16
+            },
+            "end": {
+              "line": 135,
+              "column": 18
+            }
+          },
+          "replacement": "!=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_135_col_16.log",
+      "diff_path": "diff/src__svn__error.rs_line_135_col_16.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 57.2389747,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 21.4147986,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:141:5: replace redact_command -> String with \"xyzzy\".into()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "redact_command",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 140,
+                "column": 1
+              },
+              "end": {
+                "line": 147,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 141,
+              "column": 5
+            },
+            "end": {
+              "line": 146,
+              "column": 20
+            }
+          },
+          "replacement": "\"xyzzy\".into()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_141_col_5_001.log",
+      "diff_path": "diff/src__svn__error.rs_line_141_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 58.9905465,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 14.3429126,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:141:5: replace redact_command -> String with String::new()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "redact_command",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 140,
+                "column": 1
+              },
+              "end": {
+                "line": 147,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 141,
+              "column": 5
+            },
+            "end": {
+              "line": 146,
+              "column": 20
+            }
+          },
+          "replacement": "String::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_141_col_5.log",
+      "diff_path": "diff/src__svn__error.rs_line_141_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 69.9200446,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 11.5371909,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:150:5: replace redact_arg -> String with String::new()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "redact_arg",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 149,
+                "column": 1
+              },
+              "end": {
+                "line": 160,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 150,
+              "column": 5
+            },
+            "end": {
+              "line": 159,
+              "column": 20
+            }
+          },
+          "replacement": "String::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_150_col_5.log",
+      "diff_path": "diff/src__svn__error.rs_line_150_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 58.7389952,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 7.1908592,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:150:5: replace redact_arg -> String with \"xyzzy\".into()",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "redact_arg",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 149,
+                "column": 1
+              },
+              "end": {
+                "line": 160,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 150,
+              "column": 5
+            },
+            "end": {
+              "line": 159,
+              "column": 20
+            }
+          },
+          "replacement": "\"xyzzy\".into()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_150_col_5_001.log",
+      "diff_path": "diff/src__svn__error.rs_line_150_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 20.0831679,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 10.900962400000001,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/svn/error.rs:153:12: replace == with != in redact_arg",
+          "package": "dakedaduck-svn",
+          "file": "src/svn/error.rs",
+          "function": {
+            "function_name": "redact_arg",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 149,
+                "column": 1
+              },
+              "end": {
+                "line": 160,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 153,
+              "column": 12
+            },
+            "end": {
+              "line": 153,
+              "column": 14
+            }
+          },
+          "replacement": "!=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__svn__error.rs_line_153_col_12.log",
+      "diff_path": "diff/src__svn__error.rs_line_153_col_12.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 28.506005000000002,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 5.3077192,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 29,
+  "missed": 0,
+  "caught": 23,
+  "timeout": 0,
+  "unviable": 6,
+  "success": 0,
+  "start_time": "2026-10-14T20:24:51.699066Z",
+  "end_time": "2026-10-14T20:37:47.0737486Z",
+  "cargo_mutants_version": "27.1.0"
+}

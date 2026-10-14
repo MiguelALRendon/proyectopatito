@@ -15,15 +15,15 @@ const PROGRESS_EVENT: &str = "svn://progress";
 const DONE_EVENT: &str = "svn://done";
 
 #[derive(Clone, Serialize)]
-struct ProgressPayload {
-    id: OperationId,
-    event: ProgressEvent,
+pub struct ProgressPayload {
+    pub id: OperationId,
+    pub event: ProgressEvent,
 }
 
 #[derive(Clone, Serialize)]
-struct DonePayload {
-    id: OperationId,
-    result: OperationResult,
+pub struct DonePayload {
+    pub id: OperationId,
+    pub result: OperationResult,
 }
 
 fn sinks(app: AppHandle) -> Sinks {
@@ -111,4 +111,9 @@ pub async fn wc_cleanup(
 #[tauri::command]
 pub fn op_cancel(id: u64, state: State<'_, AppState>) -> bool {
     state.op_cancel(OperationId(id))
+}
+
+#[tauri::command]
+pub fn wc_needs_cleanup(path: String, state: State<'_, AppState>) -> Result<bool, CommandError> {
+    state.wc_needs_cleanup(&path)
 }

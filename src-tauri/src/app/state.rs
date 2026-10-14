@@ -238,6 +238,11 @@ impl AppState {
         }))
     }
 
+    pub fn wc_needs_cleanup(&self, path: &str) -> Result<bool, CommandError> {
+        let target = self.workspace()?.resolve(Path::new(path), true)?;
+        Ok(self.manager.needs_cleanup(target.as_path()))
+    }
+
     pub fn op_cancel(&self, id: OperationId) -> bool {
         self.manager.cancel(id)
     }
@@ -256,7 +261,10 @@ impl AppState {
 
     fn detect(&self) -> Result<SvnBinary, LocatorError> {
         let manual = locked(&self.config).svn_path.clone();
-        let located = locate(manual.as_deref());
+        let located = match manual.as_deref() {
+            Some(path) => locate(Some(path)).or_else(|error| locate(None).map_err(|_| error)),
+            None => locate(None),
+        };
         *locked(&self.svn) = located.as_ref().ok().cloned();
         located
     }

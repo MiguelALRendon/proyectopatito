@@ -16,6 +16,8 @@ use crate::svn::error::{Captured, SvnError, SvnErrorKind};
 
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(120);
 const NON_INTERACTIVE_FLAG: &str = "--non-interactive";
+const LANGUAGE_VAR: &str = "LANGUAGE";
+const ENGLISH: &str = "en";
 const PASSWORD_FROM_STDIN_FLAG: &str = "--password-from-stdin";
 const LINE_DELIMITER: u8 = b'\n';
 pub const CREATE_NO_WINDOW: u32 = 0x0800_0000;
@@ -109,6 +111,7 @@ impl SvnRunner {
         command
             .args(argv)
             .kill_on_drop(true)
+            .env(LANGUAGE_VAR, ENGLISH)
             .creation_flags(CREATE_NO_WINDOW)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())

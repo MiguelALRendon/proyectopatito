@@ -11,8 +11,8 @@ use std::time::Duration;
 
 use common::TestRepo;
 use dakedaduck_svn_lib::app::operations::{
-    CommitOutcome, OperationContext, OperationError, OperationId, OperationManager, Operations,
-    ProgressSink,
+    CommitOutcome, OPERATION_TIMEOUT, OperationContext, OperationError, OperationId,
+    OperationManager, Operations, ProgressSink,
 };
 use dakedaduck_svn_lib::app::workspace::{ScopedPath, Workspace, WorkspaceError};
 use dakedaduck_svn_lib::svn::client::SvnClient;
@@ -34,10 +34,6 @@ const LOCK_WAIT_PROOF: Duration = Duration::from_secs(1);
 const LOCK_PROBE: Duration = Duration::from_millis(150);
 const UNICODE_MESSAGE: &str = "ñandú ¿qué? 日本語 ✔";
 const TINY_TIMEOUT: Duration = Duration::from_millis(1);
-const KILL_AFTER: Duration = Duration::from_secs(2);
-const STALLING_HOOK: &str = "@echo off
-ping -n 9 127.0.0.1 >nul
-";
 
 struct Env {
     _root: TempDir,
@@ -410,7 +406,7 @@ async fn update_outside_a_working_copy_reports_the_svn_failure() {
         .update(&plain, update_request(), &env.context())
         .await
         .unwrap_err();
-    assert!(error.svn_kind().is_some());
+    assert_eq!(error.svn_kind(), Some(SvnErrorKind::Other));
 }
 
 #[tokio::test]
@@ -468,7 +464,7 @@ async fn update_streams_progress_events_and_returns_the_new_revision() {
     let seen = events.lock().unwrap();
     assert!(seen.iter().any(|event| matches!(
         event,
-        ProgressEvent::Item { action: ProgressAction::Added, path } if path.contains("nuevo")
+        ProgressEvent::Item { action: ProgressAction::Added, path } if path.ends_with(r"\nuevo ñ.txt")
     )));
 }
 
@@ -681,15 +677,14 @@ async fn failed_cleanup_keeps_the_cleanup_mark() {
 async fn commit_killed_midway_leaves_the_copy_locked_until_cleanup_frees_it() {
     let env = Env::new();
     let wc = env.checkout(WC_NAME).await;
-    let hook = env.repo._dir.path().join("hooks").join("pre-commit.bat");
-    fs::write(hook, STALLING_HOOK).unwrap();
+    let started = common::install_stalling_hook(&env.repo);
     let file = wc.as_path().join("a.txt");
     fs::write(&file, "x").unwrap();
     env.raw_svn(&["add", &format!("{}@", file.display())]);
     let ctx = env.context();
     let (manager, id) = (env.ops.manager().clone(), ctx.id);
     tokio::spawn(async move {
-        tokio::time::sleep(KILL_AFTER).await;
+        common::wait_for_file(&started).await;
         manager.cancel(id);
     });
     let killed = env.ops.commit(&wc, commit_request("m"), &ctx).await;
@@ -724,10 +719,22 @@ async fn update_over_a_locally_edited_line_leaves_the_file_conflicted() {
         .await
         .unwrap();
     fs::write(mine.as_path().join("f.txt"), "linea mia").unwrap();
-    env.ops
-        .update(&mine, update_request(), &env.context())
-        .await
-        .unwrap();
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let sink_events = events.clone();
+    let sink: ProgressSink = Arc::new(move |_, event| sink_events.lock().unwrap().push(event));
+    let ctx = OperationContext {
+        progress: Some(sink),
+        ..env.context()
+    };
+    env.ops.update(&mine, update_request(), &ctx).await.unwrap();
+    let seen = events.lock().unwrap().clone();
+    assert!(
+        seen.iter().any(|event| matches!(
+            event,
+            ProgressEvent::Item { action: ProgressAction::Conflicted, path } if path.ends_with("f.txt")
+        )),
+        "{seen:?}"
+    );
     let request = StatusRequest {
         target: mine.as_path().to_path_buf(),
         remote: false,
@@ -743,4 +750,24 @@ async fn update_over_a_locally_edited_line_leaves_the_file_conflicted() {
         .iter()
         .any(|entry| entry.item == StatusItem::Conflicted);
     assert!(conflicted, "{report:?}");
+}
+
+#[test]
+fn operations_use_the_one_hour_timeout_unless_told_otherwise() {
+    let env = Env::new();
+    assert_eq!(OPERATION_TIMEOUT, Duration::from_secs(60 * 60));
+    assert_eq!(env.ops.timeout(), OPERATION_TIMEOUT);
+    let short = env.ops.clone().with_timeout(TINY_TIMEOUT);
+    assert_eq!(short.timeout(), TINY_TIMEOUT);
+}
+
+#[test]
+fn progress_line_rejects_lines_whose_status_columns_are_not_a_known_layout() {
+    for line in ["AX   a.txt", "A ?  a.txt", "A  ?  a.txt", "     a.txt"] {
+        assert_eq!(
+            parse_progress_line(line),
+            ProgressEvent::Other(line.to_string()),
+            "{line:?}"
+        );
+    }
 }

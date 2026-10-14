@@ -21,7 +21,7 @@ related: [concept-decisiones-stack, adr-0001]
 
 | Módulo | Contenido | Pruebas |
 |---|---|---|
-| `src-tauri/src/app/workspace.rs` | `Workspace::new/resolve/revalidate`, `ScopedPath`, `WorkspaceError` | `tests/workspace.rs` |
+| `src-tauri/src/app/workspace.rs` | `Workspace::new/resolve/revalidate`, `ScopedPath`, `WorkspaceError` (rechaza `..`, dispositivos, nombres reservados, nombres con punto/espacio final o `:`, symlinks y junctions que escapan, destinos bajo un archivo) | `tests/workspace.rs` |
 | `src-tauri/src/app/svn_locator.rs` | `locate`/`locate_in`, `SvnBinary`, `SvnVersion`, versión mínima 1.10 | `tests/svn_layer.rs` |
 | `src-tauri/src/svn/runner.rs` | `SvnRunner::run` (sin shell, `--non-interactive`, timeout, cancelación, contraseña solo por stdin, el runner agrega `--password-from-stdin`) | `tests/svn_layer.rs`, `tests/svn_smoke.rs` |
 | `src-tauri/src/svn/error.rs` | `SvnError`, `SvnErrorKind` por código `E######`, redacción de contraseñas | `tests/svn_layer.rs` |
@@ -30,7 +30,7 @@ related: [concept-decisiones-stack, adr-0001]
 | `src-tauri/src/svn/client.rs` | `SvnClient::info/status` tipados | `tests/svn_read.rs` |
 | `src-tauri/src/config/mod.rs` | `ConfigStore`/`AppConfig` (`config.json` en `app_config_dir`, escritura atómica, JSON corrupto a `config.json.bad`, sin secretos) | `tests/app_state.rs` |
 | `src-tauri/src/app/state.rs`, `args.rs`, `error.rs` | `AppState` (workspace, svn, config, operaciones largas con sinks de progreso y fin), DTOs de entrada, `CommandError` por `kind` | `tests/app_state.rs` |
-| `src-tauri/src/commands/mod.rs` | 11 `#[tauri::command]` finos y eventos `svn://progress`, `svn://done`; capabilities solo `core:default` y `dialog:default` | sin pruebas propias (wrappers) |
+| `src-tauri/src/commands/mod.rs` | 12 `#[tauri::command]` finos (incluye `wc_needs_cleanup`) y eventos `svn://progress`, `svn://done`; capabilities solo `core:default` y `dialog:default` | `tests/contract.rs` (forma de los payloads) y `tests/app_state.rs` |
 | `src/services/tauri.ts` | Único punto de `invoke()`/`listen()`/diálogo; tipos del contrato; `runOperation` con buffer de eventos que llegan antes del id | `src/services/tauri.test.ts` |
 | `src/stores/workspace.ts`, `project.ts` | Pinia: onboarding, copia de trabajo activa, operación en curso, progreso acotado; la contraseña nunca se guarda | `src/stores/*.test.ts` |
 | `src/views/`, `src/components/`, `src/composables/`, `src/utils/svnLabels.ts` | `OnboardingView`, `ProjectPanel`, modales, composables de tema/preferencias/confirmación/foco, etiquetas en español | `src/**/*.test.ts` (lógica); UI verificada en navegador |

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-const TAURI_IMPORT = /@tauri-apps\//;
+const TAURI_IMPORT = /@tauri-apps\/|__TAURI|\binvoke\s*\(/;
 
 const gateway = import.meta.glob('/src/services/tauri.ts', {
   query: '?raw',

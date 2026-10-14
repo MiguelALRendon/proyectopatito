@@ -6,6 +6,8 @@ use std::time::SystemTime;
 use thiserror::Error;
 
 pub const CODE_AUTH_REQUIRED: &str = "E170001";
+pub const CODE_AUTH_FAILED: &str = "E215004";
+pub const CODE_CREDENTIALS_UNAVAILABLE: &str = "E215001";
 pub const CODE_UNTRUSTED_CERTIFICATE: &str = "E230001";
 pub const CODE_WORKING_COPY_TOO_OLD: &str = "E155036";
 pub const CODE_WORKING_COPY_LOCKED: &str = "E155004";
@@ -38,7 +40,9 @@ impl SvnErrorKind {
 
     fn from_code(code: &str) -> Option<Self> {
         match code {
-            CODE_AUTH_REQUIRED => Some(Self::AuthRequired),
+            CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {
+                Some(Self::AuthRequired)
+            }
             CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),
             CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),
             CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),

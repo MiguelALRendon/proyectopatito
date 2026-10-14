@@ -51,7 +51,12 @@
   "style": {
     "enabled": true,
     "themeSource": "src/styles/tokens.css",
-    "vendorExempt": ["coverage/*", "reports/*", "src/styles/responsive.css"],
+    "vendorExempt": [
+      "coverage/*",
+      "reports/*",
+      ".stryker-tmp/*",
+      "src/styles/responsive.css"
+    ],
     "exemptions": ["0", "porcentajes", "viewport", "grid-fr", "keywords"]
   },
   "qa": {

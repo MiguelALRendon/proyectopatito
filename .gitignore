@@ -37,3 +37,9 @@ reports
 .playwright-mcp
 
 .tools
+.bossdream-project/mutants-rust*/mutants.out/log/
+.bossdream-project/mutants-rust*/mutants.out/debug.log
+.bossdream-project/mutants-rust*/mutants.out/diff/
+.bossdream-project/mutants-rust*/mutants.out/lock.json
+.bossdream-project/*.err
+src-tauri/x@/

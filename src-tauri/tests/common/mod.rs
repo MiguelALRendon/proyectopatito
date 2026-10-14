@@ -100,6 +100,7 @@ impl FakeSvn {
 }
 
 const SVNSERVE_RELATIVE: &str = "../.tools/apache-subversion/svnserve.exe";
+const SVNSERVE_OVERRIDE_VAR: &str = "SVNSERVE_BIN";
 const LOOPBACK: &str = "127.0.0.1";
 const SERVER_READY_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
 const SERVER_POLL: std::time::Duration = std::time::Duration::from_millis(50);
@@ -113,7 +114,10 @@ pub struct TestServer {
 
 impl TestServer {
     pub fn start(repo: &TestRepo, user: &str, password: &str) -> Self {
-        let svnserve = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(SVNSERVE_RELATIVE);
+        let svnserve = std::env::var_os(SVNSERVE_OVERRIDE_VAR).map_or_else(
+            || std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(SVNSERVE_RELATIVE),
+            std::path::PathBuf::from,
+        );
         assert!(
             svnserve.is_file(),
             "falta {}; ejecuta: pwsh scripts/fetch-svnserve.ps1",
@@ -165,5 +169,73 @@ fn wait_until_listening(port: u16) {
     while std::net::TcpStream::connect((LOOPBACK, port)).is_err() {
         assert!(std::time::Instant::now() < deadline, "svnserve no arrancó");
         std::thread::sleep(SERVER_POLL);
+    }
+}
+
+const TLS_SERVER_SCRIPT: &str = "tests/common/tls_server.ps1";
+const HTTP_AUTH_SERVER_SCRIPT: &str = "tests/common/http_auth_server.ps1";
+const POWERSHELL: &str = "pwsh";
+
+pub struct ScriptServer {
+    child: std::process::Child,
+    pub url: String,
+}
+
+impl ScriptServer {
+    pub fn tls() -> Self {
+        Self::start(TLS_SERVER_SCRIPT, "https", &[])
+    }
+
+    pub fn http_auth(user: &str, password: &str) -> Self {
+        Self::start(HTTP_AUTH_SERVER_SCRIPT, "http", &[user, password])
+    }
+
+    fn start(script: &str, scheme: &str, credentials: &[&str]) -> Self {
+        let script = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(script);
+        let port = free_port();
+        let mut command = Command::new(POWERSHELL);
+        command.args(["-NoProfile", "-File"]).arg(script);
+        command.arg("-Port").arg(port.to_string());
+        if let [user, password] = credentials {
+            command.args(["-User", user, "-Password", password]);
+        }
+        let child = command
+            .spawn()
+            .expect("se necesita pwsh para los servidores de prueba");
+        wait_until_listening(port);
+        Self {
+            child,
+            url: format!("{scheme}://{LOOPBACK}:{port}/repo"),
+        }
+    }
+}
+
+impl Drop for ScriptServer {
+    fn drop(&mut self) {
+        self.child.kill().ok();
+        self.child.wait().ok();
+    }
+}
+
+const STALLING_HOOK: &str = "@echo off
+echo x > \"%~dp0started.flag\"
+ping -n 9 127.0.0.1 >nul
+";
+const FLAG_WAIT: std::time::Duration = std::time::Duration::from_secs(20);
+
+pub fn install_stalling_hook(repo: &TestRepo) -> std::path::PathBuf {
+    let hooks = repo._dir.path().join("hooks");
+    std::fs::write(hooks.join("pre-commit.bat"), STALLING_HOOK).unwrap();
+    hooks.join("started.flag")
+}
+
+pub async fn wait_for_file(path: &Path) {
+    let deadline = std::time::Instant::now() + FLAG_WAIT;
+    while !path.exists() {
+        assert!(
+            std::time::Instant::now() < deadline,
+            "el hook nunca arrancó"
+        );
+        tokio::time::sleep(SERVER_POLL).await;
     }
 }

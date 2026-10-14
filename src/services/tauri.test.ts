@@ -26,6 +26,7 @@ import {
   normalizeError,
   pickDirectory,
   runOperation,
+  wcNeedsCleanup,
   wcStatus,
   workspaceSet,
   type ProgressEvent,
@@ -122,6 +123,12 @@ describe('command wrappers', () => {
     });
   });
 
+  it('asks the backend whether a copy needs cleanup', async () => {
+    invokeMock.mockResolvedValue(true);
+    await expect(wcNeedsCleanup('wc')).resolves.toBe(true);
+    expect(invokeMock).toHaveBeenCalledWith('wc_needs_cleanup', { path: 'wc' });
+  });
+
   it('normalizes a rejected invoke into a CommandError', async () => {
     invokeMock.mockRejectedValue({
       kind: 'outside_workspace',
@@ -164,6 +171,22 @@ describe('runOperation', () => {
     await expect(run).resolves.toEqual({ status: 'ok', revision: 3 });
     expect(seen).toEqual([itemEvent]);
     expect(unlisten).toHaveBeenCalledTimes(2);
+  });
+
+  it('delivers events that arrive after the operation id is known', async () => {
+    const seen: ProgressEvent[] = [];
+    const run = runOperation(
+      async () => {
+        setTimeout(() => {
+          emit(PROGRESS_EVENT, { id: 12, event: itemEvent });
+          emit(DONE_EVENT, { id: 12, result: { status: 'ok', revision: 8 } });
+        }, 0);
+        return 12;
+      },
+      (event) => seen.push(event),
+    );
+    await expect(run).resolves.toEqual({ status: 'ok', revision: 8 });
+    expect(seen).toEqual([itemEvent]);
   });
 
   it('buffers events that arrive before the operation id is known', async () => {

@@ -1,0 +1,930 @@
+[
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnErrorKind::from_codes -> Self with Default::default()\n@@ -27,20 +27,17 @@\n     WorkingCopyLocked,\n     Cancelled,\n     TimedOut,\n     Other,\n }\n \n impl SvnErrorKind {\n     pub fn from_codes(codes: &[String]) -> Self {\n-        codes\n-            .iter()\n-            .find_map(|code| Self::from_code(code))\n-            .unwrap_or(Self::Other)\n+        Default::default() /* ~ changed by cargo-mutants ~ */\n     }\n \n     fn from_code(code: &str) -> Option<Self> {\n         match code {\n             CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n                 Some(Self::AuthRequired)\n             }\n             CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_codes",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 39
+        },
+        "start": {
+          "column": 5,
+          "line": 34
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:35:9: replace SvnErrorKind::from_codes -> Self with Default::default()",
+    "package": "dakedaduck-svn",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 36,
+        "line": 38
+      },
+      "start": {
+        "column": 9,
+        "line": 35
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnErrorKind::from_code -> Option<Self> with None\n@@ -34,25 +34,17 @@\n     pub fn from_codes(codes: &[String]) -> Self {\n         codes\n             .iter()\n             .find_map(|code| Self::from_code(code))\n             .unwrap_or(Self::Other)\n     }\n \n     fn from_code(code: &str) -> Option<Self> {\n-        match code {\n-            CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n-                Some(Self::AuthRequired)\n-            }\n-            CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n-            CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),\n-            CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n-            _ => None,\n-        }\n+        None /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n impl fmt::Display for SvnErrorKind {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         let message = match self {\n             Self::AuthRequired => \"se requiere autenticacion\",\n             Self::UntrustedCertificate => \"el certificado del servidor no es confiable\",\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_code",
+      "return_type": "-> Option<Self>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 41
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:42:9: replace SvnErrorKind::from_code -> Option<Self> with None",
+    "package": "dakedaduck-svn",
+    "replacement": "None",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 50
+      },
+      "start": {
+        "column": 9,
+        "line": 42
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnErrorKind::from_code -> Option<Self> with Some(Default::default())\n@@ -34,25 +34,17 @@\n     pub fn from_codes(codes: &[String]) -> Self {\n         codes\n             .iter()\n             .find_map(|code| Self::from_code(code))\n             .unwrap_or(Self::Other)\n     }\n \n     fn from_code(code: &str) -> Option<Self> {\n-        match code {\n-            CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n-                Some(Self::AuthRequired)\n-            }\n-            CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n-            CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),\n-            CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n-            _ => None,\n-        }\n+        Some(Default::default()) /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n impl fmt::Display for SvnErrorKind {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         let message = match self {\n             Self::AuthRequired => \"se requiere autenticacion\",\n             Self::UntrustedCertificate => \"el certificado del servidor no es confiable\",\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_code",
+      "return_type": "-> Option<Self>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 41
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:42:9: replace SvnErrorKind::from_code -> Option<Self> with Some(Default::default())",
+    "package": "dakedaduck-svn",
+    "replacement": "Some(Default::default())",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 50
+      },
+      "start": {
+        "column": 9,
+        "line": 42
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ delete match arm CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE in SvnErrorKind::from_code\n@@ -35,19 +35,17 @@\n         codes\n             .iter()\n             .find_map(|code| Self::from_code(code))\n             .unwrap_or(Self::Other)\n     }\n \n     fn from_code(code: &str) -> Option<Self> {\n         match code {\n-            CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n-                Some(Self::AuthRequired)\n-            }\n+             /* ~ changed by cargo-mutants ~ */\n             CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n             CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),\n             CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n             _ => None,\n         }\n     }\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_code",
+      "return_type": "-> Option<Self>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 41
+        }
+      }
+    },
+    "genre": "MatchArm",
+    "name": "src/svn/error.rs:43:13: delete match arm CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE in SvnErrorKind::from_code",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 14,
+        "line": 45
+      },
+      "start": {
+        "column": 13,
+        "line": 43
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ delete match arm CODE_UNTRUSTED_CERTIFICATE in SvnErrorKind::from_code\n@@ -38,17 +38,17 @@\n             .unwrap_or(Self::Other)\n     }\n \n     fn from_code(code: &str) -> Option<Self> {\n         match code {\n             CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n                 Some(Self::AuthRequired)\n             }\n-            CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n+             /* ~ changed by cargo-mutants ~ */\n             CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),\n             CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n             _ => None,\n         }\n     }\n }\n \n impl fmt::Display for SvnErrorKind {\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_code",
+      "return_type": "-> Option<Self>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 41
+        }
+      }
+    },
+    "genre": "MatchArm",
+    "name": "src/svn/error.rs:46:13: delete match arm CODE_UNTRUSTED_CERTIFICATE in SvnErrorKind::from_code",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 76,
+        "line": 46
+      },
+      "start": {
+        "column": 13,
+        "line": 46
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ delete match arm CODE_WORKING_COPY_TOO_OLD in SvnErrorKind::from_code\n@@ -39,17 +39,17 @@\n     }\n \n     fn from_code(code: &str) -> Option<Self> {\n         match code {\n             CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n                 Some(Self::AuthRequired)\n             }\n             CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n-            CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),\n+             /* ~ changed by cargo-mutants ~ */\n             CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n             _ => None,\n         }\n     }\n }\n \n impl fmt::Display for SvnErrorKind {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_code",
+      "return_type": "-> Option<Self>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 41
+        }
+      }
+    },
+    "genre": "MatchArm",
+    "name": "src/svn/error.rs:47:13: delete match arm CODE_WORKING_COPY_TOO_OLD in SvnErrorKind::from_code",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 72,
+        "line": 47
+      },
+      "start": {
+        "column": 13,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ delete match arm CODE_WORKING_COPY_LOCKED in SvnErrorKind::from_code\n@@ -40,17 +40,17 @@\n \n     fn from_code(code: &str) -> Option<Self> {\n         match code {\n             CODE_AUTH_REQUIRED | CODE_AUTH_FAILED | CODE_CREDENTIALS_UNAVAILABLE => {\n                 Some(Self::AuthRequired)\n             }\n             CODE_UNTRUSTED_CERTIFICATE => Some(Self::UntrustedCertificate),\n             CODE_WORKING_COPY_TOO_OLD => Some(Self::WorkingCopyTooOld),\n-            CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n+             /* ~ changed by cargo-mutants ~ */\n             _ => None,\n         }\n     }\n }\n \n impl fmt::Display for SvnErrorKind {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n         let message = match self {\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnErrorKind::from_code",
+      "return_type": "-> Option<Self>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 51
+        },
+        "start": {
+          "column": 5,
+          "line": 41
+        }
+      }
+    },
+    "genre": "MatchArm",
+    "name": "src/svn/error.rs:48:13: delete match arm CODE_WORKING_COPY_LOCKED in SvnErrorKind::from_code",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 71,
+        "line": 48
+      },
+      "start": {
+        "column": 13,
+        "line": 48
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace <impl fmt::Display for SvnErrorKind>::fmt -> fmt::Result with Ok(Default::default())\n@@ -48,26 +48,17 @@\n             CODE_WORKING_COPY_LOCKED => Some(Self::WorkingCopyLocked),\n             _ => None,\n         }\n     }\n }\n \n impl fmt::Display for SvnErrorKind {\n     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n-        let message = match self {\n-            Self::AuthRequired => \"se requiere autenticacion\",\n-            Self::UntrustedCertificate => \"el certificado del servidor no es confiable\",\n-            Self::WorkingCopyTooOld => \"la copia de trabajo tiene un formato antiguo\",\n-            Self::WorkingCopyLocked => \"la copia de trabajo esta bloqueada\",\n-            Self::Cancelled => \"operacion cancelada\",\n-            Self::TimedOut => \"la operacion excedio el tiempo limite\",\n-            Self::Other => \"svn termino con error\",\n-        };\n-        f.write_str(message)\n+        Ok(Default::default()) /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n #[derive(Debug, Clone, Default)]\n pub struct Captured {\n     pub stdout: String,\n     pub stderr: String,\n     pub exit_code: Option<i32>,\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "<impl fmt::Display for SvnErrorKind>::fmt",
+      "return_type": "-> fmt::Result",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 66
+        },
+        "start": {
+          "column": 5,
+          "line": 55
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:56:9: replace <impl fmt::Display for SvnErrorKind>::fmt -> fmt::Result with Ok(Default::default())",
+    "package": "dakedaduck-svn",
+    "replacement": "Ok(Default::default())",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 65
+      },
+      "start": {
+        "column": 9,
+        "line": 56
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnError::from_process -> Self with Default::default()\n@@ -82,19 +82,17 @@\n     pub stdout: String,\n     pub stderr: String,\n     pub exit_code: Option<i32>,\n     pub timestamp: SystemTime,\n }\n \n impl SvnError {\n     pub fn from_process(args: &[OsString], captured: Captured) -> Self {\n-        let codes = extract_codes(&captured.stderr);\n-        let kind = SvnErrorKind::from_codes(&codes);\n-        Self::build((kind, codes), args, captured)\n+        Default::default() /* ~ changed by cargo-mutants ~ */\n     }\n \n     pub fn interrupted(kind: SvnErrorKind, args: &[OsString], captured: Captured) -> Self {\n         Self::build((kind, Vec::new()), args, captured)\n     }\n \n     pub fn spawn_failed(args: &[OsString], error: io::Error) -> Self {\n         let captured = Captured {\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnError::from_process",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 93
+        },
+        "start": {
+          "column": 5,
+          "line": 89
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:90:9: replace SvnError::from_process -> Self with Default::default()",
+    "package": "dakedaduck-svn",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 51,
+        "line": 92
+      },
+      "start": {
+        "column": 9,
+        "line": 90
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnError::interrupted -> Self with Default::default()\n@@ -88,17 +88,17 @@\n impl SvnError {\n     pub fn from_process(args: &[OsString], captured: Captured) -> Self {\n         let codes = extract_codes(&captured.stderr);\n         let kind = SvnErrorKind::from_codes(&codes);\n         Self::build((kind, codes), args, captured)\n     }\n \n     pub fn interrupted(kind: SvnErrorKind, args: &[OsString], captured: Captured) -> Self {\n-        Self::build((kind, Vec::new()), args, captured)\n+        Default::default() /* ~ changed by cargo-mutants ~ */\n     }\n \n     pub fn spawn_failed(args: &[OsString], error: io::Error) -> Self {\n         let captured = Captured {\n             stderr: error.to_string(),\n             ..Captured::default()\n         };\n         Self::build((SvnErrorKind::Other, Vec::new()), args, captured)\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnError::interrupted",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 97
+        },
+        "start": {
+          "column": 5,
+          "line": 95
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:96:9: replace SvnError::interrupted -> Self with Default::default()",
+    "package": "dakedaduck-svn",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 56,
+        "line": 96
+      },
+      "start": {
+        "column": 9,
+        "line": 96
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnError::spawn_failed -> Self with Default::default()\n@@ -92,21 +92,17 @@\n         Self::build((kind, codes), args, captured)\n     }\n \n     pub fn interrupted(kind: SvnErrorKind, args: &[OsString], captured: Captured) -> Self {\n         Self::build((kind, Vec::new()), args, captured)\n     }\n \n     pub fn spawn_failed(args: &[OsString], error: io::Error) -> Self {\n-        let captured = Captured {\n-            stderr: error.to_string(),\n-            ..Captured::default()\n-        };\n-        Self::build((SvnErrorKind::Other, Vec::new()), args, captured)\n+        Default::default() /* ~ changed by cargo-mutants ~ */\n     }\n \n     fn build(\n         (kind, codes): (SvnErrorKind, Vec<String>),\n         args: &[OsString],\n         captured: Captured,\n     ) -> Self {\n         Self {\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnError::spawn_failed",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 105
+        },
+        "start": {
+          "column": 5,
+          "line": 99
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:100:9: replace SvnError::spawn_failed -> Self with Default::default()",
+    "package": "dakedaduck-svn",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 71,
+        "line": 104
+      },
+      "start": {
+        "column": 9,
+        "line": 100
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ delete field stderr from struct Captured expression in SvnError::spawn_failed\n@@ -93,17 +93,17 @@\n     }\n \n     pub fn interrupted(kind: SvnErrorKind, args: &[OsString], captured: Captured) -> Self {\n         Self::build((kind, Vec::new()), args, captured)\n     }\n \n     pub fn spawn_failed(args: &[OsString], error: io::Error) -> Self {\n         let captured = Captured {\n-            stderr: error.to_string(),\n+             /* ~ changed by cargo-mutants ~ */\n             ..Captured::default()\n         };\n         Self::build((SvnErrorKind::Other, Vec::new()), args, captured)\n     }\n \n     fn build(\n         (kind, codes): (SvnErrorKind, Vec<String>),\n         args: &[OsString],\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnError::spawn_failed",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 105
+        },
+        "start": {
+          "column": 5,
+          "line": 99
+        }
+      }
+    },
+    "genre": "StructField",
+    "name": "src/svn/error.rs:101:13: delete field stderr from struct Captured expression in SvnError::spawn_failed",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 39,
+        "line": 101
+      },
+      "start": {
+        "column": 13,
+        "line": 101
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace SvnError::build -> Self with Default::default()\n@@ -104,25 +104,17 @@\n         Self::build((SvnErrorKind::Other, Vec::new()), args, captured)\n     }\n \n     fn build(\n         (kind, codes): (SvnErrorKind, Vec<String>),\n         args: &[OsString],\n         captured: Captured,\n     ) -> Self {\n-        Self {\n-            codes,\n-            kind,\n-            command: redact_command(args),\n-            stdout: captured.stdout,\n-            stderr: captured.stderr,\n-            exit_code: captured.exit_code,\n-            timestamp: SystemTime::now(),\n-        }\n+        Default::default() /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n     stderr.lines().filter_map(parse_code_line).collect()\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "SvnError::build",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 121
+        },
+        "start": {
+          "column": 5,
+          "line": 107
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:112:9: replace SvnError::build -> Self with Default::default()",
+    "package": "dakedaduck-svn",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 120
+      },
+      "start": {
+        "column": 9,
+        "line": 112
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace extract_codes -> Vec<String> with vec![]\n@@ -117,17 +117,17 @@\n             stderr: captured.stderr,\n             exit_code: captured.exit_code,\n             timestamp: SystemTime::now(),\n         }\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n-    stderr.lines().filter_map(parse_code_line).collect()\n+    vec![] /* ~ changed by cargo-mutants ~ */\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "extract_codes",
+      "return_type": "-> Vec<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 126
+        },
+        "start": {
+          "column": 1,
+          "line": 124
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![]",
+    "package": "dakedaduck-svn",
+    "replacement": "vec![]",
+    "span": {
+      "end": {
+        "column": 57,
+        "line": 125
+      },
+      "start": {
+        "column": 5,
+        "line": 125
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace extract_codes -> Vec<String> with vec![String::new()]\n@@ -117,17 +117,17 @@\n             stderr: captured.stderr,\n             exit_code: captured.exit_code,\n             timestamp: SystemTime::now(),\n         }\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n-    stderr.lines().filter_map(parse_code_line).collect()\n+    vec![String::new()] /* ~ changed by cargo-mutants ~ */\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "extract_codes",
+      "return_type": "-> Vec<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 126
+        },
+        "start": {
+          "column": 1,
+          "line": 124
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![String::new()]",
+    "package": "dakedaduck-svn",
+    "replacement": "vec![String::new()]",
+    "span": {
+      "end": {
+        "column": 57,
+        "line": 125
+      },
+      "start": {
+        "column": 5,
+        "line": 125
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace extract_codes -> Vec<String> with vec![\"xyzzy\".into()]\n@@ -117,17 +117,17 @@\n             stderr: captured.stderr,\n             exit_code: captured.exit_code,\n             timestamp: SystemTime::now(),\n         }\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n-    stderr.lines().filter_map(parse_code_line).collect()\n+    vec![\"xyzzy\".into()] /* ~ changed by cargo-mutants ~ */\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "extract_codes",
+      "return_type": "-> Vec<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 126
+        },
+        "start": {
+          "column": 1,
+          "line": 124
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:125:5: replace extract_codes -> Vec<String> with vec![\"xyzzy\".into()]",
+    "package": "dakedaduck-svn",
+    "replacement": "vec![\"xyzzy\".into()]",
+    "span": {
+      "end": {
+        "column": 57,
+        "line": 125
+      },
+      "start": {
+        "column": 5,
+        "line": 125
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace parse_code_line -> Option<String> with None\n@@ -121,19 +121,17 @@\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n     stderr.lines().filter_map(parse_code_line).collect()\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n-    let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n-    let (code, _) = rest.split_once(':')?;\n-    is_error_code(code).then(|| code.to_string())\n+    None /* ~ changed by cargo-mutants ~ */\n }\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "parse_code_line",
+      "return_type": "-> Option<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 132
+        },
+        "start": {
+          "column": 1,
+          "line": 128
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with None",
+    "package": "dakedaduck-svn",
+    "replacement": "None",
+    "span": {
+      "end": {
+        "column": 50,
+        "line": 131
+      },
+      "start": {
+        "column": 5,
+        "line": 129
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace parse_code_line -> Option<String> with Some(String::new())\n@@ -121,19 +121,17 @@\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n     stderr.lines().filter_map(parse_code_line).collect()\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n-    let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n-    let (code, _) = rest.split_once(':')?;\n-    is_error_code(code).then(|| code.to_string())\n+    Some(String::new()) /* ~ changed by cargo-mutants ~ */\n }\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "parse_code_line",
+      "return_type": "-> Option<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 132
+        },
+        "start": {
+          "column": 1,
+          "line": 128
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with Some(String::new())",
+    "package": "dakedaduck-svn",
+    "replacement": "Some(String::new())",
+    "span": {
+      "end": {
+        "column": 50,
+        "line": 131
+      },
+      "start": {
+        "column": 5,
+        "line": 129
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace parse_code_line -> Option<String> with Some(\"xyzzy\".into())\n@@ -121,19 +121,17 @@\n     }\n }\n \n pub fn extract_codes(stderr: &str) -> Vec<String> {\n     stderr.lines().filter_map(parse_code_line).collect()\n }\n \n fn parse_code_line(line: &str) -> Option<String> {\n-    let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n-    let (code, _) = rest.split_once(':')?;\n-    is_error_code(code).then(|| code.to_string())\n+    Some(\"xyzzy\".into()) /* ~ changed by cargo-mutants ~ */\n }\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "parse_code_line",
+      "return_type": "-> Option<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 132
+        },
+        "start": {
+          "column": 1,
+          "line": 128
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:129:5: replace parse_code_line -> Option<String> with Some(\"xyzzy\".into())",
+    "package": "dakedaduck-svn",
+    "replacement": "Some(\"xyzzy\".into())",
+    "span": {
+      "end": {
+        "column": 50,
+        "line": 131
+      },
+      "start": {
+        "column": 5,
+        "line": 129
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace is_error_code -> bool with true\n@@ -127,19 +127,17 @@\n \n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n fn is_error_code(code: &str) -> bool {\n-    code.len() == CODE_LEN\n-        && code.starts_with(CODE_PREFIX)\n-        && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n+    true /* ~ changed by cargo-mutants ~ */\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n     let mut redact_next = false;\n     let parts: Vec<String> = args\n         .iter()\n         .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n         .collect();\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "is_error_code",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 138
+        },
+        "start": {
+          "column": 1,
+          "line": 134
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:135:5: replace is_error_code -> bool with true",
+    "package": "dakedaduck-svn",
+    "replacement": "true",
+    "span": {
+      "end": {
+        "column": 63,
+        "line": 137
+      },
+      "start": {
+        "column": 5,
+        "line": 135
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace is_error_code -> bool with false\n@@ -127,19 +127,17 @@\n \n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n fn is_error_code(code: &str) -> bool {\n-    code.len() == CODE_LEN\n-        && code.starts_with(CODE_PREFIX)\n-        && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n+    false /* ~ changed by cargo-mutants ~ */\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n     let mut redact_next = false;\n     let parts: Vec<String> = args\n         .iter()\n         .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n         .collect();\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "is_error_code",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 138
+        },
+        "start": {
+          "column": 1,
+          "line": 134
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:135:5: replace is_error_code -> bool with false",
+    "package": "dakedaduck-svn",
+    "replacement": "false",
+    "span": {
+      "end": {
+        "column": 63,
+        "line": 137
+      },
+      "start": {
+        "column": 5,
+        "line": 135
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace && with || in is_error_code\n@@ -129,17 +129,17 @@\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n-        && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n+        || /* ~ changed by cargo-mutants ~ */ code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n     let mut redact_next = false;\n     let parts: Vec<String> = args\n         .iter()\n         .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n         .collect();\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "is_error_code",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 138
+        },
+        "start": {
+          "column": 1,
+          "line": 134
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/svn/error.rs:137:9: replace && with || in is_error_code",
+    "package": "dakedaduck-svn",
+    "replacement": "||",
+    "span": {
+      "end": {
+        "column": 11,
+        "line": 137
+      },
+      "start": {
+        "column": 9,
+        "line": 137
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace && with || in is_error_code\n@@ -128,17 +128,17 @@\n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n-        && code.starts_with(CODE_PREFIX)\n+        || /* ~ changed by cargo-mutants ~ */ code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n     let mut redact_next = false;\n     let parts: Vec<String> = args\n         .iter()\n         .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "is_error_code",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 138
+        },
+        "start": {
+          "column": 1,
+          "line": 134
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/svn/error.rs:136:9: replace && with || in is_error_code",
+    "package": "dakedaduck-svn",
+    "replacement": "||",
+    "span": {
+      "end": {
+        "column": 11,
+        "line": 136
+      },
+      "start": {
+        "column": 9,
+        "line": 136
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace == with != in is_error_code\n@@ -127,17 +127,17 @@\n \n fn parse_code_line(line: &str) -> Option<String> {\n     let rest = line.trim().strip_prefix(STDERR_LINE_PREFIX)?;\n     let (code, _) = rest.split_once(':')?;\n     is_error_code(code).then(|| code.to_string())\n }\n \n fn is_error_code(code: &str) -> bool {\n-    code.len() == CODE_LEN\n+    code.len() != /* ~ changed by cargo-mutants ~ */ CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n     let mut redact_next = false;\n     let parts: Vec<String> = args\n         .iter()\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "is_error_code",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 138
+        },
+        "start": {
+          "column": 1,
+          "line": 134
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/svn/error.rs:135:16: replace == with != in is_error_code",
+    "package": "dakedaduck-svn",
+    "replacement": "!=",
+    "span": {
+      "end": {
+        "column": 18,
+        "line": 135
+      },
+      "start": {
+        "column": 16,
+        "line": 135
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace redact_command -> String with String::new()\n@@ -133,22 +133,17 @@\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n-    let mut redact_next = false;\n-    let parts: Vec<String> = args\n-        .iter()\n-        .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n-        .collect();\n-    parts.join(\" \")\n+    String::new() /* ~ changed by cargo-mutants ~ */\n }\n \n fn redact_arg(arg: &str, redact_next: &mut bool) -> String {\n     if std::mem::take(redact_next) {\n         return REDACTED.to_string();\n     }\n     if arg == PASSWORD_FLAG {\n         *redact_next = true;\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "redact_command",
+      "return_type": "-> String",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 147
+        },
+        "start": {
+          "column": 1,
+          "line": 140
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:141:5: replace redact_command -> String with String::new()",
+    "package": "dakedaduck-svn",
+    "replacement": "String::new()",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 146
+      },
+      "start": {
+        "column": 5,
+        "line": 141
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace redact_command -> String with \"xyzzy\".into()\n@@ -133,22 +133,17 @@\n \n fn is_error_code(code: &str) -> bool {\n     code.len() == CODE_LEN\n         && code.starts_with(CODE_PREFIX)\n         && code[1..].bytes().all(|byte| byte.is_ascii_digit())\n }\n \n pub fn redact_command(args: &[OsString]) -> String {\n-    let mut redact_next = false;\n-    let parts: Vec<String> = args\n-        .iter()\n-        .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n-        .collect();\n-    parts.join(\" \")\n+    \"xyzzy\".into() /* ~ changed by cargo-mutants ~ */\n }\n \n fn redact_arg(arg: &str, redact_next: &mut bool) -> String {\n     if std::mem::take(redact_next) {\n         return REDACTED.to_string();\n     }\n     if arg == PASSWORD_FLAG {\n         *redact_next = true;\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "redact_command",
+      "return_type": "-> String",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 147
+        },
+        "start": {
+          "column": 1,
+          "line": 140
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:141:5: replace redact_command -> String with \"xyzzy\".into()",
+    "package": "dakedaduck-svn",
+    "replacement": "\"xyzzy\".into()",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 146
+      },
+      "start": {
+        "column": 5,
+        "line": 141
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace redact_arg -> String with String::new()\n@@ -142,19 +142,10 @@\n     let parts: Vec<String> = args\n         .iter()\n         .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n         .collect();\n     parts.join(\" \")\n }\n \n fn redact_arg(arg: &str, redact_next: &mut bool) -> String {\n-    if std::mem::take(redact_next) {\n-        return REDACTED.to_string();\n-    }\n-    if arg == PASSWORD_FLAG {\n-        *redact_next = true;\n-    }\n-    if arg.starts_with(PASSWORD_FLAG_EQUALS) {\n-        return format!(\"{PASSWORD_FLAG_EQUALS}{REDACTED}\");\n-    }\n-    arg.to_string()\n+    String::new() /* ~ changed by cargo-mutants ~ */\n }\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "redact_arg",
+      "return_type": "-> String",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 160
+        },
+        "start": {
+          "column": 1,
+          "line": 149
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:150:5: replace redact_arg -> String with String::new()",
+    "package": "dakedaduck-svn",
+    "replacement": "String::new()",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 159
+      },
+      "start": {
+        "column": 5,
+        "line": 150
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace redact_arg -> String with \"xyzzy\".into()\n@@ -142,19 +142,10 @@\n     let parts: Vec<String> = args\n         .iter()\n         .map(|arg| redact_arg(&arg.to_string_lossy(), &mut redact_next))\n         .collect();\n     parts.join(\" \")\n }\n \n fn redact_arg(arg: &str, redact_next: &mut bool) -> String {\n-    if std::mem::take(redact_next) {\n-        return REDACTED.to_string();\n-    }\n-    if arg == PASSWORD_FLAG {\n-        *redact_next = true;\n-    }\n-    if arg.starts_with(PASSWORD_FLAG_EQUALS) {\n-        return format!(\"{PASSWORD_FLAG_EQUALS}{REDACTED}\");\n-    }\n-    arg.to_string()\n+    \"xyzzy\".into() /* ~ changed by cargo-mutants ~ */\n }\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "redact_arg",
+      "return_type": "-> String",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 160
+        },
+        "start": {
+          "column": 1,
+          "line": 149
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/svn/error.rs:150:5: replace redact_arg -> String with \"xyzzy\".into()",
+    "package": "dakedaduck-svn",
+    "replacement": "\"xyzzy\".into()",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 159
+      },
+      "start": {
+        "column": 5,
+        "line": 150
+      }
+    }
+  },
+  {
+    "diff": "--- src/svn/error.rs\n+++ replace == with != in redact_arg\n@@ -145,16 +145,16 @@\n         .collect();\n     parts.join(\" \")\n }\n \n fn redact_arg(arg: &str, redact_next: &mut bool) -> String {\n     if std::mem::take(redact_next) {\n         return REDACTED.to_string();\n     }\n-    if arg == PASSWORD_FLAG {\n+    if arg != /* ~ changed by cargo-mutants ~ */ PASSWORD_FLAG {\n         *redact_next = true;\n     }\n     if arg.starts_with(PASSWORD_FLAG_EQUALS) {\n         return format!(\"{PASSWORD_FLAG_EQUALS}{REDACTED}\");\n     }\n     arg.to_string()\n }\n",
+    "file": "src/svn/error.rs",
+    "function": {
+      "function_name": "redact_arg",
+      "return_type": "-> String",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 160
+        },
+        "start": {
+          "column": 1,
+          "line": 149
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/svn/error.rs:153:12: replace == with != in redact_arg",
+    "package": "dakedaduck-svn",
+    "replacement": "!=",
+    "span": {
+      "end": {
+        "column": 14,
+        "line": 153
+      },
+      "start": {
+        "column": 12,
+        "line": 153
+      }
+    }
+  }
+]

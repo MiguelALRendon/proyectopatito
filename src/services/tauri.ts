@@ -74,7 +74,14 @@ export interface Credentials {
   password: string | null;
 }
 
-export type CheckoutDepth = 'empty' | 'files' | 'immediates' | 'infinity';
+export const CHECKOUT_DEPTHS = [
+  'empty',
+  'files',
+  'immediates',
+  'infinity',
+] as const;
+
+export type CheckoutDepth = (typeof CHECKOUT_DEPTHS)[number];
 
 export interface CheckoutRequest extends Credentials {
   url: string;
@@ -99,18 +106,21 @@ export interface CleanupRequest {
   path: string;
 }
 
-export type ItemAction =
-  | 'added'
-  | 'deleted'
-  | 'updated'
-  | 'conflicted'
-  | 'merged'
-  | 'existed'
-  | 'replaced'
-  | 'broken'
-  | 'sending'
-  | 'transmitting'
-  | 'other';
+export const ITEM_ACTIONS = [
+  'added',
+  'deleted',
+  'updated',
+  'conflicted',
+  'merged',
+  'existed',
+  'replaced',
+  'broken',
+  'sending',
+  'transmitting',
+  'other',
+] as const;
+
+export type ItemAction = (typeof ITEM_ACTIONS)[number];
 
 export type ProgressEvent =
   | { kind: 'item'; data: { action: ItemAction; path: string } }
@@ -181,6 +191,8 @@ export const wcInfo = (path: string) => call<InfoEntry>('wc_info', { path });
 export const wcStatus = (path: string, remote = false) =>
   call<StatusReport>('wc_status', { path, remote });
 export const opCancel = (id: number) => call<boolean>('op_cancel', { id });
+export const wcNeedsCleanup = (path: string) =>
+  call<boolean>('wc_needs_cleanup', { path });
 export const svnCheckout = (req: CheckoutRequest) =>
   call<number>('svn_checkout', { req });
 export const wcUpdate = (req: UpdateRequest) =>
