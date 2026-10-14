@@ -4,7 +4,7 @@ title: Entorno de desarrollo en Windows
 type: human-explanation
 status: current
 source: user
-last_verified: 2026-10-12
+last_verified: 2026-10-14
 symbols: []
 related: [concept-decisiones-stack]
 ---
@@ -12,6 +12,8 @@ related: [concept-decisiones-stack]
 # Entorno de desarrollo en Windows
 
 Todo lo siguiente viene del usuario (2026-10-12) y describe su máquina; no está anclado a código.
+
+**Entorno SVN de pruebas libre (usuario, 2026-10-14):** el usuario no tenía Subversion antes de este proyecto y no lo usa en esta máquina. Toda instalación, cache de credenciales (`%APPDATA%\Subversion`) y repositorio de SVN aquí es de prueba: se puede romper, llenar o borrar sin cuidado especial. Vale solo para SVN en esta máquina.
 
 | Pieza | Estado |
 |---|---|

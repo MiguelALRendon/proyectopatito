@@ -21,3 +21,4 @@ Tolerancia cero. Regla en @.claude/rules/comentarios.md, aplicada de forma deter
 - **Frontend:** Vue 3 (<script setup>) + TypeScript + Vite + Pinia; Monaco para código (carga diferida). Referencia visual: DocuMalia (Claymorphism).
 - **Tests:** cargo test (integración con repo real vía svnadmin + file:///), Vitest + Stryker en frontend.
 - **Reglas duras:** nunca tauri-plugin-shell hacia el frontend; todo destino pasa por Workspace::resolve (ScopedPath); jamás --force en generadores de scaffold.
+- **Entorno SVN de pruebas libre:** la instalación de SVN de esta máquina (SlikSVN, `svnserve` de `.tools/`, auth cache y config de svn del usuario) se instaló solo para este proyecto y no hay repositorios reales ni otro uso. Se puede tocar, romper y llenar de repos/credenciales de prueba sin cuidado especial para encontrar bugs. Autorización del usuario, 2026-10-14; vale solo para SVN en esta máquina.
