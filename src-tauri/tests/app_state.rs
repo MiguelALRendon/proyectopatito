@@ -10,7 +10,7 @@ use std::process::Command;
 use std::sync::Arc;
 use std::time::Duration;
 
-use common::{FakeSvn, TestRepo};
+use common::{FakeSvn, TestRepo, TestServer};
 use dakedaduck_svn_lib::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, UpdateArgs};
 use dakedaduck_svn_lib::app::error::{CommandError, CommandErrorKind};
 use dakedaduck_svn_lib::app::operations::{OperationError, OperationId};
@@ -540,8 +540,6 @@ fn tokio_test_block<F: std::future::Future>(future: F) -> F::Output {
 }
 
 const CAPABILITIES_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/capabilities");
-const AUTH_FAILURE_STDERR: &str = "svn: E170001: Authorization failed
-";
 const MALFORMED_XML: &str = "<info><entry";
 const CURRENT_VERSION: &str = "1.14.2";
 
@@ -665,34 +663,6 @@ async fn failed_operation_emits_done_with_an_error_result() {
 }
 
 #[tokio::test]
-async fn retrying_with_wrong_credentials_reports_auth_required_again() {
-    let sandbox = sandbox();
-    let state = state_with_workspace(&sandbox);
-    let fake = FakeSvn {
-        stderr: AUTH_FAILURE_STDERR,
-        exit_code: 1,
-        ..FakeSvn::with_version(CURRENT_VERSION)
-    };
-    let _fake_dir = adopt_fake_svn(&state, &fake);
-    for password in ["primera", "segunda"] {
-        let (sinks, mut receiver) = sinks();
-        let args = CheckoutArgs {
-            username: Some("alice".into()),
-            password: Some(password.into()),
-            ..checkout_args(&TestRepo::create(), "copia")
-        };
-        state.start_checkout(args, sinks).unwrap();
-        match finished(&mut receiver).await {
-            OperationResult::Err(error) => {
-                assert_eq!(error.kind, CommandErrorKind::AuthRequired);
-                assert!(!serde_json::to_string(&error).unwrap().contains(password));
-            }
-            other => panic!("se esperaba AuthRequired, llegó {other:?}"),
-        }
-    }
-}
-
-#[tokio::test]
 async fn malformed_svn_xml_is_reported_as_parse_failed() {
     let state = state_with_workspace(&sandbox());
     let fake = FakeSvn {
@@ -717,4 +687,60 @@ fn the_main_window_capabilities_grant_only_core_and_dialog_defaults() {
         capability["permissions"],
         serde_json::json!(["core:default", "dialog:default"])
     );
+}
+
+const SERVER_USER: &str = "alice";
+const SERVER_PASSWORD: &str = "s3cret-real";
+
+async fn checkout_against_server(
+    server: &TestServer,
+    credentials: Option<(&str, &str)>,
+) -> OperationResult {
+    let state = state_with_workspace(&sandbox());
+    let (sinks, mut receiver) = sinks();
+    let args = CheckoutArgs {
+        url: server.url.clone(),
+        dest: "copia".into(),
+        revision: None,
+        depth: Depth::Infinity,
+        ignore_externals: false,
+        username: credentials.map(|(user, _)| user.into()),
+        password: credentials.map(|(_, password)| password.into()),
+    };
+    state.start_checkout(args, sinks).unwrap();
+    finished(&mut receiver).await
+}
+
+fn assert_auth_required(result: OperationResult, secret: &str) {
+    let OperationResult::Err(error) = result else {
+        panic!("se esperaba AuthRequired");
+    };
+    assert_eq!(error.kind, CommandErrorKind::AuthRequired);
+    assert!(!serde_json::to_string(&error).unwrap().contains(secret));
+}
+
+#[tokio::test]
+async fn real_server_without_credentials_reports_auth_required() {
+    let repo = TestRepo::create();
+    let server = TestServer::start(&repo, SERVER_USER, SERVER_PASSWORD);
+    let result = checkout_against_server(&server, None).await;
+    assert_auth_required(result, SERVER_PASSWORD);
+}
+
+#[tokio::test]
+async fn real_server_with_a_wrong_password_reports_auth_required_without_leaking_it() {
+    let repo = TestRepo::create();
+    let server = TestServer::start(&repo, SERVER_USER, SERVER_PASSWORD);
+    let wrong = ("alice", "clave-equivocada");
+    let result = checkout_against_server(&server, Some(wrong)).await;
+    assert_auth_required(result, wrong.1);
+}
+
+#[tokio::test]
+async fn real_server_accepts_the_password_sent_through_stdin() {
+    let repo = TestRepo::create();
+    let server = TestServer::start(&repo, SERVER_USER, SERVER_PASSWORD);
+    let right = (SERVER_USER, SERVER_PASSWORD);
+    let result = checkout_against_server(&server, Some(right)).await;
+    assert_eq!(result, OperationResult::Ok { revision: Some(0) });
 }

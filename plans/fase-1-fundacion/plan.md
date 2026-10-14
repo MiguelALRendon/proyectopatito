@@ -158,4 +158,4 @@ tipo: new · complejidad: large
 - supuesto — verificar: versiones de `tokio`, `quick-xml`, `tauri-plugin-dialog` compatibles con Tauri 2 y rustc 1.88; confirmar con context7 en el increment que las agrega.
 - supuesto — verificar: `junction` creable en el test sin privilegios de administrador en Windows 11 (`mklink /J`).
 - supuesto — verificar: Playwright puede correr sobre `vite dev` con `invoke` simulado; la ventana Tauri real queda para verificación manual.
-- supuesto — verificar: `--password-from-stdin` combinado con `--non-interactive` en svn 1.14.2 (el auditor no halló doc en svnbook).
+- verificado 2026-10-14 contra svnserve real: `--password-from-stdin` con `--non-interactive` funciona si la contraseña se envía sin LF final (ADR 0005).

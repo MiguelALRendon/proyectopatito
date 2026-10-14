@@ -98,3 +98,72 @@ impl FakeSvn {
         output
     }
 }
+
+const SVNSERVE_RELATIVE: &str = "../.tools/apache-subversion/svnserve.exe";
+const LOOPBACK: &str = "127.0.0.1";
+const SERVER_READY_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
+const SERVER_POLL: std::time::Duration = std::time::Duration::from_millis(50);
+const SVNSERVE_CONF: &str =
+    "[general]\nanon-access = none\nauth-access = write\npassword-db = passwd\n";
+
+pub struct TestServer {
+    child: std::process::Child,
+    pub url: String,
+}
+
+impl TestServer {
+    pub fn start(repo: &TestRepo, user: &str, password: &str) -> Self {
+        let svnserve = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(SVNSERVE_RELATIVE);
+        assert!(
+            svnserve.is_file(),
+            "falta {}; ejecuta: pwsh scripts/fetch-svnserve.ps1",
+            svnserve.display()
+        );
+        let conf = repo._dir.path().join("conf");
+        std::fs::write(conf.join("svnserve.conf"), SVNSERVE_CONF).unwrap();
+        std::fs::write(
+            conf.join("passwd"),
+            format!("[users]\n{user} = {password}\n"),
+        )
+        .unwrap();
+        let port = free_port();
+        let child = Command::new(svnserve)
+            .args([
+                "-d",
+                "--foreground",
+                "--listen-host",
+                LOOPBACK,
+                "--listen-port",
+            ])
+            .arg(port.to_string())
+            .arg("-r")
+            .arg(repo._dir.path())
+            .spawn()
+            .expect("no se pudo lanzar svnserve");
+        wait_until_listening(port);
+        Self {
+            child,
+            url: format!("svn://{LOOPBACK}:{port}"),
+        }
+    }
+}
+
+impl Drop for TestServer {
+    fn drop(&mut self) {
+        self.child.kill().ok();
+        self.child.wait().ok();
+    }
+}
+
+fn free_port() -> u16 {
+    let listener = std::net::TcpListener::bind((LOOPBACK, 0)).unwrap();
+    listener.local_addr().unwrap().port()
+}
+
+fn wait_until_listening(port: u16) {
+    let deadline = std::time::Instant::now() + SERVER_READY_TIMEOUT;
+    while std::net::TcpStream::connect((LOOPBACK, port)).is_err() {
+        assert!(std::time::Instant::now() < deadline, "svnserve no arrancó");
+        std::thread::sleep(SERVER_POLL);
+    }
+}

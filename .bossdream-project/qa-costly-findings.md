@@ -23,8 +23,8 @@ Casos obligatorios de entrada: 25 (20 reglas + 5 transiciones) según `test-inve
 | 19 | capabilities solo core:default y dialog:default (regla) | lee `capabilities/` | OK |
 | 20 | solo services/tauri.ts importa @tauri-apps (regla) | glob de `src/**` | OK. Sabotaje con un import en `src/utils`: la prueba falla como debe |
 | 21 | copia_modificada→copia_en_conflicto (transición) | dos copias editan la misma línea, update | OK: StatusItem::Conflicted |
-| 22 | reintento_con_credenciales→auth_required (transición) | svn.exe falso responde E170001 dos veces con contraseñas distintas | OK. Límite: es un svn falso, no un servidor real (SlikSVN no trae svnserve) |
+| 22 | reintento_con_credenciales→auth_required (transición) | `svnserve` real (Apache Subversion 1.15) con usuario y contraseña: sin credenciales, contraseña equivocada y contraseña correcta | OK tras corregir un bug real: la contraseña se enviaba con LF final y svn en Windows lo conserva (`Password incorrect` con la contraseña correcta). Ahora se envía sin terminador (ADR 0005) |
 
-Pendiente: autenticación contra servidor real (necesita `svnserve.exe`, que no está instalado) y TLS.
+Pendiente: solo TLS real (necesita un servidor HTTPS con certificado).
 
-Verificación tras los cambios: `cargo test` 160 pruebas en verde (antes 132), `vitest` 82 (antes 80), `cargo clippy -D warnings` limpio.
+Verificación tras los cambios: `cargo test` 161 pruebas en verde (antes 132), `vitest` 82 (antes 80), `cargo clippy -D warnings` limpio.

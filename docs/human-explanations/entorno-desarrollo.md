@@ -16,6 +16,7 @@ Todo lo siguiente viene del usuario (2026-10-12) y describe su máquina; no est�
 | Pieza | Estado |
 |---|---|
 | SlikSVN 1.14.2 | Instalado con winget en `C:\Program Files\SlikSvn\bin` (`svn.exe`, `svnadmin.exe`). **No está en el PATH.** |
+| svnserve.exe (Apache Subversion 1.15) | Solo para las pruebas de autenticación real. Se baja con `pwsh scripts/fetch-svnserve.ps1` (binarios de VisualSVN, hash SHA-256 verificado) a `.tools/apache-subversion/`, ignorado por git. |
 | PowerShell 7 | Instalado con winget; los hooks de BossDream usan `pwsh`. Requiere reiniciar la sesión de Claude Code. |
 | Rust | El toolchain global era GNU y fallaba (`dlltool`). Se fijó MSVC solo para este proyecto con `rustup override`. |
 

@@ -17,7 +17,6 @@ use crate::svn::error::{Captured, SvnError, SvnErrorKind};
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(120);
 const NON_INTERACTIVE_FLAG: &str = "--non-interactive";
 const PASSWORD_FROM_STDIN_FLAG: &str = "--password-from-stdin";
-const LINE_END: &[u8] = b"\n";
 const LINE_DELIMITER: u8 = b'\n';
 pub const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
@@ -197,9 +196,8 @@ async fn write_password(child: &mut Child, password: &str) {
     let Some(mut stdin) = child.stdin.take() else {
         return;
     };
-    // si el hijo sale antes de leer, su exit code ya reporta el fallo
+    // sin LF final: svn en Windows lo conserva en la contraseña y el servidor la rechaza; el EOF la termina
     stdin.write_all(password.as_bytes()).await.ok();
-    stdin.write_all(LINE_END).await.ok();
 }
 
 async fn cancelled(cancel: Option<&Notify>) {

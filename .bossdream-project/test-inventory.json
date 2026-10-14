@@ -1990,9 +1990,9 @@
       "transicion_relacionada": "tiempo_agotado->wc_requiere_cleanup"
     },
     {
-      "nombre": "retrying_with_wrong_credentials_reports_auth_required_again",
+      "nombre": "real_server_with_a_wrong_password_reports_auth_required_without_leaking_it",
       "archivo": "src-tauri/tests/app_state.rs",
-      "metodo": "AppState::start_checkout",
+      "metodo": "AppState::start_checkout (svnserve real)",
       "cubre": "reintento_con_credenciales->auth_required",
       "transicion_relacionada": "reintento_con_credenciales->auth_required"
     },
@@ -2014,6 +2014,20 @@
       "archivo": "src-tauri/tests/svn_layer.rs",
       "metodo": "search_dirs",
       "cubre": "locate busca en orden: configuración manual, PATH, TortoiseSVN, SlikSVN, Apache"
+    },
+    {
+      "nombre": "real_server_accepts_the_password_sent_through_stdin",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout (svnserve real)",
+      "cubre": "reintento_con_credenciales->completada",
+      "transicion_relacionada": "reintento_con_credenciales->completada"
+    },
+    {
+      "nombre": "real_server_without_credentials_reports_auth_required",
+      "archivo": "src-tauri/tests/app_state.rs",
+      "metodo": "AppState::start_checkout (svnserve real)",
+      "cubre": "operacion_en_curso->auth_required",
+      "transicion_relacionada": "operacion_en_curso->auth_required"
     }
   ],
   "evidence": "Leído el código de producción (src-tauri/src/app/{workspace,operations,state,error,args,svn_locator}.rs, svn/{runner,error,commands,client,parsers,progress,message_file}.rs, config/mod.rs, commands/mod.rs; src/services/tauri.ts, src/stores/{project,workspace}.ts, src/utils/svnLabels.ts, src/composables/*.ts) y los 13 archivos de prueba; las pruebas NO fueron ejecutadas por este agente (conteos 132/80 vienen del invocador, no verificados; no existe .bossdream-project/smoker-log.json). Verificado: workspace resolve/revalidate con junction real en src-tauri/tests/workspace.rs:172-181 y 227-237 y a nivel de operación en svn_operations.rs:356-377; cancelación+cleanup con svn real en svn_operations.rs:380-394 (Cancelled, needs_cleanup true, luego cleanup lo limpia), cancelación en cola sin marca en svn_operations.rs:512-524, serialización por copia (ignorando mayúsculas) en svn_operations.rs:315-331 y paralelismo en 334-343; kill por timeout y por cancelación en svn_layer.rs:184-216 (con powershell, no svn); contraseña por stdin y bandera --password-from-stdin en svn_layer.rs:234-244 y 368-382 (con powershell/cmd, no svn); ciclo checkout->add->commit (rev 1)->info->status vacío->cleanup en app_state.rs:479-529 y commit unicode en svn_operations.rs:422-431; update con progreso y revisión 1 en svn_operations.rs:447-466; status local/remoto reales en svn_read.rs:250-296; reintento con credenciales sin persistir la contraseña en src/stores/project.test.ts:254-267; buffer de eventos tempranos y filtrado por id en src/services/tauri.test.ts:169-200. HUECOS REALES sin prueba (quedan en rules/transiciones sin test): (1) en_ejecucion->tiempo_agotado y tiempo_agotado->wc_requiere_cleanup: el timeout solo se prueba en el runner (svn_layer.rs:184), no que Operations marque cleanup (OPERATION_TIMEOUT 1h fija en operations.rs:24); (2) copia_modificada->copia_en_conflicto: el plan 4.4 prometía prueba de conflicto y no existe ninguna; (3) reintento_con_credenciales->auth_required (credenciales erróneas) y E170001/E230001/E155036/E155004 nunca producidos por svn real (repos file:///, solo stderr sintético en app_state.rs:162-177); (4) svn_sin_detectar->svn_demasiado_antiguo solo a nivel locate_in (svn_layer.rs:319), no vía AppState; (5) start_checkout/start_commit/start_cleanup con ruta fuera del workspace y start_update con contraseña sin usuario (app_state.rs:361-420 solo cubre update con '..', checkout/commit con password sin user); (6) cleanup de una copia realmente bloqueada (E155004), cleanup fallido y fallo de svn distinto no marcan/limpian la marca; (7) UpdateRequest con -r/--ignore-externals/--username (solo se prueba con valores por defecto); (8) acciones E/R/B y verbos Deleting/Replacing de progress.rs:9-14,40-52; (9) SvnError stdout/timestamp, symlink que escapa, orden de búsqueda de locate (default_search_dirs), NoSvn end-to-end, ParseFailed, OperationResult::Err en svn://done y fallo de guardado en adopt_svn; (10) CA-11: capabilities/default.json:7-8 (solo core:default y dialog:default) y 'solo services/tauri.ts toca invoke' se verifican leyendo el archivo, sin prueba automatizada; las vistas .vue (ProjectPanel, OnboardingView) no tienen pruebas de componente (presentación exenta según plan 6.6, validada manualmente en 6.7). CA-18 (cargo check/test, npm test/build) no se verificó aquí.",

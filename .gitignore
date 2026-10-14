@@ -35,3 +35,5 @@ coverage
 reports
 .stryker-tmp
 .playwright-mcp
+
+.tools
