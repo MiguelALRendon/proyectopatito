@@ -22,6 +22,7 @@ vi.mock('@tauri-apps/plugin-dialog', () => ({
 
 import {
   DONE_EVENT,
+  NO_CREDENTIALS,
   PROGRESS_EVENT,
   normalizeError,
   pickDirectory,
@@ -54,6 +55,15 @@ beforeEach(() => {
   unlisten.mockReset();
   invokeMock.mockReset();
   openMock.mockReset();
+});
+
+describe('NO_CREDENTIALS', () => {
+  it('cannot be mutated by a caller that fills in a password', () => {
+    const shared: { password: string | null } = NO_CREDENTIALS;
+    expect(Object.isFrozen(NO_CREDENTIALS)).toBe(true);
+    expect(() => (shared.password = 'secreto')).toThrow(TypeError);
+    expect(NO_CREDENTIALS.password).toBeNull();
+  });
 });
 
 describe('normalizeError', () => {

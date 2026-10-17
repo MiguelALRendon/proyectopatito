@@ -1,0 +1,17 @@
+src/app/wc_status.rs:69:9: replace StatusCache::generation -> u64 with 0
+src/app/wc_status.rs:222:83: replace || with && in needs_attention
+src/app/wc_status.rs:222:58: replace || with && in needs_attention
+src/app/wc_status.rs:226:5: replace has_remote_change -> bool with true
+src/app/wc_status.rs:233:29: delete ! in has_remote_change
+src/app/wc_status.rs:238:5: replace has_local_marker -> bool with true
+src/app/wc_status.rs:240:9: replace || with && in has_local_marker
+src/app/wc_status.rs:246:5: replace is_plain -> bool with false
+src/app/wc_status.rs:250:5: replace is_normal -> bool with false
+src/app/files/edit.rs:45:31: replace > with >= in FileService::write_text
+src/app/files/edit.rs:93:34: replace + with * in read_bounded
+src/app/files/edit.rs:140:27: replace match guard error.kind() == ErrorKind::AlreadyExists with true in create_temp
+src/app/files/external.rs:24:9: replace <impl Launcher for SystemLauncher>::open -> io::Result<()> with Ok(())
+src/app/files/text.rs:8:54: replace * with +
+src/app/files/text.rs:9:33: replace * with +
+src/app/files/version.rs:9:15: replace ^ with | in fnv1a
+src/app/files/version.rs:9:15: replace ^ with & in fnv1a

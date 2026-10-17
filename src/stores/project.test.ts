@@ -17,6 +17,7 @@ vi.mock('../services/tauri', async (importOriginal) => ({
 
 import * as service from '../services/tauri';
 import type { OperationResult, ProgressEvent } from '../services/tauri';
+import { useExplorerStore } from './explorer';
 import { MAX_PROGRESS_LINES, useProjectStore } from './project';
 import rawContract from '../../src-tauri/tests/fixtures/contract.json?raw';
 
@@ -702,5 +703,121 @@ describe('cancel', () => {
     expect(store.error?.message).toBe('no se pudo cancelar');
     release(okResult);
     await running;
+  });
+});
+
+describe('cleanup of an explicit target and finished operations', () => {
+  it('cleans the explicit target instead of the open copy or the offered one', async () => {
+    fakeOperation(okResult);
+    const store = useProjectStore();
+    await store.open('wc');
+    await store.cleanup('bloqueada');
+    expect(service.wcCleanup).toHaveBeenCalledWith({ path: 'bloqueada' });
+  });
+
+  it('still cleans the open copy when no target is given', async () => {
+    fakeOperation(okResult);
+    const store = useProjectStore();
+    await store.open('wc');
+    await store.cleanup();
+    expect(service.wcCleanup).toHaveBeenCalledWith({ path: 'wc' });
+  });
+
+  it('counts an operation that failed, was cancelled or succeeded, but not a rejected start', async () => {
+    const store = useProjectStore();
+    await store.open('wc');
+    expect(store.finishedOperations).toBe(0);
+    fakeOperation(errResult('svn_failed'));
+    await store.update();
+    fakeOperation(errResult('cancelled'));
+    await store.update();
+    fakeOperation(okResult);
+    await store.update();
+    expect(store.finishedOperations).toBe(3);
+  });
+
+  it('counts the operation only after its follow-up refresh finished', async () => {
+    fakeOperation(okResult);
+    const store = useProjectStore();
+    await store.open('wc');
+    let release: (value: service.InfoEntry) => void = () => undefined;
+    vi.mocked(service.wcInfo).mockReturnValueOnce(
+      new Promise((resolve) => (release = resolve)),
+    );
+    const running = store.update();
+    await flushPromises();
+    expect(store.finishedOperations).toBe(0);
+    release(info);
+    await running;
+    expect(store.finishedOperations).toBe(1);
+  });
+
+  it('does not count a request ignored because the store is locked', async () => {
+    fakeOperation(okResult);
+    const store = useProjectStore();
+    await store.open('wc');
+    vi.mocked(service.wcInfo).mockReturnValueOnce(new Promise(() => undefined));
+    void store.open('otra');
+    await store.update();
+    expect(store.finishedOperations).toBe(0);
+  });
+});
+
+describe('explorer reload after an operation', () => {
+  function watchedStores() {
+    const explorer = useExplorerStore();
+    const reload = vi
+      .spyOn(explorer, 'reloadAfterChange')
+      .mockResolvedValue(undefined);
+    return { reload, store: useProjectStore() };
+  }
+
+  it('does not reload when the request is ignored because the store is locked', async () => {
+    const { reload, store } = watchedStores();
+    vi.mocked(service.wcInfo).mockReturnValueOnce(new Promise(() => undefined));
+    void store.open('wc');
+    await store.update();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['update', (store: ReturnType<typeof useProjectStore>) => store.update()],
+    [
+      'commit',
+      (store: ReturnType<typeof useProjectStore>) => store.commit('m', null),
+    ],
+    ['cleanup', (store: ReturnType<typeof useProjectStore>) => store.cleanup()],
+  ])(
+    'reloads the listing and the states after %s, even if it failed',
+    async (_name, run) => {
+      const { reload, store } = watchedStores();
+      await store.open('wc');
+      fakeOperation(errResult('svn_failed'));
+      await run(store);
+      expect(reload).toHaveBeenCalledTimes(1);
+      fakeOperation(okResult);
+      await run(store);
+      expect(reload).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('reloads after a checkout', async () => {
+    const { reload, store } = watchedStores();
+    fakeOperation(okResult);
+    await store.checkout('svn://h/r', 'nueva');
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('reloads before announcing that the operation finished', async () => {
+    const { reload, store } = watchedStores();
+    await store.open('wc');
+    let finishedWhenReloading = -1;
+    reload.mockImplementation(async () => {
+      finishedWhenReloading = store.finishedOperations;
+    });
+    fakeOperation(okResult);
+    await store.update();
+    expect(finishedWhenReloading).toBe(0);
+    expect(store.finishedOperations).toBe(1);
   });
 });

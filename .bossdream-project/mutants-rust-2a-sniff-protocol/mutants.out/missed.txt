@@ -1,0 +1,1 @@
+src/app/sniff.rs:202:17: delete field bytes from struct Sample expression in is_text

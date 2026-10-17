@@ -1,0 +1,4 @@
+src/app/sniff.rs:4:34: replace * with +
+src/app/sniff.rs:202:17: delete field bytes from struct Sample expression in is_text
+src/app/sniff.rs:346:55: replace * with / in has_plausible_first_ico_entry
+src/commands/protocol.rs:48:5: replace on_request with ()

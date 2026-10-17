@@ -1,11 +1,28 @@
 import { describe, expect, it } from 'vitest';
+import type { StatusEntry } from '../services/tauri';
 import {
+  STATE_LEGEND,
+  entryStates,
   errorGuidance,
   formatProgressLine,
   isValidFolderName,
   formatDate,
   itemLabel,
 } from './svnLabels';
+
+const PLAIN_ENTRY: StatusEntry = {
+  path: 'wc/a.txt',
+  item: 'normal',
+  props: 'none',
+  revision: 1,
+  remote_item: null,
+  remote_props: null,
+  wc_locked: false,
+  tree_conflicted: false,
+  copied: false,
+  switched: false,
+  lock: null,
+};
 
 describe('isValidFolderName', () => {
   it.each([
@@ -50,8 +67,13 @@ describe('itemLabel', () => {
       ignored: ['Ignorado', 'neutral'],
       incomplete: ['Incompleto', 'danger'],
       external: ['Externo', 'neutral'],
-      obstructed: ['Obstruido', 'danger'],
+      obstructed: ['Tipo cambiado', 'danger'],
       merged: ['Fusionado', 'success'],
+      tree_conflicted: ['Conflicto de árbol', 'danger'],
+      locked: ['Bloqueado', 'warning'],
+      wc_locked: ['Requiere limpieza', 'danger'],
+      copied: ['Copiado', 'neutral'],
+      switched: ['Cambiado de rama', 'neutral'],
     };
     Object.entries(expected).forEach(([item, [label, tone]]) =>
       expect(itemLabel(item)).toEqual({ label, tone }),
@@ -63,6 +85,68 @@ describe('itemLabel', () => {
       label: 'frobnicated',
       tone: 'neutral',
     });
+  });
+});
+
+describe('STATE_LEGEND', () => {
+  it('lists every state a badge can show, once, without the empty one', () => {
+    const keys = STATE_LEGEND.map((state) => state.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(keys).not.toContain('none');
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        'modified',
+        'locked',
+        'tree_conflicted',
+        'copied',
+        'switched',
+        'obstructed',
+      ]),
+    );
+  });
+
+  it('takes label and tone from the same table as the badges', () => {
+    STATE_LEGEND.forEach(({ key, label, tone }) =>
+      expect(itemLabel(key)).toEqual({ label, tone }),
+    );
+  });
+});
+
+describe('entryStates', () => {
+  it('shows nothing for an entry without changes', () => {
+    expect(entryStates(PLAIN_ENTRY)).toEqual([]);
+  });
+
+  it('shows the item and a property change once each', () => {
+    const changed = { ...PLAIN_ENTRY, item: 'modified', props: 'modified' };
+    expect(entryStates(changed)).toEqual(['modified']);
+    const onlyProps = { ...PLAIN_ENTRY, props: 'modified' };
+    expect(entryStates(onlyProps)).toEqual(['modified']);
+  });
+
+  it('adds one state per svn flag, whatever the item', () => {
+    const flagged: StatusEntry = {
+      ...PLAIN_ENTRY,
+      item: 'added',
+      tree_conflicted: true,
+      wc_locked: true,
+      copied: true,
+      switched: true,
+      lock: { owner: 'alice', comment: null },
+    };
+    expect(entryStates(flagged)).toEqual([
+      'added',
+      'tree_conflicted',
+      'wc_locked',
+      'copied',
+      'switched',
+      'locked',
+    ]);
+  });
+
+  it('marks a locked file that is otherwise unchanged', () => {
+    const locked = { ...PLAIN_ENTRY, lock: { owner: 'a', comment: 'x' } };
+    expect(entryStates(locked)).toEqual(['locked']);
   });
 });
 

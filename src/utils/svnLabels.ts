@@ -1,4 +1,4 @@
-import type { ErrorKind, ProgressEvent } from '../services/tauri';
+import type { ErrorKind, ProgressEvent, StatusEntry } from '../services/tauri';
 
 export type Tone = 'neutral' | 'success' | 'warning' | 'danger';
 
@@ -6,6 +6,15 @@ interface ItemLabel {
   label: string;
   tone: Tone;
 }
+
+const NO_STATE = 'none';
+const NEUTRAL_ITEMS: ReadonlySet<string> = new Set([NO_STATE, 'normal']);
+const BOOLEAN_FLAGS = [
+  'tree_conflicted',
+  'wc_locked',
+  'copied',
+  'switched',
+] as const;
 
 const ITEM_LABELS: Record<string, ItemLabel> = {
   none: { label: 'Sin estado', tone: 'neutral' },
@@ -17,12 +26,22 @@ const ITEM_LABELS: Record<string, ItemLabel> = {
   missing: { label: 'Faltante', tone: 'danger' },
   replaced: { label: 'Reemplazado', tone: 'warning' },
   conflicted: { label: 'En conflicto', tone: 'danger' },
+  tree_conflicted: { label: 'Conflicto de árbol', tone: 'danger' },
   ignored: { label: 'Ignorado', tone: 'neutral' },
   incomplete: { label: 'Incompleto', tone: 'danger' },
   external: { label: 'Externo', tone: 'neutral' },
-  obstructed: { label: 'Obstruido', tone: 'danger' },
+  obstructed: { label: 'Tipo cambiado', tone: 'danger' },
   merged: { label: 'Fusionado', tone: 'success' },
+  locked: { label: 'Bloqueado', tone: 'warning' },
+  wc_locked: { label: 'Requiere limpieza', tone: 'danger' },
+  copied: { label: 'Copiado', tone: 'neutral' },
+  switched: { label: 'Cambiado de rama', tone: 'neutral' },
 };
+
+export const STATE_LEGEND: readonly (ItemLabel & { key: string })[] =
+  Object.entries(ITEM_LABELS)
+    .filter(([key]) => key !== NO_STATE)
+    .map(([key, entry]) => ({ key, ...entry }));
 
 const ACTION_LABELS: Record<string, string> = {
   added: 'Agregado',
@@ -54,6 +73,15 @@ const CURRENT_SEGMENT = '.';
 
 export function itemLabel(item: string): ItemLabel {
   return ITEM_LABELS[item] ?? { label: item, tone: 'neutral' };
+}
+
+export function entryStates(entry: StatusEntry): string[] {
+  const states = [entry.item, entry.props].filter(
+    (state) => !NEUTRAL_ITEMS.has(state),
+  );
+  states.push(...BOOLEAN_FLAGS.filter((flag) => entry[flag]));
+  if (entry.lock) states.push('locked');
+  return [...new Set(states)];
 }
 
 export function errorGuidance(kind: ErrorKind): string | null {

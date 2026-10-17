@@ -43,3 +43,9 @@ reports
 .bossdream-project/mutants-rust*/mutants.out/lock.json
 .bossdream-project/*.err
 src-tauri/x@/
+src-tauri/target-e2e
+.impeccable/
+
+.bossdream-project/mutants-rust-2a*/**/debug.log
+.bossdream-project/mutants-rust-2a*/**/diff/
+.bossdream-project/mutants-rust-2a*/**/log/

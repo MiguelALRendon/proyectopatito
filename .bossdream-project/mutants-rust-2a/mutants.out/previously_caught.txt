@@ -1,0 +1,672 @@
+src/app/range.rs:117:64: replace > with >= in bounds
+src/app/ui_state.rs:147:52: replace > with >= in checked_tab
+src/app/ui_state.rs:152:9: delete field title from struct Tab expression in checked_tab
+src/app/ui_state.rs:173:47: replace > with == in keep_newest
+src/app/ui_state.rs:173:47: replace > with >= in keep_newest
+src/app/ui_state.rs:226:24: delete ! in clean_path
+src/app/ui_state.rs:226:50: replace != with == in clean_path
+src/app/ui_state.rs:233:5: replace is_rooted -> bool with true
+src/app/ui_state.rs:233:5: replace is_rooted -> bool with false
+src/app/ui_state.rs:247:5: replace reject_forbidden -> Result<(), UiStateError> with Ok(())
+src/app/ui_state.rs:254:5: replace is_available -> bool with true
+src/app/ui_state.rs:254:5: replace is_available -> bool with false
+src/app/ui_state.rs:258:51: replace == with != in is_available
+src/app/wc_status.rs:69:9: replace StatusCache::generation -> u64 with 1
+src/app/wc_status.rs:73:9: replace StatusCache::store with ()
+src/app/wc_status.rs:74:29: replace == with != in StatusCache::store
+src/app/wc_status.rs:80:9: replace StatusCache::invalidate with ()
+src/app/wc_status.rs:82:26: replace += with -= in StatusCache::invalidate
+src/app/wc_status.rs:82:26: replace += with *= in StatusCache::invalidate
+src/app/wc_status.rs:83:36: delete ! in StatusCache::invalidate
+src/app/wc_status.rs:106:9: replace StatusQuery::skips_cache -> bool with true
+src/app/wc_status.rs:106:9: replace StatusQuery::skips_cache -> bool with false
+src/app/wc_status.rs:106:21: replace || with && in StatusQuery::skips_cache
+src/app/wc_status.rs:130:16: delete field timeout from struct Self expression in WcStatusReader::with_timeout
+src/app/wc_status.rs:135:13: delete field max_entries from struct Self expression in WcStatusReader::with_max_entries
+src/app/wc_status.rs:141:9: replace WcStatusReader::read -> Result<WcStatusMap, SvnClientError> with Ok(Default::default())
+src/app/wc_status.rs:151:13: delete field timeout from struct RunOptions expression in WcStatusReader::read
+src/app/wc_status.rs:152:13: delete field password from struct RunOptions expression in WcStatusReader::read
+src/app/wc_status.rs:171:9: replace WcStatusReader::map_of -> WcStatusMap with Default::default()
+src/app/wc_status.rs:174:29: delete ! in WcStatusReader::map_of
+src/app/wc_status.rs:179:39: replace > with == in WcStatusReader::map_of
+src/app/wc_status.rs:179:39: replace > with < in WcStatusReader::map_of
+src/app/wc_status.rs:179:39: replace > with >= in WcStatusReader::map_of
+src/app/wc_status.rs:192:13: delete field path from struct StatusEntry expression in WcStatusReader::relative
+src/app/wc_status.rs:208:5: replace priority_of -> u8 with 0
+src/app/wc_status.rs:208:5: replace priority_of -> u8 with 1
+src/app/wc_status.rs:208:19: replace == with != in priority_of
+src/app/wc_status.rs:218:5: replace needs_attention -> bool with true
+src/app/wc_status.rs:218:5: replace needs_attention -> bool with false
+src/app/wc_status.rs:222:17: replace || with && in needs_attention
+src/app/wc_status.rs:222:32: replace == with != in needs_attention
+src/app/wc_status.rs:226:5: replace has_remote_change -> bool with false
+src/app/wc_status.rs:229:29: delete ! in has_remote_change
+src/app/wc_status.rs:234:17: replace || with && in has_remote_change
+src/app/wc_status.rs:238:5: replace has_local_marker -> bool with false
+src/app/wc_status.rs:242:9: replace || with && in has_local_marker
+src/app/wc_status.rs:241:9: replace || with && in has_local_marker
+src/app/wc_status.rs:239:9: replace || with && in has_local_marker
+src/app/wc_status.rs:246:5: replace is_plain -> bool with true
+src/app/wc_status.rs:250:5: replace is_normal -> bool with true
+src/app/wc_status.rs:250:47: replace && with || in is_normal
+src/app/wc_status.rs:251:48: replace && with || in is_normal
+src/app/wc_status.rs:251:19: replace && with || in is_normal
+src/app/wc_status.rs:251:22: delete ! in is_normal
+src/app/wc_status.rs:251:51: delete ! in is_normal
+src/app/wc_status.rs:255:5: replace changed_folders -> Vec<String> with vec![]
+src/app/wc_status.rs:255:5: replace changed_folders -> Vec<String> with vec![String::new()]
+src/app/wc_status.rs:255:5: replace changed_folders -> Vec<String> with vec!["xyzzy".into()]
+src/app/wc_status.rs:257:36: replace != with == in changed_folders
+src/app/files/edit.rs:30:27: replace > with == in FileService::read_text
+src/app/files/edit.rs:30:27: replace > with < in FileService::read_text
+src/app/files/edit.rs:30:27: replace > with >= in FileService::read_text
+src/app/files/edit.rs:45:31: replace > with == in FileService::write_text
+src/app/files/edit.rs:64:9: replace FileService::read_chunk -> Result<Vec<u8>, FileError> with Ok(vec![])
+src/app/files/edit.rs:64:9: replace FileService::read_chunk -> Result<Vec<u8>, FileError> with Ok(vec![0])
+src/app/files/edit.rs:64:9: replace FileService::read_chunk -> Result<Vec<u8>, FileError> with Ok(vec![1])
+src/app/files/edit.rs:64:19: replace >= with < in FileService::read_chunk
+src/app/files/edit.rs:77:9: replace FileService::ensure_writable -> Result<(), FileError> with Ok(())
+src/app/files/edit.rs:84:9: replace FileService::lock_reference -> PathBuf with Default::default()
+src/app/files/edit.rs:92:5: replace read_bounded -> Result<Vec<u8>, FileError> with Ok(vec![])
+src/app/files/edit.rs:92:5: replace read_bounded -> Result<Vec<u8>, FileError> with Ok(vec![0])
+src/app/files/edit.rs:92:5: replace read_bounded -> Result<Vec<u8>, FileError> with Ok(vec![1])
+src/app/files/edit.rs:93:34: replace + with - in read_bounded
+src/app/files/edit.rs:94:27: replace > with == in read_bounded
+src/app/files/edit.rs:94:27: replace > with >= in read_bounded
+src/app/files/edit.rs:101:5: replace ensure_unchanged -> Result<(), FileError> with Ok(())
+src/app/files/edit.rs:102:24: replace match guard version == expected_version with true in ensure_unchanged
+src/app/files/edit.rs:102:24: replace match guard version == expected_version with false in ensure_unchanged
+src/app/files/edit.rs:102:32: replace == with != in ensure_unchanged
+src/app/files/edit.rs:109:5: replace current_version -> Result<String, FileError> with Ok(String::new())
+src/app/files/edit.rs:109:5: replace current_version -> Result<String, FileError> with Ok("xyzzy".into())
+src/app/files/edit.rs:115:5: replace replace_atomically -> Result<String, FileError> with Ok(String::new())
+src/app/files/edit.rs:115:5: replace replace_atomically -> Result<String, FileError> with Ok("xyzzy".into())
+src/app/files/edit.rs:126:5: replace publish -> Result<String, FileError> with Ok(String::new())
+src/app/files/edit.rs:126:5: replace publish -> Result<String, FileError> with Ok("xyzzy".into())
+src/app/files/edit.rs:132:5: replace fill_temp -> io::Result<()> with Ok(())
+src/app/files/edit.rs:140:27: replace match guard error.kind() == ErrorKind::AlreadyExists with false in create_temp
+src/app/files/edit.rs:140:40: replace == with != in create_temp
+src/app/files/edit.rs:148:5: replace temp_name -> PathBuf with Default::default()
+src/app/files/edit.rs:154:23: replace match guard LOCKED_BY_OTHER_PROCESS.contains(&code) with true in rename_error
+src/app/files/edit.rs:154:23: replace match guard LOCKED_BY_OTHER_PROCESS.contains(&code) with false in rename_error
+src/app/files/external.rs:30:9: replace FileService::can_open_external -> bool with true
+src/app/files/external.rs:30:9: replace FileService::can_open_external -> bool with false
+src/app/files/external.rs:38:9: replace FileService::open_external -> Result<(), FileError> with Ok(())
+src/app/files/external.rs:43:9: replace FileService::ensure_openable -> Result<(), FileError> with Ok(())
+src/app/files/external.rs:44:52: replace || with && in FileService::ensure_openable
+src/app/files/external.rs:44:12: delete ! in FileService::ensure_openable
+src/app/files/external.rs:52:5: replace has_openable_extension -> bool with true
+src/app/files/external.rs:52:5: replace has_openable_extension -> bool with false
+src/app/files/external.rs:61:5: replace starts_with_pe_signature -> io::Result<bool> with Ok(true)
+src/app/files/external.rs:61:5: replace starts_with_pe_signature -> io::Result<bool> with Ok(false)
+src/app/files/external.rs:65:13: replace == with != in starts_with_pe_signature
+src/app/files/serve.rs:40:5: replace read_outcome -> Result<Vec<u8>, FileError> with Ok(vec![])
+src/app/files/serve.rs:40:5: replace read_outcome -> Result<Vec<u8>, FileError> with Ok(vec![0])
+src/app/files/serve.rs:40:5: replace read_outcome -> Result<Vec<u8>, FileError> with Ok(vec![1])
+src/app/files/serve.rs:47:5: replace read_slice -> Result<Vec<u8>, FileError> with Ok(vec![])
+src/app/files/serve.rs:47:5: replace read_slice -> Result<Vec<u8>, FileError> with Ok(vec![0])
+src/app/files/serve.rs:47:5: replace read_slice -> Result<Vec<u8>, FileError> with Ok(vec![1])
+src/app/files/serve.rs:51:26: replace != with == in read_slice
+src/app/files/text.rs:8:70: replace * with +
+src/app/files/text.rs:8:70: replace * with /
+src/app/files/text.rs:8:54: replace * with /
+src/app/files/text.rs:9:33: replace * with /
+src/app/files/text.rs:59:9: replace Encoding::requires_bom -> bool with true
+src/app/files/text.rs:59:9: replace Encoding::requires_bom -> bool with false
+src/app/files/text.rs:59:14: replace != with == in Encoding::requires_bom
+src/app/files/text.rs:63:9: replace Encoding::bom -> &'static[u8] with Vec::leak(Vec::new())
+src/app/files/text.rs:63:9: replace Encoding::bom -> &'static[u8] with Vec::leak(vec![0])
+src/app/files/text.rs:63:9: replace Encoding::bom -> &'static[u8] with Vec::leak(vec![1])
+src/app/files/text.rs:71:9: replace Encoding::of_bom -> Option<Self> with None
+src/app/files/text.rs:77:9: replace Encoding::decode -> Option<String> with None
+src/app/files/text.rs:77:9: replace Encoding::decode -> Option<String> with Some(String::new())
+src/app/files/text.rs:77:9: replace Encoding::decode -> Option<String> with Some("xyzzy".into())
+src/app/files/text.rs:85:9: replace Encoding::encode -> Vec<u8> with vec![]
+src/app/files/text.rs:85:9: replace Encoding::encode -> Vec<u8> with vec![0]
+src/app/files/text.rs:85:9: replace Encoding::encode -> Vec<u8> with vec![1]
+src/app/files/text.rs:94:5: replace decode_utf16 -> Option<String> with None
+src/app/files/text.rs:94:5: replace decode_utf16 -> Option<String> with Some(String::new())
+src/app/files/text.rs:94:5: replace decode_utf16 -> Option<String> with Some("xyzzy".into())
+src/app/files/text.rs:95:8: delete ! in decode_utf16
+src/app/files/text.rs:110:24: delete ! in decode_document
+src/app/files/text.rs:125:5: replace encode_document -> Vec<u8> with vec![]
+src/app/files/text.rs:125:5: replace encode_document -> Vec<u8> with vec![0]
+src/app/files/text.rs:125:5: replace encode_document -> Vec<u8> with vec![1]
+src/app/files/text.rs:125:40: replace || with && in encode_document
+src/app/files/text.rs:138:42: replace - with + in line_endings
+src/app/files/text.rs:138:42: replace - with / in line_endings
+src/app/files/text.rs:139:28: replace > with == in line_endings
+src/app/files/text.rs:139:28: replace > with < in line_endings
+src/app/files/text.rs:139:28: replace > with >= in line_endings
+src/app/files/text.rs:140:25: replace && with || in line_endings
+src/app/files/text.rs:140:21: replace > with == in line_endings
+src/app/files/text.rs:140:21: replace > with < in line_endings
+src/app/files/text.rs:140:21: replace > with >= in line_endings
+src/app/files/text.rs:140:31: replace > with == in line_endings
+src/app/files/text.rs:140:31: replace > with < in line_endings
+src/app/files/text.rs:140:31: replace > with >= in line_endings
+src/app/files/text.rs:144:5: replace apply_eol -> String with String::new()
+src/app/files/text.rs:144:5: replace apply_eol -> String with "xyzzy".into()
+src/app/files/version.rs:8:5: replace fnv1a -> u64 with 0
+src/app/files/version.rs:8:5: replace fnv1a -> u64 with 1
+src/app/files/version.rs:14:5: replace version_of -> String with String::new()
+src/app/files/version.rs:14:5: replace version_of -> String with "xyzzy".into()
+src/app/files/mod.rs:268:25: replace + with * in FileService::working_copy_root
+src/app/range.rs:3:33: replace * with +
+src/app/range.rs:4:40: replace * with +
+src/app/ui_state.rs:56:5: replace normalize -> Result<UiState, UiStateError> with Ok(Default::default())
+src/app/ui_state.rs:56:22: replace != with == in normalize
+src/app/ui_state.rs:65:56: replace == with != in normalize
+src/app/ui_state.rs:86:9: replace Probe<'_>::exists -> bool with true
+src/app/ui_state.rs:86:9: replace Probe<'_>::exists -> bool with false
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![]
+src/app/ui_state.rs:101:52: replace == with != in locate_tabs
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::new()
+src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![])
+src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![])
+src/app/ui_state.rs:147:26: replace || with && in checked_tab
+src/app/ui_state.rs:147:52: replace > with == in checked_tab
+src/app/ui_state.rs:147:52: replace > with < in checked_tab
+src/app/ui_state.rs:151:9: delete field path from struct Tab expression in checked_tab
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::new())
+src/app/ui_state.rs:171:5: replace keep_newest with ()
+src/app/ui_state.rs:173:47: replace > with < in keep_newest
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::new()
+src/app/ui_state.rs:180:20: replace <= with > in drop_oldest
+src/app/ui_state.rs:190:5: replace ensure_within -> Result<(), UiStateError> with Ok(())
+src/app/ui_state.rs:190:14: replace > with == in ensure_within
+src/app/ui_state.rs:190:14: replace > with < in ensure_within
+src/app/ui_state.rs:190:14: replace > with >= in ensure_within
+src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![]
+src/app/ui_state.rs:205:5: replace clip_label -> String with String::new()
+src/app/ui_state.rs:205:5: replace clip_label -> String with "xyzzy".into()
+src/app/ui_state.rs:209:5: replace checked_path -> Result<String, UiStateError> with Ok(String::new())
+src/app/ui_state.rs:209:5: replace checked_path -> Result<String, UiStateError> with Ok("xyzzy".into())
+src/app/ui_state.rs:212:16: replace match guard error.kind() == ErrorKind::NotADirectory with true in checked_path
+src/app/ui_state.rs:212:16: replace match guard error.kind() == ErrorKind::NotADirectory with false in checked_path
+src/app/ui_state.rs:212:29: replace == with != in checked_path
+src/app/ui_state.rs:221:5: replace clean_path -> Result<String, UiStateError> with Ok(String::new())
+src/app/ui_state.rs:221:5: replace clean_path -> Result<String, UiStateError> with Ok("xyzzy".into())
+src/app/ui_state.rs:226:41: replace && with || in clean_path
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with None
+src/app/closing.rs:43:9: replace Closing::mark_frontend_ready with ()
+src/app/closing.rs:48:33: replace || with && in Closing::request_close
+src/app/closing.rs:48:12: delete ! in Closing::request_close
+src/app/closing.rs:61:9: replace Closing::hold with ()
+src/app/closing.rs:61:25: delete ! in Closing::hold
+src/app/closing.rs:62:22: replace && with || in Closing::hold
+src/app/closing.rs:62:25: delete ! in Closing::hold
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with true
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with false
+src/app/closing.rs:68:36: replace != with == in Closing::confirm
+src/app/closing.rs:74:9: replace Closing::cancel with ()
+src/app/closing.rs:78:9: replace Closing::expire -> bool with true
+src/app/closing.rs:78:9: replace Closing::expire -> bool with false
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with None
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with Some(Default::default())
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with true
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with false
+src/app/files/mod.rs:38:60: replace | with &
+src/app/files/mod.rs:38:28: replace | with &
+src/app/files/mod.rs:163:16: delete field statuses from struct Self expression in FileService::with_statuses
+src/app/files/mod.rs:168:13: delete field max_entries from struct Self expression in FileService::with_max_entries
+src/app/files/mod.rs:179:12: delete ! in FileService::list
+src/app/files/mod.rs:194:12: delete ! in FileService::probe
+src/app/files/mod.rs:205:9: replace FileService::guard -> Result<(), FileError> with Ok(())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], false))
+src/app/files/mod.rs:223:30: replace == with != in FileService::read_entries
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with None
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with None
+src/app/files/mod.rs:248:40: replace && with || in FileService::describe
+src/app/files/mod.rs:248:43: delete ! in FileService::describe
+src/app/files/mod.rs:249:33: replace && with || in FileService::describe
+src/app/files/mod.rs:249:25: delete ! in FileService::describe
+src/app/files/mod.rs:256:12: delete ! in FileService::regular_file
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with None
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with Some(Default::default())
+src/app/files/mod.rs:268:25: replace + with - in FileService::working_copy_root
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with None
+src/app/files/mod.rs:277:27: replace == with != in FileService::find_wc_root
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with String::new()
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with "xyzzy".into()
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with true
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with false
+src/app/files/mod.rs:290:35: replace != with == in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with | in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with ^ in is_cloud_only
+src/app/files/mod.rs:294:40: replace && with || in probe_facts
+src/app/files/mod.rs:294:43: delete ! in probe_facts
+src/app/files/mod.rs:298:31: replace > with == in probe_facts
+src/app/files/mod.rs:298:31: replace > with < in probe_facts
+src/app/files/mod.rs:298:31: replace > with >= in probe_facts
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![0])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![1])
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with true
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with false
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with true
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with false
+src/app/files/mod.rs:319:29: replace || with && in is_hidden_from_listing
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with true
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with false
+src/app/files/mod.rs:323:23: replace != with == in has_attribute
+src/app/files/mod.rs:323:16: replace & with | in has_attribute
+src/app/files/mod.rs:323:16: replace & with ^ in has_attribute
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with None
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(0)
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(1)
+src/app/range.rs:3:33: replace * with /
+src/app/range.rs:37:31: replace + with - in Slice::capped
+src/app/range.rs:37:31: replace + with * in Slice::capped
+src/app/range.rs:37:23: replace - with + in Slice::capped
+src/app/range.rs:37:23: replace - with / in Slice::capped
+src/app/range.rs:43:9: replace Slice::content_range -> String with String::new()
+src/app/range.rs:43:9: replace Slice::content_range -> String with "xyzzy".into()
+src/app/range.rs:43:42: replace - with + in Slice::content_range
+src/app/range.rs:43:42: replace - with / in Slice::content_range
+src/app/range.rs:43:31: replace + with - in Slice::content_range
+src/app/range.rs:43:31: replace + with * in Slice::content_range
+src/app/range.rs:64:47: replace || with && in parse
+src/app/range.rs:64:8: delete ! in parse
+src/app/range.rs:74:37: replace match guard start > end with true in parse
+src/app/range.rs:74:37: replace match guard start > end with false in parse
+src/app/range.rs:74:43: replace > with == in parse
+src/app/range.rs:74:43: replace > with < in parse
+src/app/range.rs:74:43: replace > with >= in parse
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(None)
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(0))
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(1))
+src/app/range.rs:83:8: delete ! in parse_position
+src/app/range.rs:97:14: replace > with == in whole
+src/app/range.rs:97:14: replace > with < in whole
+src/app/range.rs:97:14: replace > with >= in whole
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with None
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 1))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 1))
+src/app/range.rs:117:58: replace match guard start > last with true in bounds
+src/app/range.rs:117:58: replace match guard start > last with false in bounds
+src/app/range.rs:117:64: replace > with == in bounds
+src/app/range.rs:117:64: replace > with < in bounds
+src/app/ui_state.rs:240:5: replace scoped -> Result<ScopedPath, UiStateError> with Ok(Default::default())
+src/app/wc_status.rs:59:9: replace StatusCache::lookup -> Lookup with Default::default()
+src/app/wc_status.rs:89:9: replace CacheKey::of -> Self with Default::default()
+src/app/wc_status.rs:130:9: replace WcStatusReader::with_timeout -> Self with Default::default()
+src/app/wc_status.rs:134:9: replace WcStatusReader::with_max_entries -> Self with Default::default()
+src/app/wc_status.rs:162:9: replace WcStatusReader::lookup -> Lookup with Default::default()
+src/app/wc_status.rs:190:9: replace WcStatusReader::relative -> StatusEntry with Default::default()
+src/app/wc_status.rs:199:5: replace request_of -> StatusRequest with Default::default()
+src/app/files/edit.rs:29:9: replace FileService::read_text -> Result<TextDocument, FileError> with Ok(Default::default())
+src/app/files/edit.rs:43:9: replace FileService::write_text -> Result<TextWritten, FileError> with Ok(Default::default())
+src/app/files/edit.rs:45:31: replace > with < in FileService::write_text
+src/app/files/edit.rs:94:27: replace > with < in read_bounded
+src/app/files/edit.rs:137:5: replace create_temp -> io::Result<(File, PathBuf)> with Ok((Default::default(), Default::default()))
+src/app/files/edit.rs:153:5: replace rename_error -> FileError with Default::default()
+src/app/files/serve.rs:24:9: replace FileService::open_for_serve -> Result<Served, FileError> with Ok(Default::default())
+src/app/files/text.rs:71:9: replace Encoding::of_bom -> Option<Self> with Some(Default::default())
+src/app/files/text.rs:105:5: replace decode_document -> Result<TextDocument, FileError> with Ok(Default::default())
+src/app/files/text.rs:137:5: replace line_endings -> (Eol, bool) with (Default::default(), true)
+src/app/files/text.rs:137:5: replace line_endings -> (Eol, bool) with (Default::default(), false)
+src/app/ui_state.rs:72:5: replace describe -> UiStateView with Default::default()
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new()]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from_iter([Default::default()])]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new(Default::default())]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from(Default::default())]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new()]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from_iter([Default::default()])]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new(Default::default())]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from(Default::default())]
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new())])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from_iter([Default::default()]))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::new())])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::from_iter([Default::default()]))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::new(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::from(Default::default()))])
+src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![Default::default()])
+src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![Default::default()])
+src/app/ui_state.rs:147:5: replace checked_tab -> Result<Tab, UiStateError> with Ok(Default::default())
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([(String::new(), Default::default())]))
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([("xyzzy".into(), Default::default())]))
+src/app/ui_state.rs:165:52: delete field columns from struct FolderView expression in normalize_views
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([(String::new(), Default::default())])
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([("xyzzy".into(), Default::default())])
+src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![Default::default()]
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with Some((Default::default(), Default::default()))
+src/app/closing.rs:48:9: replace Closing::request_close -> CloseDecision with Default::default()
+src/app/files/mod.rs:38:28: replace | with ^
+src/app/files/mod.rs:88:9: replace EntryKind::of -> Self with Default::default()
+src/app/files/mod.rs:163:9: replace FileService::with_statuses -> Self with Default::default()
+src/app/files/mod.rs:167:9: replace FileService::with_max_entries -> Self with Default::default()
+src/app/files/mod.rs:174:9: replace FileService::scope -> Result<ScopedPath, FileError> with Ok(Default::default())
+src/app/files/mod.rs:178:9: replace FileService::list -> Result<DirListing, FileError> with Ok(Default::default())
+src/app/files/mod.rs:192:9: replace FileService::probe -> Result<FileProbe, FileError> with Ok(Default::default())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], false))
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:254:9: replace FileService::regular_file -> Result<Metadata, FileError> with Ok(Default::default())
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with Some(Default::default())
+src/app/files/mod.rs:294:5: replace probe_facts -> io::Result<FileProbe> with Ok(Default::default())
+src/app/range.rs:4:40: replace * with /
+src/app/range.rs:35:9: replace Slice::capped -> Self with Default::default()
+src/app/range.rs:60:5: replace parse -> Result<Range, RangeError> with Ok(Default::default())
+src/app/range.rs:90:5: replace plan -> Outcome with Default::default()
+src/app/range.rs:97:5: replace whole -> Outcome with Default::default()
+src/app/range.rs:108:5: replace partial -> Outcome with Default::default()
+src/app/files/mod.rs:268:25: replace + with * in FileService::working_copy_root
+src/app/range.rs:3:33: replace * with +
+src/app/range.rs:4:40: replace * with +
+src/app/ui_state.rs:56:5: replace normalize -> Result<UiState, UiStateError> with Ok(Default::default())
+src/app/ui_state.rs:56:22: replace != with == in normalize
+src/app/ui_state.rs:65:56: replace == with != in normalize
+src/app/ui_state.rs:86:9: replace Probe<'_>::exists -> bool with true
+src/app/ui_state.rs:86:9: replace Probe<'_>::exists -> bool with false
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![]
+src/app/ui_state.rs:101:52: replace == with != in locate_tabs
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::new()
+src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![])
+src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![])
+src/app/ui_state.rs:147:26: replace || with && in checked_tab
+src/app/ui_state.rs:147:52: replace > with == in checked_tab
+src/app/ui_state.rs:147:52: replace > with < in checked_tab
+src/app/ui_state.rs:151:9: delete field path from struct Tab expression in checked_tab
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::new())
+src/app/ui_state.rs:171:5: replace keep_newest with ()
+src/app/ui_state.rs:173:47: replace > with < in keep_newest
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::new()
+src/app/ui_state.rs:180:20: replace <= with > in drop_oldest
+src/app/ui_state.rs:190:5: replace ensure_within -> Result<(), UiStateError> with Ok(())
+src/app/ui_state.rs:190:14: replace > with == in ensure_within
+src/app/ui_state.rs:190:14: replace > with < in ensure_within
+src/app/ui_state.rs:190:14: replace > with >= in ensure_within
+src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![]
+src/app/ui_state.rs:205:5: replace clip_label -> String with String::new()
+src/app/ui_state.rs:205:5: replace clip_label -> String with "xyzzy".into()
+src/app/ui_state.rs:209:5: replace checked_path -> Result<String, UiStateError> with Ok(String::new())
+src/app/ui_state.rs:209:5: replace checked_path -> Result<String, UiStateError> with Ok("xyzzy".into())
+src/app/ui_state.rs:212:16: replace match guard error.kind() == ErrorKind::NotADirectory with true in checked_path
+src/app/ui_state.rs:212:16: replace match guard error.kind() == ErrorKind::NotADirectory with false in checked_path
+src/app/ui_state.rs:212:29: replace == with != in checked_path
+src/app/ui_state.rs:221:5: replace clean_path -> Result<String, UiStateError> with Ok(String::new())
+src/app/ui_state.rs:221:5: replace clean_path -> Result<String, UiStateError> with Ok("xyzzy".into())
+src/app/ui_state.rs:226:41: replace && with || in clean_path
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with None
+src/app/closing.rs:43:9: replace Closing::mark_frontend_ready with ()
+src/app/closing.rs:48:33: replace || with && in Closing::request_close
+src/app/closing.rs:48:12: delete ! in Closing::request_close
+src/app/closing.rs:61:9: replace Closing::hold with ()
+src/app/closing.rs:61:25: delete ! in Closing::hold
+src/app/closing.rs:62:22: replace && with || in Closing::hold
+src/app/closing.rs:62:25: delete ! in Closing::hold
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with true
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with false
+src/app/closing.rs:68:36: replace != with == in Closing::confirm
+src/app/closing.rs:74:9: replace Closing::cancel with ()
+src/app/closing.rs:78:9: replace Closing::expire -> bool with true
+src/app/closing.rs:78:9: replace Closing::expire -> bool with false
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with None
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with Some(Default::default())
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with true
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with false
+src/app/files/mod.rs:38:60: replace | with &
+src/app/files/mod.rs:38:28: replace | with &
+src/app/files/mod.rs:163:16: delete field statuses from struct Self expression in FileService::with_statuses
+src/app/files/mod.rs:168:13: delete field max_entries from struct Self expression in FileService::with_max_entries
+src/app/files/mod.rs:179:12: delete ! in FileService::list
+src/app/files/mod.rs:194:12: delete ! in FileService::probe
+src/app/files/mod.rs:205:9: replace FileService::guard -> Result<(), FileError> with Ok(())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], false))
+src/app/files/mod.rs:223:30: replace == with != in FileService::read_entries
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with None
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with None
+src/app/files/mod.rs:248:40: replace && with || in FileService::describe
+src/app/files/mod.rs:248:43: delete ! in FileService::describe
+src/app/files/mod.rs:249:33: replace && with || in FileService::describe
+src/app/files/mod.rs:249:25: delete ! in FileService::describe
+src/app/files/mod.rs:256:12: delete ! in FileService::regular_file
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with None
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with Some(Default::default())
+src/app/files/mod.rs:268:25: replace + with - in FileService::working_copy_root
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with None
+src/app/files/mod.rs:277:27: replace == with != in FileService::find_wc_root
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with String::new()
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with "xyzzy".into()
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with true
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with false
+src/app/files/mod.rs:290:35: replace != with == in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with | in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with ^ in is_cloud_only
+src/app/files/mod.rs:294:40: replace && with || in probe_facts
+src/app/files/mod.rs:294:43: delete ! in probe_facts
+src/app/files/mod.rs:298:31: replace > with == in probe_facts
+src/app/files/mod.rs:298:31: replace > with < in probe_facts
+src/app/files/mod.rs:298:31: replace > with >= in probe_facts
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![0])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![1])
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with true
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with false
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with true
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with false
+src/app/files/mod.rs:319:29: replace || with && in is_hidden_from_listing
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with true
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with false
+src/app/files/mod.rs:323:23: replace != with == in has_attribute
+src/app/files/mod.rs:323:16: replace & with | in has_attribute
+src/app/files/mod.rs:323:16: replace & with ^ in has_attribute
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with None
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(0)
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(1)
+src/app/range.rs:3:33: replace * with /
+src/app/range.rs:37:31: replace + with - in Slice::capped
+src/app/range.rs:37:31: replace + with * in Slice::capped
+src/app/range.rs:37:23: replace - with + in Slice::capped
+src/app/range.rs:37:23: replace - with / in Slice::capped
+src/app/range.rs:43:9: replace Slice::content_range -> String with String::new()
+src/app/range.rs:43:9: replace Slice::content_range -> String with "xyzzy".into()
+src/app/range.rs:43:42: replace - with + in Slice::content_range
+src/app/range.rs:43:42: replace - with / in Slice::content_range
+src/app/range.rs:43:31: replace + with - in Slice::content_range
+src/app/range.rs:43:31: replace + with * in Slice::content_range
+src/app/range.rs:64:47: replace || with && in parse
+src/app/range.rs:64:8: delete ! in parse
+src/app/range.rs:74:37: replace match guard start > end with true in parse
+src/app/range.rs:74:37: replace match guard start > end with false in parse
+src/app/range.rs:74:43: replace > with == in parse
+src/app/range.rs:74:43: replace > with < in parse
+src/app/range.rs:74:43: replace > with >= in parse
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(None)
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(0))
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(1))
+src/app/range.rs:83:8: delete ! in parse_position
+src/app/range.rs:97:14: replace > with == in whole
+src/app/range.rs:97:14: replace > with < in whole
+src/app/range.rs:97:14: replace > with >= in whole
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with None
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 1))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 1))
+src/app/range.rs:117:58: replace match guard start > last with true in bounds
+src/app/range.rs:117:58: replace match guard start > last with false in bounds
+src/app/range.rs:117:64: replace > with == in bounds
+src/app/range.rs:117:64: replace > with < in bounds
+src/app/ui_state.rs:72:5: replace describe -> UiStateView with Default::default()
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new()]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from_iter([Default::default()])]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new(Default::default())]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from(Default::default())]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new()]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from_iter([Default::default()])]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new(Default::default())]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from(Default::default())]
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new())])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from_iter([Default::default()]))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::new())])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::from_iter([Default::default()]))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::new(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::from(Default::default()))])
+src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![Default::default()])
+src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![Default::default()])
+src/app/ui_state.rs:147:5: replace checked_tab -> Result<Tab, UiStateError> with Ok(Default::default())
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([(String::new(), Default::default())]))
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([("xyzzy".into(), Default::default())]))
+src/app/ui_state.rs:165:52: delete field columns from struct FolderView expression in normalize_views
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([(String::new(), Default::default())])
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([("xyzzy".into(), Default::default())])
+src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![Default::default()]
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with Some((Default::default(), Default::default()))
+src/app/closing.rs:48:9: replace Closing::request_close -> CloseDecision with Default::default()
+src/app/files/mod.rs:38:28: replace | with ^
+src/app/files/mod.rs:88:9: replace EntryKind::of -> Self with Default::default()
+src/app/files/mod.rs:163:9: replace FileService::with_statuses -> Self with Default::default()
+src/app/files/mod.rs:167:9: replace FileService::with_max_entries -> Self with Default::default()
+src/app/files/mod.rs:174:9: replace FileService::scope -> Result<ScopedPath, FileError> with Ok(Default::default())
+src/app/files/mod.rs:178:9: replace FileService::list -> Result<DirListing, FileError> with Ok(Default::default())
+src/app/files/mod.rs:192:9: replace FileService::probe -> Result<FileProbe, FileError> with Ok(Default::default())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], false))
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:254:9: replace FileService::regular_file -> Result<Metadata, FileError> with Ok(Default::default())
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with Some(Default::default())
+src/app/files/mod.rs:294:5: replace probe_facts -> io::Result<FileProbe> with Ok(Default::default())
+src/app/range.rs:4:40: replace * with /
+src/app/range.rs:35:9: replace Slice::capped -> Self with Default::default()
+src/app/range.rs:60:5: replace parse -> Result<Range, RangeError> with Ok(Default::default())
+src/app/range.rs:90:5: replace plan -> Outcome with Default::default()
+src/app/range.rs:97:5: replace whole -> Outcome with Default::default()
+src/app/range.rs:108:5: replace partial -> Outcome with Default::default()
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with None
+src/app/closing.rs:43:9: replace Closing::mark_frontend_ready with ()
+src/app/closing.rs:48:33: replace || with && in Closing::request_close
+src/app/closing.rs:48:12: delete ! in Closing::request_close
+src/app/closing.rs:61:9: replace Closing::hold with ()
+src/app/closing.rs:61:25: delete ! in Closing::hold
+src/app/closing.rs:62:22: replace && with || in Closing::hold
+src/app/closing.rs:62:25: delete ! in Closing::hold
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with true
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with false
+src/app/closing.rs:68:36: replace != with == in Closing::confirm
+src/app/closing.rs:74:9: replace Closing::cancel with ()
+src/app/closing.rs:78:9: replace Closing::expire -> bool with true
+src/app/closing.rs:78:9: replace Closing::expire -> bool with false
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with None
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with Some(Default::default())
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with true
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with false
+src/app/files/mod.rs:38:60: replace | with &
+src/app/files/mod.rs:38:28: replace | with &
+src/app/files/mod.rs:163:16: delete field statuses from struct Self expression in FileService::with_statuses
+src/app/files/mod.rs:168:13: delete field max_entries from struct Self expression in FileService::with_max_entries
+src/app/files/mod.rs:179:12: delete ! in FileService::list
+src/app/files/mod.rs:194:12: delete ! in FileService::probe
+src/app/files/mod.rs:205:9: replace FileService::guard -> Result<(), FileError> with Ok(())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], false))
+src/app/files/mod.rs:223:30: replace == with != in FileService::read_entries
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with None
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with None
+src/app/files/mod.rs:248:40: replace && with || in FileService::describe
+src/app/files/mod.rs:248:43: delete ! in FileService::describe
+src/app/files/mod.rs:249:33: replace && with || in FileService::describe
+src/app/files/mod.rs:249:25: delete ! in FileService::describe
+src/app/files/mod.rs:256:12: delete ! in FileService::regular_file
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with None
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with Some(Default::default())
+src/app/files/mod.rs:268:25: replace + with - in FileService::working_copy_root
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with None
+src/app/files/mod.rs:277:27: replace == with != in FileService::find_wc_root
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with String::new()
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with "xyzzy".into()
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with true
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with false
+src/app/files/mod.rs:290:35: replace != with == in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with | in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with ^ in is_cloud_only
+src/app/files/mod.rs:294:40: replace && with || in probe_facts
+src/app/files/mod.rs:294:43: delete ! in probe_facts
+src/app/files/mod.rs:298:31: replace > with == in probe_facts
+src/app/files/mod.rs:298:31: replace > with < in probe_facts
+src/app/files/mod.rs:298:31: replace > with >= in probe_facts
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![0])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![1])
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with true
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with false
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with true
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with false
+src/app/files/mod.rs:319:29: replace || with && in is_hidden_from_listing
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with true
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with false
+src/app/files/mod.rs:323:23: replace != with == in has_attribute
+src/app/files/mod.rs:323:16: replace & with | in has_attribute
+src/app/files/mod.rs:323:16: replace & with ^ in has_attribute
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with None
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(0)
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(1)
+src/app/range.rs:3:33: replace * with /
+src/app/range.rs:37:31: replace + with - in Slice::capped
+src/app/range.rs:37:31: replace + with * in Slice::capped
+src/app/range.rs:37:23: replace - with + in Slice::capped
+src/app/range.rs:37:23: replace - with / in Slice::capped
+src/app/range.rs:43:9: replace Slice::content_range -> String with String::new()
+src/app/range.rs:43:9: replace Slice::content_range -> String with "xyzzy".into()
+src/app/range.rs:43:42: replace - with + in Slice::content_range
+src/app/range.rs:43:42: replace - with / in Slice::content_range
+src/app/range.rs:43:31: replace + with - in Slice::content_range
+src/app/range.rs:43:31: replace + with * in Slice::content_range
+src/app/range.rs:64:47: replace || with && in parse
+src/app/range.rs:64:8: delete ! in parse
+src/app/range.rs:74:37: replace match guard start > end with true in parse
+src/app/range.rs:74:37: replace match guard start > end with false in parse
+src/app/range.rs:74:43: replace > with == in parse
+src/app/range.rs:74:43: replace > with < in parse
+src/app/range.rs:74:43: replace > with >= in parse
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(None)
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(0))
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(1))
+src/app/range.rs:83:8: delete ! in parse_position
+src/app/range.rs:97:14: replace > with == in whole
+src/app/range.rs:97:14: replace > with < in whole
+src/app/range.rs:97:14: replace > with >= in whole
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with None
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 1))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 1))
+src/app/range.rs:117:58: replace match guard start > last with true in bounds
+src/app/range.rs:117:58: replace match guard start > last with false in bounds
+src/app/range.rs:117:64: replace > with == in bounds
+src/app/range.rs:117:64: replace > with < in bounds
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with Some((Default::default(), Default::default()))
+src/app/closing.rs:48:9: replace Closing::request_close -> CloseDecision with Default::default()
+src/app/files/mod.rs:38:28: replace | with ^
+src/app/files/mod.rs:88:9: replace EntryKind::of -> Self with Default::default()
+src/app/files/mod.rs:163:9: replace FileService::with_statuses -> Self with Default::default()
+src/app/files/mod.rs:167:9: replace FileService::with_max_entries -> Self with Default::default()
+src/app/files/mod.rs:174:9: replace FileService::scope -> Result<ScopedPath, FileError> with Ok(Default::default())
+src/app/files/mod.rs:178:9: replace FileService::list -> Result<DirListing, FileError> with Ok(Default::default())
+src/app/files/mod.rs:192:9: replace FileService::probe -> Result<FileProbe, FileError> with Ok(Default::default())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], false))
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:254:9: replace FileService::regular_file -> Result<Metadata, FileError> with Ok(Default::default())
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with Some(Default::default())
+src/app/files/mod.rs:294:5: replace probe_facts -> io::Result<FileProbe> with Ok(Default::default())
+src/app/range.rs:4:40: replace * with /
+src/app/range.rs:35:9: replace Slice::capped -> Self with Default::default()
+src/app/range.rs:60:5: replace parse -> Result<Range, RangeError> with Ok(Default::default())
+src/app/range.rs:90:5: replace plan -> Outcome with Default::default()
+src/app/range.rs:97:5: replace whole -> Outcome with Default::default()
+src/app/range.rs:108:5: replace partial -> Outcome with Default::default()

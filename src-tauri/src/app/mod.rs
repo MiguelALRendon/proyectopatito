@@ -1,6 +1,12 @@
 pub mod args;
+pub mod closing;
 pub mod error;
+pub mod files;
 pub mod operations;
+pub mod range;
+pub mod sniff;
 pub mod state;
 pub mod svn_locator;
+pub mod ui_state;
+pub mod wc_status;
 pub mod workspace;

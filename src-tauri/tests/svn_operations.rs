@@ -557,8 +557,23 @@ fn safe_checkout_url_accepts_known_schemes_and_user_without_password() {
         "svn://host/repo",
         "svn+ssh://usuario@host/repo",
         "file:///C:/repos/a@b",
+        "https://host?cuenta:x@y",
+        "https://host/repo#frag:x@y",
     ] {
         assert!(is_safe_checkout_url(url), "{url}");
+    }
+}
+
+#[test]
+fn safe_checkout_url_rejects_a_password_hidden_behind_a_second_at_or_a_delimiter() {
+    for url in [
+        "https://a@b:c@host/r",
+        "https://u:clave@host?x=1",
+        "https://u:clave@host#frag",
+        "https://u@v:clave@host/r",
+        "https://usuario:@host/r",
+    ] {
+        assert!(!is_safe_checkout_url(url), "{url}");
     }
 }
 
@@ -738,6 +753,8 @@ async fn update_over_a_locally_edited_line_leaves_the_file_conflicted() {
     let request = StatusRequest {
         target: mine.as_path().to_path_buf(),
         remote: false,
+        ignored: false,
+        username: None,
     };
     let report = env
         .ops

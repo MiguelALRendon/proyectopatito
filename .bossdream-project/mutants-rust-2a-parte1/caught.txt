@@ -1,0 +1,102 @@
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with None
+src/app/closing.rs:43:9: replace Closing::mark_frontend_ready with ()
+src/app/closing.rs:48:33: replace || with && in Closing::request_close
+src/app/closing.rs:48:12: delete ! in Closing::request_close
+src/app/closing.rs:61:9: replace Closing::hold with ()
+src/app/closing.rs:61:25: delete ! in Closing::hold
+src/app/closing.rs:62:22: replace && with || in Closing::hold
+src/app/closing.rs:62:25: delete ! in Closing::hold
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with true
+src/app/closing.rs:68:9: replace Closing::confirm -> bool with false
+src/app/closing.rs:68:36: replace != with == in Closing::confirm
+src/app/closing.rs:74:9: replace Closing::cancel with ()
+src/app/closing.rs:78:9: replace Closing::expire -> bool with true
+src/app/closing.rs:78:9: replace Closing::expire -> bool with false
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with None
+src/app/closing.rs:86:9: replace Closing::remaining -> Option<Duration> with Some(Default::default())
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with true
+src/app/closing.rs:91:9: replace Closing::has_expired -> bool with false
+src/app/files/mod.rs:38:60: replace | with &
+src/app/files/mod.rs:38:28: replace | with &
+src/app/files/mod.rs:163:16: delete field statuses from struct Self expression in FileService::with_statuses
+src/app/files/mod.rs:168:13: delete field max_entries from struct Self expression in FileService::with_max_entries
+src/app/files/mod.rs:179:12: delete ! in FileService::list
+src/app/files/mod.rs:194:12: delete ! in FileService::probe
+src/app/files/mod.rs:205:9: replace FileService::guard -> Result<(), FileError> with Ok(())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![], false))
+src/app/files/mod.rs:223:30: replace == with != in FileService::read_entries
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with None
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with None
+src/app/files/mod.rs:248:40: replace && with || in FileService::describe
+src/app/files/mod.rs:248:43: delete ! in FileService::describe
+src/app/files/mod.rs:249:33: replace && with || in FileService::describe
+src/app/files/mod.rs:249:25: delete ! in FileService::describe
+src/app/files/mod.rs:256:12: delete ! in FileService::regular_file
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with None
+src/app/files/mod.rs:266:9: replace FileService::working_copy_root -> Option<PathBuf> with Some(Default::default())
+src/app/files/mod.rs:268:25: replace + with - in FileService::working_copy_root
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with None
+src/app/files/mod.rs:277:27: replace == with != in FileService::find_wc_root
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with String::new()
+src/app/files/mod.rs:282:9: replace FileService::relative -> String with "xyzzy".into()
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with true
+src/app/files/mod.rs:290:5: replace is_cloud_only -> bool with false
+src/app/files/mod.rs:290:35: replace != with == in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with | in is_cloud_only
+src/app/files/mod.rs:290:16: replace & with ^ in is_cloud_only
+src/app/files/mod.rs:294:40: replace && with || in probe_facts
+src/app/files/mod.rs:294:43: delete ! in probe_facts
+src/app/files/mod.rs:298:31: replace > with == in probe_facts
+src/app/files/mod.rs:298:31: replace > with < in probe_facts
+src/app/files/mod.rs:298:31: replace > with >= in probe_facts
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![0])
+src/app/files/mod.rs:307:5: replace read_head -> io::Result<Vec<u8>> with Ok(vec![1])
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with true
+src/app/files/mod.rs:315:5: replace is_forbidden_name -> bool with false
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with true
+src/app/files/mod.rs:319:5: replace is_hidden_from_listing -> bool with false
+src/app/files/mod.rs:319:29: replace || with && in is_hidden_from_listing
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with true
+src/app/files/mod.rs:323:5: replace has_attribute -> bool with false
+src/app/files/mod.rs:323:23: replace != with == in has_attribute
+src/app/files/mod.rs:323:16: replace & with | in has_attribute
+src/app/files/mod.rs:323:16: replace & with ^ in has_attribute
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with None
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(0)
+src/app/files/mod.rs:327:5: replace modified_millis -> Option<u64> with Some(1)
+src/app/range.rs:3:33: replace * with /
+src/app/range.rs:37:31: replace + with - in Slice::capped
+src/app/range.rs:37:31: replace + with * in Slice::capped
+src/app/range.rs:37:23: replace - with + in Slice::capped
+src/app/range.rs:37:23: replace - with / in Slice::capped
+src/app/range.rs:43:9: replace Slice::content_range -> String with String::new()
+src/app/range.rs:43:9: replace Slice::content_range -> String with "xyzzy".into()
+src/app/range.rs:43:42: replace - with + in Slice::content_range
+src/app/range.rs:43:42: replace - with / in Slice::content_range
+src/app/range.rs:43:31: replace + with - in Slice::content_range
+src/app/range.rs:43:31: replace + with * in Slice::content_range
+src/app/range.rs:64:47: replace || with && in parse
+src/app/range.rs:64:8: delete ! in parse
+src/app/range.rs:74:37: replace match guard start > end with true in parse
+src/app/range.rs:74:37: replace match guard start > end with false in parse
+src/app/range.rs:74:43: replace > with == in parse
+src/app/range.rs:74:43: replace > with < in parse
+src/app/range.rs:74:43: replace > with >= in parse
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(None)
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(0))
+src/app/range.rs:80:5: replace parse_position -> Result<Option<u64>, RangeError> with Ok(Some(1))
+src/app/range.rs:83:8: delete ! in parse_position
+src/app/range.rs:97:14: replace > with == in whole
+src/app/range.rs:97:14: replace > with < in whole
+src/app/range.rs:97:14: replace > with >= in whole
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with None
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((0, 1))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 0))
+src/app/range.rs:115:5: replace bounds -> Option<(u64, u64)> with Some((1, 1))
+src/app/range.rs:117:58: replace match guard start > last with true in bounds
+src/app/range.rs:117:58: replace match guard start > last with false in bounds
+src/app/range.rs:117:64: replace > with == in bounds
+src/app/range.rs:117:64: replace > with < in bounds

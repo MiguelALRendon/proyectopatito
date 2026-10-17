@@ -105,6 +105,12 @@ pub struct InfoEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct StatusLock {
+    pub owner: String,
+    pub comment: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct StatusEntry {
     pub path: String,
     pub item: StatusItem,
@@ -112,6 +118,11 @@ pub struct StatusEntry {
     pub revision: Option<u64>,
     pub remote_item: Option<StatusItem>,
     pub remote_props: Option<StatusItem>,
+    pub wc_locked: bool,
+    pub tree_conflicted: bool,
+    pub copied: bool,
+    pub switched: bool,
+    pub lock: Option<StatusLock>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]

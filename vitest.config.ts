@@ -7,7 +7,11 @@ export default defineConfig({
     environment: 'node',
     environmentMatchGlobs: [
       ['src/views/**/*.test.ts', 'happy-dom'],
-      ['src/composables/{useFocusTrap,useModalIsolation}.test.ts', 'happy-dom'],
+      [
+        'src/composables/{useFocusTrap,useModalIsolation,useResizablePanel,useSelection,useWindowClose}.test.ts',
+        'happy-dom',
+      ],
+      ['src/{components,documents}/**/*.test.ts', 'happy-dom'],
     ],
     exclude: [...configDefaults.exclude, '.stryker-tmp/**'],
     coverage: {

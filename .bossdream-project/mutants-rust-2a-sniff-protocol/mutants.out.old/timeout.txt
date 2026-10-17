@@ -1,0 +1,3 @@
+src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(Vec::new()))
+src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![0]))
+src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![1]))

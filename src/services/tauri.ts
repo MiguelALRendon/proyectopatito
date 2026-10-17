@@ -4,6 +4,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 
 export const PROGRESS_EVENT = 'svn://progress';
 export const DONE_EVENT = 'svn://done';
+export const CLOSE_REQUESTED_EVENT = 'app://close-requested';
 
 export const ERROR_KINDS = [
   'no_workspace',
@@ -20,6 +21,16 @@ export const ERROR_KINDS = [
   'svn_failed',
   'parse_failed',
   'io',
+  'not_a_directory',
+  'forbidden_path',
+  'not_text',
+  'too_large',
+  'file_changed',
+  'read_only',
+  'file_locked',
+  'working_copy_busy',
+  'cloud_only',
+  'not_allowed',
 ] as const;
 
 export type ErrorKind = (typeof ERROR_KINDS)[number];
@@ -55,6 +66,11 @@ export interface InfoEntry {
   last_changed_date: string | null;
 }
 
+export interface StatusLock {
+  owner: string;
+  comment: string | null;
+}
+
 export interface StatusEntry {
   path: string;
   item: string;
@@ -62,6 +78,11 @@ export interface StatusEntry {
   revision: number | null;
   remote_item: string | null;
   remote_props: string | null;
+  wc_locked: boolean;
+  tree_conflicted: boolean;
+  copied: boolean;
+  switched: boolean;
+  lock: StatusLock | null;
 }
 
 export interface StatusReport {
@@ -73,6 +94,11 @@ export interface Credentials {
   username: string | null;
   password: string | null;
 }
+
+export const NO_CREDENTIALS: Readonly<Credentials> = Object.freeze({
+  username: null,
+  password: null,
+});
 
 export const CHECKOUT_DEPTHS = [
   'empty',
@@ -170,7 +196,7 @@ export function normalizeError(raw: unknown): CommandError {
   return { kind: 'io', message, codes: [], detail: null };
 }
 
-async function call<T>(
+export async function call<T>(
   command: string,
   args?: Record<string, unknown>,
 ): Promise<T> {
@@ -201,6 +227,14 @@ export const wcCommit = (req: CommitRequest) =>
   call<number>('wc_commit', { req });
 export const wcCleanup = (req: CleanupRequest) =>
   call<number>('wc_cleanup', { req });
+
+export const appFrontendReady = () => call<void>('app_frontend_ready');
+export const appHoldClose = () => call<void>('app_hold_close');
+export const appConfirmClose = () => call<void>('app_confirm_close');
+export const appCancelClose = () => call<void>('app_cancel_close');
+
+export const onCloseRequested = (handler: () => void): Promise<() => void> =>
+  listen(CLOSE_REQUESTED_EVENT, handler);
 
 export async function pickDirectory(): Promise<string | null> {
   try {

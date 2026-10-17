@@ -143,6 +143,7 @@ fn config_file_never_contains_credentials_keys() {
     let config = AppConfig {
         workspace_root: Some(sandbox.root.clone()),
         svn_path: Some(PathBuf::from(r"C:\svn.exe")),
+        ..AppConfig::default()
     };
     sandbox.store.save(&config).unwrap();
     let text = fs::read_to_string(&sandbox.store.path)
@@ -153,12 +154,102 @@ fn config_file_never_contains_credentials_keys() {
     }
 }
 
+fn write_raw_config(sandbox: &Sandbox, text: &str) {
+    fs::create_dir_all(sandbox.store.path.parent().unwrap()).unwrap();
+    fs::write(&sandbox.store.path, text).unwrap();
+}
+
+#[test]
+fn config_load_of_an_empty_file_returns_the_default_and_keeps_the_file_aside() {
+    let sandbox = sandbox();
+    write_raw_config(&sandbox, "");
+    assert_eq!(sandbox.store.load().unwrap(), AppConfig::default());
+    assert!(sandbox.store.path.with_extension("json.bad").exists());
+    assert!(!sandbox.store.path.exists());
+}
+
+#[test]
+fn config_load_with_a_mistyped_workspace_root_keeps_svn_path_without_quarantine() {
+    for mistyped in ["42", "true", "[1]", r#"{"a":1}"#, "null"] {
+        let sandbox = sandbox();
+        write_raw_config(
+            &sandbox,
+            &format!(r#"{{"workspace_root":{mistyped},"svn_path":"C:/x/svn.exe"}}"#),
+        );
+        let config = sandbox.store.load().unwrap();
+        assert_eq!(config.workspace_root, None, "{mistyped}");
+        assert_eq!(
+            config.svn_path,
+            Some(PathBuf::from("C:/x/svn.exe")),
+            "{mistyped}"
+        );
+        assert!(sandbox.store.path.exists(), "{mistyped}");
+        assert!(!sandbox.store.path.with_extension("json.bad").exists());
+    }
+}
+
+#[test]
+fn config_load_with_a_mistyped_svn_path_keeps_workspace_root_without_quarantine() {
+    for mistyped in ["42", "false", r#"["a"]"#, r#"{"a":1}"#] {
+        let sandbox = sandbox();
+        write_raw_config(
+            &sandbox,
+            &format!(r#"{{"workspace_root":"C:/raiz","svn_path":{mistyped}}}"#),
+        );
+        let config = sandbox.store.load().unwrap();
+        assert_eq!(config.svn_path, None, "{mistyped}");
+        assert_eq!(config.workspace_root, Some(PathBuf::from("C:/raiz")));
+        assert!(!sandbox.store.path.with_extension("json.bad").exists());
+    }
+}
+
+#[test]
+fn a_second_corrupt_config_does_not_replace_the_previous_quarantined_copy() {
+    let sandbox = sandbox();
+    for text in ["{ primera", "{ segunda", "{ tercera"] {
+        write_raw_config(&sandbox, text);
+        sandbox.store.load().unwrap();
+    }
+    let kept = |extension: &str| fs::read_to_string(sandbox.store.path.with_extension(extension));
+    assert_eq!(kept("json.bad").unwrap(), "{ primera");
+    assert_eq!(kept("json.bad.1").unwrap(), "{ segunda");
+    assert_eq!(kept("json.bad.2").unwrap(), "{ tercera");
+}
+
+#[test]
+fn a_corrupt_config_that_cannot_be_quarantined_fails_to_load_and_is_never_overwritten() {
+    const SHARE_READ_ONLY: u32 = 1;
+    let sandbox = sandbox();
+    let original = "{ corrupto";
+    write_raw_config(&sandbox, original);
+    let holder = OpenOptions::new()
+        .read(true)
+        .share_mode(SHARE_READ_ONLY)
+        .open(&sandbox.store.path)
+        .unwrap();
+    assert!(sandbox.store.load().is_err());
+    let state = AppState::new(sandbox.store.clone());
+    drop(holder);
+    let error = state.workspace_set(&sandbox.root).unwrap_err();
+    assert_eq!(error.kind, CommandErrorKind::Io);
+    assert_eq!(fs::read_to_string(&sandbox.store.path).unwrap(), original);
+}
+
+#[test]
+fn a_failed_config_save_leaves_no_temporary_file_behind() {
+    let sandbox = sandbox();
+    fs::create_dir_all(&sandbox.store.path).unwrap();
+    assert!(sandbox.store.save(&AppConfig::default()).is_err());
+    assert!(!sandbox.store.path.with_extension("json.tmp").exists());
+}
+
 #[test]
 fn config_save_creates_parent_directories_and_round_trips_without_leftovers() {
     let sandbox = sandbox();
     let config = AppConfig {
         workspace_root: Some(sandbox.root.clone()),
         svn_path: None,
+        ..AppConfig::default()
     };
     sandbox.store.save(&config).unwrap();
     assert_eq!(sandbox.store.load().unwrap(), config);

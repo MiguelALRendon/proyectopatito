@@ -1,26 +1,13 @@
 {
-  "generado_en": "2026-10-14T14:48:34.438200-06:00",
-  "origen": "reports/mutation/mutation.html (Stryker, corrida de test-checks-10); listado por mutante en .bossdream-project/stryker-mutants.txt (contar con grep -c \"^Killed\" y \"^Survived\")",
+  "ejecutado_en": "2026-10-16",
+  "fase": "2A",
+  "mutation_score": 90.74,
+  "covered_score": 91.01,
+  "killed": 3114,
+  "timeout": 13,
+  "survived": 309,
+  "no_cov": 10,
+  "errors": 2,
   "umbral_break": 85,
-  "conteo_por_estado": {
-    "NoCoverage": 1,
-    "Killed": 523,
-    "Survived": 48
-  },
-  "puntaje_aproximado_pct": 91.43,
-  "mutantes_vivos_equivalentes": {
-    "cantidad": 1,
-    "motivo": "UpdateOperator --latestRead en refresh() de src/stores/project.ts: un contador decreciente también entrega un ticket único por lectura; el comportamiento observable no cambia."
-  },
-  "vivos_por_mutador": {
-    "ConditionalExpression": 9,
-    "StringLiteral": 26,
-    "BlockStatement": 2,
-    "ArrayDeclaration": 3,
-    "BooleanLiteral": 1,
-    "ArrowFunction": 1,
-    "ObjectLiteral": 2,
-    "UpdateOperator": 1,
-    "OptionalChaining": 3
-  }
+  "log": ".bossdream-project/evidence-2a/stryker.log"
 }

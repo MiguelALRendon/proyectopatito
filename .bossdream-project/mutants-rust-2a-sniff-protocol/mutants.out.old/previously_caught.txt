@@ -1,0 +1,24 @@
+src/app/sniff.rs:175:8: delete ! in classify
+src/app/sniff.rs:182:5: replace image_format -> Option<&'static ImageFormat> with None
+src/app/sniff.rs:188:5: replace is_pdf -> bool with true
+src/app/sniff.rs:188:5: replace is_pdf -> bool with false
+src/app/sniff.rs:195:5: replace is_text -> bool with true
+src/app/sniff.rs:195:5: replace is_text -> bool with false
+src/app/sniff.rs:212:5: replace is_utf8_text -> bool with true
+src/app/sniff.rs:212:5: replace is_utf8_text -> bool with false
+src/app/sniff.rs:217:40: replace && with || in is_utf8_text
+src/app/sniff.rs:222:5: replace is_utf16_text -> bool with true
+src/app/sniff.rs:222:5: replace is_utf16_text -> bool with false
+src/app/sniff.rs:222:26: replace && with || in is_utf16_text
+src/app/sniff.rs:222:8: delete ! in is_utf16_text
+src/app/sniff.rs:222:67: replace != with == in is_utf16_text
+src/app/sniff.rs:222:48: replace % with / in is_utf16_text
+src/app/sniff.rs:222:48: replace % with + in is_utf16_text
+src/app/sniff.rs:230:25: replace && with || in is_utf16_text
+src/app/sniff.rs:239:5: replace is_svg -> bool with true
+src/app/sniff.rs:239:5: replace is_svg -> bool with false
+src/app/sniff.rs:252:56: replace || with && in is_svg
+src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with None
+src/app/sniff.rs:4:34: replace * with /
+src/app/sniff.rs:165:5: replace classify -> Sniffed with Default::default()
+src/app/sniff.rs:182:5: replace image_format -> Option<&'static ImageFormat> with Some(Box::leak(Box::new(Default::default())))

@@ -1,0 +1,9 @@
+$ ls -l --time-style=full-iso (fecha de modificacion = fin de la corrida o de la edicion)
+-rw-r--r-- 1 spook 197609 29772 2026-10-17 02:36:10.838951700 -0600 .bossdream-project/evidence-2a/e2e-final-1-tras-compilar-4-fallos-pdf.log
+-rw-r--r-- 1 spook 197609 28203 2026-10-17 02:58:41.137881500 -0600 .bossdream-project/evidence-2a/e2e-final-2-4-fallos-pdf.log
+-rw-r--r-- 1 spook 197609 26540 2026-10-17 03:18:38.179241300 -0600 .bossdream-project/evidence-2a/e2e-final-3-2-fallos-pdf.log
+-rw-r--r-- 1 spook 197609 23560 2026-10-17 03:36:53.548424900 -0600 .bossdream-project/evidence-2a/e2e-final.log
+-rw-r--r-- 1 spook 197609 24402 2026-10-16 19:41:22.692393000 -0600 .bossdream-project/evidence-2a/e2e-rerun.log
+-rw-r--r-- 1 spook 197609  4356 2026-10-17 02:39:14.058840600 -0600 .bossdream-project/evidence-2a/e2e-viewers-rerun.log
+-rw-r--r-- 1 spook 197609 24097 2026-10-16 19:27:39.892718000 -0600 .bossdream-project/evidence-2a/e2e.log
+-rw-r--r-- 1 spook 197609  3680 2026-10-17 03:19:09.837519600 -0600 scripts/e2e/start-app.ps1

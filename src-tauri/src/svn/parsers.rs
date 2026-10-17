@@ -2,7 +2,7 @@ use quick_xml::de::from_reader;
 use serde::Deserialize;
 use thiserror::Error;
 
-use crate::svn::models::{InfoEntry, StatusEntry, StatusItem, StatusReport};
+use crate::svn::models::{InfoEntry, StatusEntry, StatusItem, StatusLock, StatusReport};
 
 #[derive(Debug, Error)]
 pub enum ParseError {
@@ -92,6 +92,15 @@ struct RawWcStatus {
     props: String,
     #[serde(rename = "@revision")]
     revision: Option<i64>,
+    #[serde(rename = "@wc-locked", default)]
+    wc_locked: bool,
+    #[serde(rename = "@tree-conflicted", default)]
+    tree_conflicted: bool,
+    #[serde(rename = "@copied", default)]
+    copied: bool,
+    #[serde(rename = "@switched", default)]
+    switched: bool,
+    lock: Option<RawLock>,
 }
 
 #[derive(Deserialize)]
@@ -100,6 +109,23 @@ struct RawReposStatus {
     item: String,
     #[serde(rename = "@props")]
     props: String,
+    lock: Option<RawLock>,
+}
+
+#[derive(Deserialize)]
+struct RawLock {
+    #[serde(default)]
+    owner: String,
+    comment: Option<String>,
+}
+
+impl From<RawLock> for StatusLock {
+    fn from(raw: RawLock) -> Self {
+        Self {
+            owner: raw.owner,
+            comment: raw.comment,
+        }
+    }
 }
 
 pub fn parse_info(xml: &[u8]) -> Result<InfoEntry, ParseError> {
@@ -157,14 +183,22 @@ impl RawStatus {
 
 impl From<RawStatusEntry> for StatusEntry {
     fn from(raw: RawStatusEntry) -> Self {
-        let remote = raw.repos_status;
+        let local = raw.wc_status;
+        let mut remote = raw.repos_status;
+        let remote_lock = remote.as_mut().and_then(|r| r.lock.take());
+        let lock = local.lock.or(remote_lock).map(StatusLock::from);
         Self {
             path: raw.path,
-            item: raw.wc_status.item.as_str().into(),
-            props: raw.wc_status.props.as_str().into(),
-            revision: raw.wc_status.revision.and_then(revision_of),
+            item: local.item.as_str().into(),
+            props: local.props.as_str().into(),
+            revision: local.revision.and_then(revision_of),
             remote_item: remote.as_ref().map(|r| StatusItem::from(r.item.as_str())),
             remote_props: remote.map(|r| StatusItem::from(r.props.as_str())),
+            wc_locked: local.wc_locked,
+            tree_conflicted: local.tree_conflicted,
+            copied: local.copied,
+            switched: local.switched,
+            lock,
         }
     }
 }

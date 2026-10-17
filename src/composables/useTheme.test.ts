@@ -1,9 +1,18 @@
+import { effectScope, watch } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const store = new Map<string, string>();
 const setAttribute = vi.fn();
 const removeAttribute = vi.fn();
 let systemPrefersDark = false;
+const changeListeners = new Set<(event: MediaQueryListEvent) => void>();
+
+function emitSystemChange(prefersDark: boolean) {
+  systemPrefersDark = prefersDark;
+  changeListeners.forEach((listener) =>
+    listener({ matches: prefersDark } as MediaQueryListEvent),
+  );
+}
 
 async function loadTheme() {
   vi.resetModules();
@@ -15,6 +24,7 @@ beforeEach(() => {
   setAttribute.mockClear();
   removeAttribute.mockClear();
   systemPrefersDark = false;
+  changeListeners.clear();
   vi.stubGlobal('localStorage', {
     getItem: (key: string) => store.get(key) ?? null,
     setItem: (key: string, value: string) => store.set(key, value),
@@ -24,7 +34,13 @@ beforeEach(() => {
     documentElement: { setAttribute, removeAttribute },
   });
   vi.stubGlobal('window', {
-    matchMedia: () => ({ matches: systemPrefersDark }),
+    matchMedia: () => ({
+      matches: systemPrefersDark,
+      addEventListener: (_type: string, listener: never) =>
+        changeListeners.add(listener),
+      removeEventListener: (_type: string, listener: never) =>
+        changeListeners.delete(listener),
+    }),
   });
 });
 
@@ -51,6 +67,44 @@ describe('useTheme', () => {
     const { useTheme } = await loadTheme();
     expect(useTheme().resolvedTheme.value).toBe('dark');
     expect(setAttribute).toHaveBeenCalledWith('data-theme', 'dark');
+  });
+
+  it('follows a system theme change while nothing is stored', async () => {
+    const { useTheme } = await loadTheme();
+    const { resolvedTheme } = useTheme();
+    expect(resolvedTheme.value).toBe('light');
+    emitSystemChange(true);
+    expect(resolvedTheme.value).toBe('dark');
+    emitSystemChange(false);
+    expect(resolvedTheme.value).toBe('light');
+  });
+
+  it('notifies watchers when the system theme changes', async () => {
+    const { useTheme } = await loadTheme();
+    const { resolvedTheme } = useTheme();
+    const seen: string[] = [];
+    watch(resolvedTheme, (theme) => seen.push(theme), { flush: 'sync' });
+    emitSystemChange(true);
+    expect(seen).toEqual(['dark']);
+  });
+
+  it('ignores system changes once a theme is stored', async () => {
+    store.set('dakedaduck-theme', 'light');
+    const { useTheme } = await loadTheme();
+    const { resolvedTheme } = useTheme();
+    emitSystemChange(true);
+    expect(resolvedTheme.value).toBe('light');
+  });
+
+  it('stops listening when its scope is disposed', async () => {
+    const { useTheme } = await loadTheme();
+    const scope = effectScope();
+    const handle = scope.run(() => useTheme());
+    expect(changeListeners.size).toBe(1);
+    scope.stop();
+    expect(changeListeners.size).toBe(0);
+    emitSystemChange(true);
+    expect(handle?.resolvedTheme.value).toBe('light');
   });
 
   it('toggles from the resolved theme, persists it and applies it', async () => {

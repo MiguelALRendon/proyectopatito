@@ -23,6 +23,7 @@ describe('frontend boundary', () => {
       .filter(([, code]) => TAURI_IMPORT.test(code))
       .map(([path]) => path);
     expect(Object.keys(rest).length).toBeGreaterThan(10);
+    expect(Object.keys(rest)).toContain('/src/services/filesApi.ts');
     expect(offenders).toEqual([]);
   });
 });

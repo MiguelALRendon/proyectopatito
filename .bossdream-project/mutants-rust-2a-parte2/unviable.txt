@@ -1,0 +1,48 @@
+src/app/ui_state.rs:72:5: replace describe -> UiStateView with Default::default()
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new()]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from_iter([Default::default()])]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new(Default::default())]
+src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from(Default::default())]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new()]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from_iter([Default::default()])]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new(Default::default())]
+src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from(Default::default())]
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new())])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from_iter([Default::default()]))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::new())])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::from_iter([Default::default()]))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::new(Default::default()))])
+src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([("xyzzy".into(), Located::from(Default::default()))])
+src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![Default::default()])
+src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![Default::default()])
+src/app/ui_state.rs:147:5: replace checked_tab -> Result<Tab, UiStateError> with Ok(Default::default())
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([(String::new(), Default::default())]))
+src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([("xyzzy".into(), Default::default())]))
+src/app/ui_state.rs:165:52: delete field columns from struct FolderView expression in normalize_views
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([(String::new(), Default::default())])
+src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([("xyzzy".into(), Default::default())])
+src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![Default::default()]
+src/app/closing.rs:27:9: replace Phase::limit -> Option<(Instant, Duration)> with Some((Default::default(), Default::default()))
+src/app/closing.rs:48:9: replace Closing::request_close -> CloseDecision with Default::default()
+src/app/files/mod.rs:38:28: replace | with ^
+src/app/files/mod.rs:88:9: replace EntryKind::of -> Self with Default::default()
+src/app/files/mod.rs:163:9: replace FileService::with_statuses -> Self with Default::default()
+src/app/files/mod.rs:167:9: replace FileService::with_max_entries -> Self with Default::default()
+src/app/files/mod.rs:174:9: replace FileService::scope -> Result<ScopedPath, FileError> with Ok(Default::default())
+src/app/files/mod.rs:178:9: replace FileService::list -> Result<DirListing, FileError> with Ok(Default::default())
+src/app/files/mod.rs:192:9: replace FileService::probe -> Result<FileProbe, FileError> with Ok(Default::default())
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], true))
+src/app/files/mod.rs:217:9: replace FileService::read_entries -> io::Result<(Vec<FileEntry>, bool)> with Ok((vec![Default::default()], false))
+src/app/files/mod.rs:232:9: replace FileService::entry -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:236:9: replace FileService::describe -> Option<FileEntry> with Some(Default::default())
+src/app/files/mod.rs:254:9: replace FileService::regular_file -> Result<Metadata, FileError> with Ok(Default::default())
+src/app/files/mod.rs:274:9: replace FileService::find_wc_root -> Option<WcLocation> with Some(Default::default())
+src/app/files/mod.rs:294:5: replace probe_facts -> io::Result<FileProbe> with Ok(Default::default())
+src/app/range.rs:4:40: replace * with /
+src/app/range.rs:35:9: replace Slice::capped -> Self with Default::default()
+src/app/range.rs:60:5: replace parse -> Result<Range, RangeError> with Ok(Default::default())
+src/app/range.rs:90:5: replace plan -> Outcome with Default::default()
+src/app/range.rs:97:5: replace whole -> Outcome with Default::default()
+src/app/range.rs:108:5: replace partial -> Outcome with Default::default()

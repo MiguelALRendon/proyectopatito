@@ -1,7 +1,9 @@
 use serde::Serialize;
 
+use crate::app::files::FileError;
 use crate::app::operations::OperationError;
 use crate::app::svn_locator::LocatorError;
+use crate::app::ui_state::UiStateError;
 use crate::app::workspace::WorkspaceError;
 use crate::svn::client::SvnClientError;
 use crate::svn::error::{SvnError, SvnErrorKind};
@@ -27,6 +29,16 @@ pub enum CommandErrorKind {
     SvnFailed,
     ParseFailed,
     Io,
+    NotADirectory,
+    ForbiddenPath,
+    NotText,
+    TooLarge,
+    FileChanged,
+    ReadOnly,
+    FileLocked,
+    WorkingCopyBusy,
+    CloudOnly,
+    NotAllowed,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -61,6 +73,38 @@ impl From<WorkspaceError> for CommandError {
             WorkspaceError::OutsideWorkspace => CommandErrorKind::OutsideWorkspace,
             WorkspaceError::DestinationExists => CommandErrorKind::DestinationExists,
             WorkspaceError::Io(_) => CommandErrorKind::Io,
+            _ => CommandErrorKind::InvalidPath,
+        };
+        Self::new(kind, error.to_string())
+    }
+}
+
+impl From<FileError> for CommandError {
+    fn from(error: FileError) -> Self {
+        let kind = match error {
+            FileError::Workspace(error) => return error.into(),
+            FileError::NotADirectory => CommandErrorKind::NotADirectory,
+            FileError::NotAFile => CommandErrorKind::InvalidPath,
+            FileError::ForbiddenPath => CommandErrorKind::ForbiddenPath,
+            FileError::NotText => CommandErrorKind::NotText,
+            FileError::TooLarge => CommandErrorKind::TooLarge,
+            FileError::FileChanged => CommandErrorKind::FileChanged,
+            FileError::ReadOnly => CommandErrorKind::ReadOnly,
+            FileError::FileLocked => CommandErrorKind::FileLocked,
+            FileError::CloudOnly => CommandErrorKind::CloudOnly,
+            FileError::NotAllowed => CommandErrorKind::NotAllowed,
+            FileError::Busy(_) => CommandErrorKind::WorkingCopyBusy,
+            FileError::Io(_) => CommandErrorKind::Io,
+        };
+        Self::new(kind, error.to_string())
+    }
+}
+
+impl From<UiStateError> for CommandError {
+    fn from(error: UiStateError) -> Self {
+        let kind = match error {
+            UiStateError::Workspace(error) => return error.into(),
+            UiStateError::ForbiddenPath => CommandErrorKind::ForbiddenPath,
             _ => CommandErrorKind::InvalidPath,
         };
         Self::new(kind, error.to_string())

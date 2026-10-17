@@ -11,6 +11,7 @@ const COMMIT_SUBCOMMAND: &str = "commit";
 const CLEANUP_SUBCOMMAND: &str = "cleanup";
 const XML_FLAG: &str = "--xml";
 const SHOW_UPDATES_FLAG: &str = "--show-updates";
+const NO_IGNORE_FLAG: &str = "--no-ignore";
 const REVISION_FLAG: &str = "-r";
 const DEPTH_FLAG: &str = "--depth";
 const IGNORE_EXTERNALS_FLAG: &str = "--ignore-externals";
@@ -19,6 +20,7 @@ const MESSAGE_FILE_FLAG: &str = "-F";
 const ENCODING_FLAG: &str = "--encoding";
 const MESSAGE_ENCODING: &str = "UTF-8";
 const ALLOWED_URL_SCHEMES: [&str; 5] = ["http", "https", "svn", "svn+ssh", "file"];
+const AUTHORITY_END: [char; 3] = ['/', '?', '#'];
 const PEG_TERMINATOR: &str = "@";
 
 #[derive(Debug, Clone)]
@@ -40,6 +42,8 @@ impl InfoRequest {
 pub struct StatusRequest {
     pub target: PathBuf,
     pub remote: bool,
+    pub ignored: bool,
+    pub username: Option<String>,
 }
 
 impl StatusRequest {
@@ -48,6 +52,10 @@ impl StatusRequest {
         if self.remote {
             args.push(SHOW_UPDATES_FLAG.into());
         }
+        if self.ignored {
+            args.push(NO_IGNORE_FLAG.into());
+        }
+        push_username(&mut args, self.username.as_deref());
         args.push(peg_safe(&self.target));
         args
     }
@@ -178,9 +186,8 @@ pub fn is_safe_checkout_url(url: &str) -> bool {
     if !ALLOWED_URL_SCHEMES.contains(&scheme.to_ascii_lowercase().as_str()) {
         return false;
     }
-    let authority = rest.split('/').next().unwrap_or_default();
-    match authority.split_once('@') {
-        Some((userinfo, _)) => !userinfo.contains(':'),
-        None => true,
-    }
+    let authority = rest.split(AUTHORITY_END).next().unwrap_or_default();
+    authority
+        .rsplit_once('@')
+        .is_none_or(|(userinfo, _)| !userinfo.contains(':'))
 }

@@ -43,3 +43,13 @@ Resumen del orquestador. Las salidas crudas de las rondas finales (QA Manager y 
 ## Estados `requires-agent` de `test-checks-10.json`
 
 `quality_approval` y `flow_correctness.flow_breaker` salen `requires-agent` por diseño del script: el juicio semántico lo emiten los dos agentes de este documento, no el script determinista.
+
+
+## QA Increment Fase 2A (2026-10-16/17)
+
+- QA Manager: REJECTED (pasada 1), REJECTED (pasada 2), ACCEPTED (pasada 3). Informes en `evidence-2a/informes-de-agentes.md`.
+- Flow-breaker: blocked por `lista_limpia->fallida`; corregido un bug real (`hasConflict` en sesion fallida).
+- Auditor de pruebas: 17 hallazgos, todos tratados con pruebas nuevas.
+- Mutacion Rust: sin vivos nombrados salvo `files/mod.rs:38:60` y `sniff.rs:202:17` (equivalentes) y `protocol.rs:48:5` (solo E2E). Stryker 90,74 %.
+- Cifras: cargo 528, vitest 1637, E2E 142/142 en la corrida final (3 corridas previas con fallos PDF de causa no verificada, T-26).
+- Auditor de evidencia: 9 pasadas; las 9 bloquearon por afirmaciones sin respaldo en archivo que se fueron corrigiendo; la ultima pidio solo cambios de redaccion, aplicados sin una decima auditoria.

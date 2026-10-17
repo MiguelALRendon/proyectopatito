@@ -1,0 +1,4867 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 42.7410354,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 9.7979621,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/files/mod.rs:268:25: replace + with * in FileService::working_copy_root",
+          "package": "dakedaduck-svn",
+          "file": "src/app/files/mod.rs",
+          "function": {
+            "function_name": "FileService::working_copy_root",
+            "return_type": "-> Option<PathBuf>",
+            "span": {
+              "start": {
+                "line": 265,
+                "column": 5
+              },
+              "end": {
+                "line": 271,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 268,
+              "column": 25
+            },
+            "end": {
+              "line": 268,
+              "column": 26
+            }
+          },
+          "replacement": "*",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__files__mod.rs_line_268_col_25.log",
+      "diff_path": "diff/src__app__files__mod.rs_line_268_col_25.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.2946851,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.9182399,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/range.rs:3:33: replace * with +",
+          "package": "dakedaduck-svn",
+          "file": "src/app/range.rs",
+          "function": null,
+          "span": {
+            "start": {
+              "line": 3,
+              "column": 33
+            },
+            "end": {
+              "line": 3,
+              "column": 34
+            }
+          },
+          "replacement": "+",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__range.rs_line_3_col_33.log",
+      "diff_path": "diff/src__app__range.rs_line_3_col_33.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.6568249,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.4716527,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/range.rs:4:40: replace * with +",
+          "package": "dakedaduck-svn",
+          "file": "src/app/range.rs",
+          "function": null,
+          "span": {
+            "start": {
+              "line": 4,
+              "column": 40
+            },
+            "end": {
+              "line": 4,
+              "column": 41
+            }
+          },
+          "replacement": "+",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__range.rs_line_4_col_40.log",
+      "diff_path": "diff/src__app__range.rs_line_4_col_40.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.6427057,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.0657492,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/range.rs:117:64: replace > with >= in bounds",
+          "package": "dakedaduck-svn",
+          "file": "src/app/range.rs",
+          "function": {
+            "function_name": "bounds",
+            "return_type": "-> Option<(u64, u64)>",
+            "span": {
+              "start": {
+                "line": 114,
+                "column": 1
+              },
+              "end": {
+                "line": 123,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 117,
+              "column": 64
+            },
+            "end": {
+              "line": 117,
+              "column": 65
+            }
+          },
+          "replacement": ">=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/src__app__range.rs_line_117_col_64.log",
+      "diff_path": "diff/src__app__range.rs_line_117_col_64.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.8214374,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 8.8078149,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:56:5: replace normalize -> Result<UiState, UiStateError> with Ok(Default::default())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize",
+            "return_type": "-> Result<UiState, UiStateError>",
+            "span": {
+              "start": {
+                "line": 55,
+                "column": 1
+              },
+              "end": {
+                "line": 69,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 56,
+              "column": 5
+            },
+            "end": {
+              "line": 68,
+              "column": 7
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_56_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_56_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 31.0233754,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9727305,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:56:22: replace != with == in normalize",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize",
+            "return_type": "-> Result<UiState, UiStateError>",
+            "span": {
+              "start": {
+                "line": 55,
+                "column": 1
+              },
+              "end": {
+                "line": 69,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 56,
+              "column": 22
+            },
+            "end": {
+              "line": 56,
+              "column": 24
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_56_col_22.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_56_col_22.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 30.857018,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.5705158,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:65:56: replace == with != in normalize",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize",
+            "return_type": "-> Result<UiState, UiStateError>",
+            "span": {
+              "start": {
+                "line": 55,
+                "column": 1
+              },
+              "end": {
+                "line": 69,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 65,
+              "column": 56
+            },
+            "end": {
+              "line": 65,
+              "column": 58
+            }
+          },
+          "replacement": "!=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_65_col_56.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_65_col_56.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.6441082,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.1315681,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:72:5: replace describe -> UiStateView with Default::default()",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "describe",
+            "return_type": "-> UiStateView",
+            "span": {
+              "start": {
+                "line": 71,
+                "column": 1
+              },
+              "end": {
+                "line": 80,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 72,
+              "column": 5
+            },
+            "end": {
+              "line": 79,
+              "column": 6
+            }
+          },
+          "replacement": "Default::default()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_72_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_72_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.0148616,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:86:9: replace Probe<'_>::exists -> bool with true",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "Probe<'_>::exists",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 85,
+                "column": 5
+              },
+              "end": {
+                "line": 88,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 86,
+              "column": 9
+            },
+            "end": {
+              "line": 87,
+              "column": 78
+            }
+          },
+          "replacement": "true",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_86_col_9.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_86_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.1025064,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.5759161,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:86:9: replace Probe<'_>::exists -> bool with false",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "Probe<'_>::exists",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 85,
+                "column": 5
+              },
+              "end": {
+                "line": 88,
+                "column": 6
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 86,
+              "column": 9
+            },
+            "end": {
+              "line": 87,
+              "column": 78
+            }
+          },
+          "replacement": "false",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_86_col_9_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_86_col_9_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.909164,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8768808,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_favorites",
+            "return_type": "-> Vec<Located<Favorite>>",
+            "span": {
+              "start": {
+                "line": 91,
+                "column": 1
+              },
+              "end": {
+                "line": 97,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 92,
+              "column": 5
+            },
+            "end": {
+              "line": 96,
+              "column": 44
+            }
+          },
+          "replacement": "vec![]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_92_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_92_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 27.1614582,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9773014,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new()]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_favorites",
+            "return_type": "-> Vec<Located<Favorite>>",
+            "span": {
+              "start": {
+                "line": 91,
+                "column": 1
+              },
+              "end": {
+                "line": 97,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 92,
+              "column": 5
+            },
+            "end": {
+              "line": 96,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::new()]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_92_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_92_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.0173261,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from_iter([Default::default()])]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_favorites",
+            "return_type": "-> Vec<Located<Favorite>>",
+            "span": {
+              "start": {
+                "line": 91,
+                "column": 1
+              },
+              "end": {
+                "line": 97,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 92,
+              "column": 5
+            },
+            "end": {
+              "line": 96,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::from_iter([Default::default()])]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_92_col_5_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_92_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8657735,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::new(Default::default())]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_favorites",
+            "return_type": "-> Vec<Located<Favorite>>",
+            "span": {
+              "start": {
+                "line": 91,
+                "column": 1
+              },
+              "end": {
+                "line": 97,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 92,
+              "column": 5
+            },
+            "end": {
+              "line": 96,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::new(Default::default())]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_92_col_5_003.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_92_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8657546,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:92:5: replace locate_favorites -> Vec<Located<Favorite>> with vec![Located::from(Default::default())]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_favorites",
+            "return_type": "-> Vec<Located<Favorite>>",
+            "span": {
+              "start": {
+                "line": 91,
+                "column": 1
+              },
+              "end": {
+                "line": 97,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 92,
+              "column": 5
+            },
+            "end": {
+              "line": 96,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::from(Default::default())]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_92_col_5_004.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_92_col_5_004.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8647071,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_tabs",
+            "return_type": "-> Vec<Located<Tab>>",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 100,
+              "column": 5
+            },
+            "end": {
+              "line": 104,
+              "column": 44
+            }
+          },
+          "replacement": "vec![]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_100_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_100_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 26.6995404,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.5261940000000003,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new()]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_tabs",
+            "return_type": "-> Vec<Located<Tab>>",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 100,
+              "column": 5
+            },
+            "end": {
+              "line": 104,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::new()]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_100_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_100_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.1161234,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from_iter([Default::default()])]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_tabs",
+            "return_type": "-> Vec<Located<Tab>>",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 100,
+              "column": 5
+            },
+            "end": {
+              "line": 104,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::from_iter([Default::default()])]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_100_col_5_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_100_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.9663268999999999,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::new(Default::default())]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_tabs",
+            "return_type": "-> Vec<Located<Tab>>",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 100,
+              "column": 5
+            },
+            "end": {
+              "line": 104,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::new(Default::default())]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_100_col_5_003.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_100_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8136351,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:100:5: replace locate_tabs -> Vec<Located<Tab>> with vec![Located::from(Default::default())]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_tabs",
+            "return_type": "-> Vec<Located<Tab>>",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 100,
+              "column": 5
+            },
+            "end": {
+              "line": 104,
+              "column": 44
+            }
+          },
+          "replacement": "vec![Located::from(Default::default())]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_100_col_5_004.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_100_col_5_004.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8670404,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:101:52: replace == with != in locate_tabs",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_tabs",
+            "return_type": "-> Vec<Located<Tab>>",
+            "span": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 101,
+              "column": 52
+            },
+            "end": {
+              "line": 101,
+              "column": 54
+            }
+          },
+          "replacement": "!=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_101_col_52.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_101_col_52.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 26.7317083,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9759449,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::new()",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.2763212,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.7760059,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new())])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(String::new(), Located::new())])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.965926,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from_iter([Default::default()]))])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(String::new(), Located::from_iter([Default::default()]))])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8645965,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::new(Default::default()))])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(String::new(), Located::new(Default::default()))])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_003.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_003.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8638214,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(String::new(), Located::from(Default::default()))])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(String::new(), Located::from(Default::default()))])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_004.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_004.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8145609,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(\"xyzzy\".into(), Located::new())])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(\"xyzzy\".into(), Located::new())])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_005.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_005.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8650034,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(\"xyzzy\".into(), Located::from_iter([Default::default()]))])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(\"xyzzy\".into(), Located::from_iter([Default::default()]))])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_006.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_006.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8661443,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(\"xyzzy\".into(), Located::new(Default::default()))])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(\"xyzzy\".into(), Located::new(Default::default()))])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_007.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_007.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.9170337,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:111:5: replace locate_views -> BTreeMap<String, Located<FolderView>> with BTreeMap::from_iter([(\"xyzzy\".into(), Located::from(Default::default()))])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "locate_views",
+            "return_type": "-> BTreeMap<String, Located<FolderView>>",
+            "span": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 111,
+              "column": 5
+            },
+            "end": {
+              "line": 115,
+              "column": 44
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(\"xyzzy\".into(), Located::from(Default::default()))])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_111_col_5_008.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_111_col_5_008.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.0184748,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_favorites",
+            "return_type": "-> Result<Vec<Favorite>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 118,
+                "column": 1
+              },
+              "end": {
+                "line": 135,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 122,
+              "column": 5
+            },
+            "end": {
+              "line": 134,
+              "column": 8
+            }
+          },
+          "replacement": "Ok(vec![])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_122_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_122_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.8043983,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8730356,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:122:5: replace normalize_favorites -> Result<Vec<Favorite>, UiStateError> with Ok(vec![Default::default()])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_favorites",
+            "return_type": "-> Result<Vec<Favorite>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 118,
+                "column": 1
+              },
+              "end": {
+                "line": 135,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 122,
+              "column": 5
+            },
+            "end": {
+              "line": 134,
+              "column": 8
+            }
+          },
+          "replacement": "Ok(vec![Default::default()])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_122_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_122_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.0636779,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_tabs",
+            "return_type": "-> Result<Vec<Tab>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 137,
+                "column": 1
+              },
+              "end": {
+                "line": 144,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 138,
+              "column": 5
+            },
+            "end": {
+              "line": 143,
+              "column": 53
+            }
+          },
+          "replacement": "Ok(vec![])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_138_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_138_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.0933291,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8750617,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:138:5: replace normalize_tabs -> Result<Vec<Tab>, UiStateError> with Ok(vec![Default::default()])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_tabs",
+            "return_type": "-> Result<Vec<Tab>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 137,
+                "column": 1
+              },
+              "end": {
+                "line": 144,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 138,
+              "column": 5
+            },
+            "end": {
+              "line": 143,
+              "column": 53
+            }
+          },
+          "replacement": "Ok(vec![Default::default()])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_138_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_138_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.1177836,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:147:5: replace checked_tab -> Result<Tab, UiStateError> with Ok(Default::default())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 147,
+              "column": 5
+            },
+            "end": {
+              "line": 154,
+              "column": 7
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_147_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_147_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.0173775,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:147:26: replace || with && in checked_tab",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 147,
+              "column": 26
+            },
+            "end": {
+              "line": 147,
+              "column": 28
+            }
+          },
+          "replacement": "&&",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_147_col_26.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_147_col_26.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 30.4255928,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9241531,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:147:52: replace > with == in checked_tab",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 147,
+              "column": 52
+            },
+            "end": {
+              "line": 147,
+              "column": 53
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_147_col_52.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_147_col_52.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.6860179,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.0222908,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:147:52: replace > with < in checked_tab",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 147,
+              "column": 52
+            },
+            "end": {
+              "line": 147,
+              "column": 53
+            }
+          },
+          "replacement": "<",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_147_col_52_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_147_col_52_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.5065399,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.0273942,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:147:52: replace > with >= in checked_tab",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 147,
+              "column": 52
+            },
+            "end": {
+              "line": 147,
+              "column": 53
+            }
+          },
+          "replacement": ">=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/src__app__ui_state.rs_line_147_col_52_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_147_col_52_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.1463132,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 8.9594515,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:151:9: delete field path from struct Tab expression in checked_tab",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 151,
+              "column": 9
+            },
+            "end": {
+              "line": 151,
+              "column": 51
+            }
+          },
+          "replacement": "",
+          "genre": "StructField"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_151_col_9.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_151_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.108938,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8754745,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:152:9: delete field title from struct Tab expression in checked_tab",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_tab",
+            "return_type": "-> Result<Tab, UiStateError>",
+            "span": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 155,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 152,
+              "column": 9
+            },
+            "end": {
+              "line": 152,
+              "column": 38
+            }
+          },
+          "replacement": "",
+          "genre": "StructField"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/src__app__ui_state.rs_line_152_col_9.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_152_col_9.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 26.6194445,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 9.6084294,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::new())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_views",
+            "return_type": "-> Result<BTreeMap<String, FolderView>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 157,
+                "column": 1
+              },
+              "end": {
+                "line": 168,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 161,
+              "column": 5
+            },
+            "end": {
+              "line": 167,
+              "column": 28
+            }
+          },
+          "replacement": "Ok(BTreeMap::new())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_161_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_161_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 30.0703806,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.7249683,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([(String::new(), Default::default())]))",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_views",
+            "return_type": "-> Result<BTreeMap<String, FolderView>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 157,
+                "column": 1
+              },
+              "end": {
+                "line": 168,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 161,
+              "column": 5
+            },
+            "end": {
+              "line": 167,
+              "column": 28
+            }
+          },
+          "replacement": "Ok(BTreeMap::from_iter([(String::new(), Default::default())]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_161_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_161_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.9143596,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:161:5: replace normalize_views -> Result<BTreeMap<String, FolderView>, UiStateError> with Ok(BTreeMap::from_iter([(\"xyzzy\".into(), Default::default())]))",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_views",
+            "return_type": "-> Result<BTreeMap<String, FolderView>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 157,
+                "column": 1
+              },
+              "end": {
+                "line": 168,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 161,
+              "column": 5
+            },
+            "end": {
+              "line": 167,
+              "column": 28
+            }
+          },
+          "replacement": "Ok(BTreeMap::from_iter([(\"xyzzy\".into(), Default::default())]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_161_col_5_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_161_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8158014,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:165:52: delete field columns from struct FolderView expression in normalize_views",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "normalize_views",
+            "return_type": "-> Result<BTreeMap<String, FolderView>, UiStateError>",
+            "span": {
+              "start": {
+                "line": 157,
+                "column": 1
+              },
+              "end": {
+                "line": 168,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 165,
+              "column": 52
+            },
+            "end": {
+              "line": 165,
+              "column": 60
+            }
+          },
+          "replacement": "",
+          "genre": "StructField"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_165_col_52.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_165_col_52.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.9152983,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:171:5: replace keep_newest with ()",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "keep_newest",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 170,
+                "column": 1
+              },
+              "end": {
+                "line": 177,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 171,
+              "column": 5
+            },
+            "end": {
+              "line": 176,
+              "column": 6
+            }
+          },
+          "replacement": "()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_171_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_171_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.7701582,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8713424,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:173:47: replace > with == in keep_newest",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "keep_newest",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 170,
+                "column": 1
+              },
+              "end": {
+                "line": 177,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 173,
+              "column": 47
+            },
+            "end": {
+              "line": 173,
+              "column": 48
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/src__app__ui_state.rs_line_173_col_47.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_173_col_47.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.3473932,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 9.1598455,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:173:47: replace > with < in keep_newest",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "keep_newest",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 170,
+                "column": 1
+              },
+              "end": {
+                "line": 177,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 173,
+              "column": 47
+            },
+            "end": {
+              "line": 173,
+              "column": 48
+            }
+          },
+          "replacement": "<",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_173_col_47_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_173_col_47_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.85176,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.872432,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:173:47: replace > with >= in keep_newest",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "keep_newest",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 170,
+                "column": 1
+              },
+              "end": {
+                "line": 177,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 173,
+              "column": 47
+            },
+            "end": {
+              "line": 173,
+              "column": 48
+            }
+          },
+          "replacement": ">=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/src__app__ui_state.rs_line_173_col_47_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_173_col_47_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.9163127,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 9.1160067,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::new()",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "drop_oldest",
+            "return_type": "-> BTreeMap<String, FolderView>",
+            "span": {
+              "start": {
+                "line": 179,
+                "column": 1
+              },
+              "end": {
+                "line": 187,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 180,
+              "column": 5
+            },
+            "end": {
+              "line": 186,
+              "column": 33
+            }
+          },
+          "replacement": "BTreeMap::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_180_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_180_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.2119819,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.872634,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([(String::new(), Default::default())])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "drop_oldest",
+            "return_type": "-> BTreeMap<String, FolderView>",
+            "span": {
+              "start": {
+                "line": 179,
+                "column": 1
+              },
+              "end": {
+                "line": 187,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 180,
+              "column": 5
+            },
+            "end": {
+              "line": 186,
+              "column": 33
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(String::new(), Default::default())])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_180_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_180_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.9128275000000001,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:180:5: replace drop_oldest -> BTreeMap<String, FolderView> with BTreeMap::from_iter([(\"xyzzy\".into(), Default::default())])",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "drop_oldest",
+            "return_type": "-> BTreeMap<String, FolderView>",
+            "span": {
+              "start": {
+                "line": 179,
+                "column": 1
+              },
+              "end": {
+                "line": 187,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 180,
+              "column": 5
+            },
+            "end": {
+              "line": 186,
+              "column": 33
+            }
+          },
+          "replacement": "BTreeMap::from_iter([(\"xyzzy\".into(), Default::default())])",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_180_col_5_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_180_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 1.8643147,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:180:20: replace <= with > in drop_oldest",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "drop_oldest",
+            "return_type": "-> BTreeMap<String, FolderView>",
+            "span": {
+              "start": {
+                "line": 179,
+                "column": 1
+              },
+              "end": {
+                "line": 187,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 180,
+              "column": 20
+            },
+            "end": {
+              "line": 180,
+              "column": 22
+            }
+          },
+          "replacement": ">",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_180_col_20.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_180_col_20.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.0114487,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8716716,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:190:5: replace ensure_within -> Result<(), UiStateError> with Ok(())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "ensure_within",
+            "return_type": "-> Result<(), UiStateError>",
+            "span": {
+              "start": {
+                "line": 189,
+                "column": 1
+              },
+              "end": {
+                "line": 194,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 190,
+              "column": 5
+            },
+            "end": {
+              "line": 193,
+              "column": 11
+            }
+          },
+          "replacement": "Ok(())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_190_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_190_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.5850271,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9743555,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:190:14: replace > with == in ensure_within",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "ensure_within",
+            "return_type": "-> Result<(), UiStateError>",
+            "span": {
+              "start": {
+                "line": 189,
+                "column": 1
+              },
+              "end": {
+                "line": 194,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 190,
+              "column": 14
+            },
+            "end": {
+              "line": 190,
+              "column": 15
+            }
+          },
+          "replacement": "==",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_190_col_14.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_190_col_14.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 26.5005205,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8271855,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:190:14: replace > with < in ensure_within",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "ensure_within",
+            "return_type": "-> Result<(), UiStateError>",
+            "span": {
+              "start": {
+                "line": 189,
+                "column": 1
+              },
+              "end": {
+                "line": 194,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 190,
+              "column": 14
+            },
+            "end": {
+              "line": 190,
+              "column": 15
+            }
+          },
+          "replacement": "<",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_190_col_14_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_190_col_14_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.7603445,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.7210386,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:190:14: replace > with >= in ensure_within",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "ensure_within",
+            "return_type": "-> Result<(), UiStateError>",
+            "span": {
+              "start": {
+                "line": 189,
+                "column": 1
+              },
+              "end": {
+                "line": 194,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 190,
+              "column": 14
+            },
+            "end": {
+              "line": 190,
+              "column": 15
+            }
+          },
+          "replacement": ">=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_190_col_14_002.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_190_col_14_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.4931639,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9282332,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "first_per_key",
+            "return_type": "-> Vec<T>",
+            "span": {
+              "start": {
+                "line": 196,
+                "column": 1
+              },
+              "end": {
+                "line": 202,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 197,
+              "column": 5
+            },
+            "end": {
+              "line": 201,
+              "column": 19
+            }
+          },
+          "replacement": "vec![]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_197_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_197_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.9034062,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.0237867,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:197:5: replace first_per_key -> Vec<T> with vec![Default::default()]",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "first_per_key",
+            "return_type": "-> Vec<T>",
+            "span": {
+              "start": {
+                "line": 196,
+                "column": 1
+              },
+              "end": {
+                "line": 202,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 197,
+              "column": 5
+            },
+            "end": {
+              "line": 201,
+              "column": 19
+            }
+          },
+          "replacement": "vec![Default::default()]",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/src__app__ui_state.rs_line_197_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_197_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 2.0143767,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:205:5: replace clip_label -> String with String::new()",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "clip_label",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 204,
+                "column": 1
+              },
+              "end": {
+                "line": 206,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 205,
+              "column": 5
+            },
+            "end": {
+              "line": 205,
+              "column": 50
+            }
+          },
+          "replacement": "String::new()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_205_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_205_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 28.8671999,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9773902,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:205:5: replace clip_label -> String with \"xyzzy\".into()",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "clip_label",
+            "return_type": "-> String",
+            "span": {
+              "start": {
+                "line": 204,
+                "column": 1
+              },
+              "end": {
+                "line": 206,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 205,
+              "column": 5
+            },
+            "end": {
+              "line": 205,
+              "column": 50
+            }
+          },
+          "replacement": "\"xyzzy\".into()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_205_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_205_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.3491124,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9753559000000003,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:209:5: replace checked_path -> Result<String, UiStateError> with Ok(String::new())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 208,
+                "column": 1
+              },
+              "end": {
+                "line": 218,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 209,
+              "column": 5
+            },
+            "end": {
+              "line": 217,
+              "column": 6
+            }
+          },
+          "replacement": "Ok(String::new())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_209_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_209_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 26.412203,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.8721126,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:209:5: replace checked_path -> Result<String, UiStateError> with Ok(\"xyzzy\".into())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 208,
+                "column": 1
+              },
+              "end": {
+                "line": 218,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 209,
+              "column": 5
+            },
+            "end": {
+              "line": 217,
+              "column": 6
+            }
+          },
+          "replacement": "Ok(\"xyzzy\".into())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_209_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_209_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.6875201,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.7215664999999998,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:212:16: replace match guard error.kind() == ErrorKind::NotADirectory with true in checked_path",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 208,
+                "column": 1
+              },
+              "end": {
+                "line": 218,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 212,
+              "column": 16
+            },
+            "end": {
+              "line": 212,
+              "column": 56
+            }
+          },
+          "replacement": "true",
+          "genre": "MatchArmGuard"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_212_col_16.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_212_col_16.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 27.2274486,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.1233219,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:212:16: replace match guard error.kind() == ErrorKind::NotADirectory with false in checked_path",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 208,
+                "column": 1
+              },
+              "end": {
+                "line": 218,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 212,
+              "column": 16
+            },
+            "end": {
+              "line": 212,
+              "column": 56
+            }
+          },
+          "replacement": "false",
+          "genre": "MatchArmGuard"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_212_col_16_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_212_col_16_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 23.9509442,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.9730129,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:212:29: replace == with != in checked_path",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "checked_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 208,
+                "column": 1
+              },
+              "end": {
+                "line": 218,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 212,
+              "column": 29
+            },
+            "end": {
+              "line": 212,
+              "column": 31
+            }
+          },
+          "replacement": "!=",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_212_col_29.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_212_col_29.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.6719972,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.0241359,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:221:5: replace clean_path -> Result<String, UiStateError> with Ok(String::new())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "clean_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 220,
+                "column": 1
+              },
+              "end": {
+                "line": 230,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 221,
+              "column": 5
+            },
+            "end": {
+              "line": 229,
+              "column": 35
+            }
+          },
+          "replacement": "Ok(String::new())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_221_col_5.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_221_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 28.5610692,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 2.6717444,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:221:5: replace clean_path -> Result<String, UiStateError> with Ok(\"xyzzy\".into())",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "clean_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 220,
+                "column": 1
+              },
+              "end": {
+                "line": 230,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 221,
+              "column": 5
+            },
+            "end": {
+              "line": 229,
+              "column": 35
+            }
+          },
+          "replacement": "Ok(\"xyzzy\".into())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_221_col_5_001.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_221_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 25.403657,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.0215993,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/ui_state.rs:226:41: replace && with || in clean_path",
+          "package": "dakedaduck-svn",
+          "file": "src/app/ui_state.rs",
+          "function": {
+            "function_name": "clean_path",
+            "return_type": "-> Result<String, UiStateError>",
+            "span": {
+              "start": {
+                "line": 220,
+                "column": 1
+              },
+              "end": {
+                "line": 230,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 226,
+              "column": 41
+            },
+            "end": {
+              "line": 226,
+              "column": 43
+            }
+          },
+          "replacement": "||",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__ui_state.rs_line_226_col_41.log",
+      "diff_path": "diff/src__app__ui_state.rs_line_226_col_41.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 27.8405177,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.027367,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "files",
+            "--test",
+            "text_files",
+            "--test",
+            "range",
+            "--test",
+            "closing",
+            "--test",
+            "ui_state",
+            "--test",
+            "wc_status",
+            "--test",
+            "open_external"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 69,
+  "missed": 5,
+  "caught": 38,
+  "timeout": 0,
+  "unviable": 26,
+  "success": 0,
+  "start_time": "2026-10-17T03:44:08.4039123Z",
+  "end_time": null,
+  "cargo_mutants_version": "27.1.0"
+}

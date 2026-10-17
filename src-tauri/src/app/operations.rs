@@ -66,6 +66,10 @@ impl OperationError {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[error("hay una operación en curso sobre la copia de trabajo")]
+pub struct WorkingCopyBusy;
+
 #[derive(Default)]
 pub struct OperationManager {
     next_id: AtomicU64,
@@ -106,6 +110,20 @@ impl OperationManager {
         mutex.lock_owned().await
     }
 
+    pub fn try_lock_for_write(
+        &self,
+        path: &Path,
+    ) -> Result<Vec<OwnedMutexGuard<()>>, WorkingCopyBusy> {
+        let reference = working_copy_key(path);
+        let mut locks = locked(&self.locks);
+        locks.entry(reference.clone()).or_default();
+        locks
+            .iter()
+            .filter(|(key, _)| are_nested(key, &reference))
+            .map(|(_, mutex)| mutex.clone().try_lock_owned().map_err(|_| WorkingCopyBusy))
+            .collect()
+    }
+
     pub fn mark_needs_cleanup(&self, path: &Path) {
         locked(&self.dirty).insert(working_copy_key(path));
     }
@@ -123,8 +141,13 @@ pub(crate) fn locked<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
 }
 
-fn working_copy_key(path: &Path) -> String {
+pub(crate) fn working_copy_key(path: &Path) -> String {
     path.to_string_lossy().to_lowercase()
+}
+
+pub(crate) fn are_nested(key: &str, reference: &str) -> bool {
+    let (key, reference) = (Path::new(key), Path::new(reference));
+    key.starts_with(reference) || reference.starts_with(key)
 }
 
 #[derive(Clone)]

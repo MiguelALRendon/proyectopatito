@@ -119,6 +119,9 @@ fn resolve_rejects_reserved_names_in_any_case_and_extension() {
         "con ",
         "COM¹",
         "lpt².txt",
+        "CONIN$",
+        "conout$.txt",
+        "CLOCK$",
     ] {
         assert!(
             matches!(

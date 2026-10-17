@@ -65,6 +65,8 @@ fn status_request(target: &Path, remote: bool) -> StatusRequest {
     StatusRequest {
         target: target.to_path_buf(),
         remote,
+        ignored: false,
+        username: None,
     }
 }
 
@@ -171,6 +173,41 @@ fn status_args_include_show_updates_only_when_remote() {
         remote,
         os_args(&["status", "--xml", "--show-updates", r"C:\wc@"])
     );
+}
+
+#[test]
+fn status_args_add_no_ignore_and_username_in_a_fixed_order() {
+    let request = StatusRequest {
+        target: PathBuf::from(r"C:\wc"),
+        remote: true,
+        ignored: true,
+        username: Some("alice".into()),
+    };
+    assert_eq!(
+        request.args(),
+        os_args(&[
+            "status",
+            "--xml",
+            "--show-updates",
+            "--no-ignore",
+            "--username",
+            "alice",
+            r"C:\wc@"
+        ])
+    );
+}
+
+#[test]
+fn status_args_never_carry_a_password_or_a_depth() {
+    let request = StatusRequest {
+        target: PathBuf::from(r"C:\wc"),
+        remote: false,
+        ignored: true,
+        username: Some("alice".into()),
+    };
+    let args = request.args();
+    assert!(!args.contains(&OsString::from("--password")));
+    assert!(!args.contains(&OsString::from("--depth")));
 }
 
 #[test]
@@ -307,5 +344,80 @@ fn status_item_serializes_known_and_unknown_values_as_plain_strings() {
 fn status_item_round_trips_through_its_text_form() {
     for text in ["none", "normal", "conflicted", "merged", "frobnicated"] {
         assert_eq!(StatusItem::from(text).as_str(), text);
+    }
+}
+
+const STATES_XML: &[u8] = include_bytes!("fixtures/status-states.xml");
+const TREE_CONFLICT_XML: &[u8] = include_bytes!("fixtures/status-tree-conflict-remote-lock.xml");
+const WC_LOCKED_XML: &[u8] = include_bytes!("fixtures/status-wc-locked.xml");
+
+#[test]
+fn parse_status_reads_every_state_svn_produced_for_the_real_scenario() {
+    let report = parse_status(STATES_XML).unwrap();
+    let expected = [
+        ("add.txt", StatusItem::Added),
+        ("conf.txt", StatusItem::Conflicted),
+        ("del.txt", StatusItem::Deleted),
+        ("extsrc", StatusItem::External),
+        ("x.tmp", StatusItem::Ignored),
+        ("lock.txt", StatusItem::Normal),
+        ("miss.txt", StatusItem::Missing),
+        ("mod.txt", StatusItem::Modified),
+        ("repl.txt", StatusItem::Replaced),
+        ("src-copia", StatusItem::Added),
+        ("swd", StatusItem::Normal),
+        ("type.txt", StatusItem::Obstructed),
+        ("unv.txt", StatusItem::Unversioned),
+    ];
+    for (suffix, item) in expected {
+        assert_eq!(find_suffix(&report, suffix).item, item, "{suffix}");
+    }
+}
+
+#[test]
+fn parse_status_reads_the_lock_copied_and_switched_flags_of_the_real_scenario() {
+    let report = parse_status(STATES_XML).unwrap();
+    let lock = find_suffix(&report, "lock.txt").lock.clone().unwrap();
+    assert_eq!(lock.comment.as_deref(), Some("mi bloqueo"));
+    assert!(!lock.owner.is_empty());
+    assert!(find_suffix(&report, "src-copia").copied);
+    assert!(find_suffix(&report, "swd").switched);
+    assert!(!find_suffix(&report, "mod.txt").copied);
+    assert!(find_suffix(&report, "mod.txt").lock.is_none());
+}
+
+#[test]
+fn parse_status_reads_a_tree_conflict_and_a_lock_held_by_someone_else() {
+    let report = parse_status(TREE_CONFLICT_XML).unwrap();
+    let tree = find_suffix(&report, "tree.txt");
+    assert!(tree.tree_conflicted && tree.copied);
+    let shared = find_suffix(&report, "shared.txt");
+    assert_eq!(shared.remote_item, Some(StatusItem::None));
+    assert_eq!(
+        shared.lock.clone().unwrap().comment.as_deref(),
+        Some("ajeno")
+    );
+    assert!(!shared.tree_conflicted);
+}
+
+#[test]
+fn parse_status_reads_the_working_copy_lock_left_by_an_interrupted_command() {
+    let report = parse_status(WC_LOCKED_XML).unwrap();
+    assert!(find_suffix(&report, r"svnfx\wc").wc_locked);
+    assert!(!find_suffix(&report, "shared.txt").wc_locked);
+}
+
+#[test]
+fn parse_status_defaults_the_new_flags_to_false_when_svn_omits_them() {
+    let report = parse_status(STATUS_XML).unwrap();
+    for entry in &report.entries {
+        let flags = [
+            entry.wc_locked,
+            entry.tree_conflicted,
+            entry.copied,
+            entry.switched,
+        ];
+        assert_eq!(flags, [false; 4], "{}", entry.path);
+        assert!(entry.lock.is_none());
     }
 }

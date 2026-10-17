@@ -6,7 +6,10 @@
     "src/**/*.ts",
     "!src/**/*.test.ts",
     "!src/**/*.d.ts",
-    "!src/main.ts"
+    "!src/main.ts",
+    "!src/documents/monaco/**",
+    "!src/documents/pdf/**",
+    "!src/documents/markdown/xssCorpus.ts"
   ],
   "reporters": ["clear-text", "html"],
   "coverageAnalysis": "perTest",
@@ -16,7 +19,9 @@
     "break": 85
   },
   "ignorePatterns": [
-    "src-tauri",
+    "src-tauri/target",
+    "src-tauri/target-e2e",
+    "src-tauri/gen",
     "coverage",
     "reports",
     "dist",

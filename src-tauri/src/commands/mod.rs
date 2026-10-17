@@ -1,15 +1,25 @@
+mod files;
+pub mod protocol;
+mod ui;
+mod window;
+
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 
-use crate::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, UpdateArgs};
+use crate::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, StatusMapArgs, UpdateArgs};
 use crate::app::error::CommandError;
 use crate::app::operations::OperationId;
 use crate::app::state::{AppState, OperationResult, Sinks, SvnDetection};
+use crate::app::wc_status::WcStatusMap;
 use crate::svn::models::{InfoEntry, StatusReport};
 use crate::svn::progress::ProgressEvent;
+
+pub use files::*;
+pub use ui::*;
+pub use window::*;
 
 const PROGRESS_EVENT: &str = "svn://progress";
 const DONE_EVENT: &str = "svn://done";
@@ -70,6 +80,14 @@ pub async fn wc_status(
     state: State<'_, AppState>,
 ) -> Result<StatusReport, CommandError> {
     state.wc_status(&path, remote).await
+}
+
+#[tauri::command]
+pub async fn wc_status_map(
+    req: StatusMapArgs,
+    state: State<'_, AppState>,
+) -> Result<WcStatusMap, CommandError> {
+    state.wc_status_map(req).await
 }
 
 #[tauri::command]

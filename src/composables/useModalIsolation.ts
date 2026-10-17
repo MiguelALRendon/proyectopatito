@@ -1,6 +1,6 @@
 import { onBeforeUnmount, onMounted, type Ref } from 'vue';
 
-const SCROLL_LOCK_CLASS = 'modal-open';
+export const SCROLL_LOCK_CLASS = 'modal-open';
 let openModalCount = 0;
 
 function isolatableSiblings(overlay: HTMLElement): Element[] {

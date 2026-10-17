@@ -31,20 +31,48 @@
   --border-width-lg: 3px;
   --size-content-max-width: 480px;
   --size-modal-min-width: 280px;
+  --size-tab-max-width: 220px;
   --font-weight-bold: 600;
   --color-conflict-bg: #fef3c7;
   --color-conflict-marker: #9a5f1d;
   --outline-offset-focus: 2px;
+  --z-index-shell: 10;
+  --z-index-menu: 50;
+  --z-index-tooltip: 60;
   --z-index-modal: 100;
+  --size-shell-stack-max-height: 30vh;
   --size-modal-max-height: 90vh;
   --size-panel-max-width: 960px;
   --size-log-max-height: 160px;
   --size-textarea-min-height: 96px;
   --size-touch-target-min: 36px;
+  --size-menu-min-width: 280px;
   --duration-fast: 150ms;
+  --duration-enter: 180ms;
+  --duration-pop: 500ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --scale-pop-from: 0.92;
+  --opacity-pop-from: 0.55;
   --opacity-disabled: 0.6;
   --line-height-base: 1.5;
+  --radius-lg: 16px;
+  --size-grid-item-min-width: 120px;
+  --size-icon: 1.2em;
+  --size-icon-card: 2.4em;
+  --size-editor-min-height: 240px;
+  --size-column-narrow: 96px;
+  --size-column-medium: 168px;
+  --size-column-wide: 240px;
+  --size-filter-min-width: 160px;
+  --size-select-min-width: 140px;
+  --size-panel-column-min: 320px;
+  --percent-selected-mix: 18%;
+  --angle-quarter-turn: 90deg;
+  --size-split-pane-min-width: 240px;
+  --size-checker: 16px;
+  --size-page-input: 6ch;
+  --size-viewer-min-height: 320px;
 }
 
 @media (prefers-color-scheme: dark) {

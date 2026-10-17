@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import {
+  NO_CREDENTIALS,
   normalizeError,
   opCancel,
   runOperation,
@@ -18,10 +19,9 @@ import {
   type StatusReport,
 } from '../services/tauri';
 import { formatProgressLine } from '../utils/svnLabels';
+import { useExplorerStore } from './explorer';
 
 export const MAX_PROGRESS_LINES = 100;
-
-export const NO_CREDENTIALS: Credentials = { username: null, password: null };
 
 export type OperationKind = 'checkout' | 'update' | 'commit' | 'cleanup';
 
@@ -40,6 +40,7 @@ interface WorkingCopySnapshot {
 type StartOperation = (credentials: Credentials) => Promise<number>;
 
 export const useProjectStore = defineStore('project', () => {
+  const explorer = useExplorerStore();
   const path = ref<string | null>(null);
   const info = ref<InfoEntry | null>(null);
   const status = ref<StatusReport | null>(null);
@@ -47,6 +48,7 @@ export const useProjectStore = defineStore('project', () => {
   const progressLines = ref<string[]>([]);
   const error = ref<CommandError | null>(null);
   const wasCancelled = ref(false);
+  const finishedOperations = ref(0);
   const cleanupTarget = ref<string | null>(null);
   const commitDraft = ref('');
   let retry: ((credentials: Credentials) => Promise<void>) | null = null;
@@ -131,9 +133,12 @@ export const useProjectStore = defineStore('project', () => {
     const reusable = { ...submission, credentials: NO_CREDENTIALS };
     retry = (next) => submit({ ...reusable, credentials: next });
     const isOk = await execute(kind, target, () => start(credentials));
-    if (!isOk) return;
-    retry = null;
-    await whileReading(afterOk);
+    if (isOk) {
+      retry = null;
+      await whileReading(afterOk);
+    }
+    await explorer.reloadAfterChange();
+    finishedOperations.value += 1;
   }
 
   async function refresh(): Promise<void> {
@@ -255,8 +260,8 @@ export const useProjectStore = defineStore('project', () => {
     });
   }
 
-  async function cleanup(): Promise<void> {
-    const target = cleanupTarget.value ?? path.value;
+  async function cleanup(explicitTarget?: string): Promise<void> {
+    const target = explicitTarget ?? cleanupTarget.value ?? path.value;
     if (!target) return;
     const start: StartOperation = () => wcCleanup({ path: target });
     await submit({
@@ -289,6 +294,7 @@ export const useProjectStore = defineStore('project', () => {
     progressLines,
     error,
     wasCancelled,
+    finishedOperations,
     commitDraft,
     isBusy,
     isLocked,

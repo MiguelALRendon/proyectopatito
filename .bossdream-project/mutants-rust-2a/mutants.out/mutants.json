@@ -1,0 +1,520 @@
+[
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace StatusCache::generation -> u64 with 0\n@@ -61,17 +61,17 @@\n             Some(map) => Lookup::Hit(map.clone()),\n             None => Lookup::Miss {\n                 generation: state.generation,\n             },\n         }\n     }\n \n     pub fn generation(&self) -> u64 {\n-        locked(&self.state).generation\n+        0 /* ~ changed by cargo-mutants ~ */\n     }\n \n     pub fn store(&self, key: StatusKey, generation: u64, map: &WcStatusMap) {\n         let mut state = locked(&self.state);\n         if state.generation == generation {\n             state.maps.insert(CacheKey::of(key), map.clone());\n         }\n     }\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "StatusCache::generation",
+      "return_type": "-> u64",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 70
+        },
+        "start": {
+          "column": 5,
+          "line": 68
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/wc_status.rs:69:9: replace StatusCache::generation -> u64 with 0",
+    "package": "dakedaduck-svn",
+    "replacement": "0",
+    "span": {
+      "end": {
+        "column": 39,
+        "line": 69
+      },
+      "start": {
+        "column": 9,
+        "line": 69
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace || with && in needs_attention\n@@ -214,17 +214,17 @@\n     PRIORITY_CHANGE\n }\n \n fn needs_attention(entry: &StatusEntry) -> bool {\n     let broken_item = matches!(\n         entry.item,\n         StatusItem::Conflicted | StatusItem::Missing | StatusItem::Obstructed\n     );\n-    broken_item || entry.props == StatusItem::Conflicted || entry.tree_conflicted || entry.wc_locked\n+    broken_item || entry.props == StatusItem::Conflicted || entry.tree_conflicted && /* ~ changed by cargo-mutants ~ */ entry.wc_locked\n }\n \n fn has_remote_change(entry: &StatusEntry) -> bool {\n     let remote_item = entry\n         .remote_item\n         .as_ref()\n         .is_some_and(|item| !is_plain(item));\n     let remote_props = entry\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "needs_attention",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 223
+        },
+        "start": {
+          "column": 1,
+          "line": 217
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/wc_status.rs:222:83: replace || with && in needs_attention",
+    "package": "dakedaduck-svn",
+    "replacement": "&&",
+    "span": {
+      "end": {
+        "column": 85,
+        "line": 222
+      },
+      "start": {
+        "column": 83,
+        "line": 222
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace || with && in needs_attention\n@@ -214,17 +214,17 @@\n     PRIORITY_CHANGE\n }\n \n fn needs_attention(entry: &StatusEntry) -> bool {\n     let broken_item = matches!(\n         entry.item,\n         StatusItem::Conflicted | StatusItem::Missing | StatusItem::Obstructed\n     );\n-    broken_item || entry.props == StatusItem::Conflicted || entry.tree_conflicted || entry.wc_locked\n+    broken_item || entry.props == StatusItem::Conflicted && /* ~ changed by cargo-mutants ~ */ entry.tree_conflicted || entry.wc_locked\n }\n \n fn has_remote_change(entry: &StatusEntry) -> bool {\n     let remote_item = entry\n         .remote_item\n         .as_ref()\n         .is_some_and(|item| !is_plain(item));\n     let remote_props = entry\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "needs_attention",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 223
+        },
+        "start": {
+          "column": 1,
+          "line": 217
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/wc_status.rs:222:58: replace || with && in needs_attention",
+    "package": "dakedaduck-svn",
+    "replacement": "&&",
+    "span": {
+      "end": {
+        "column": 60,
+        "line": 222
+      },
+      "start": {
+        "column": 58,
+        "line": 222
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace has_remote_change -> bool with true\n@@ -218,25 +218,17 @@\n     let broken_item = matches!(\n         entry.item,\n         StatusItem::Conflicted | StatusItem::Missing | StatusItem::Obstructed\n     );\n     broken_item || entry.props == StatusItem::Conflicted || entry.tree_conflicted || entry.wc_locked\n }\n \n fn has_remote_change(entry: &StatusEntry) -> bool {\n-    let remote_item = entry\n-        .remote_item\n-        .as_ref()\n-        .is_some_and(|item| !is_plain(item));\n-    let remote_props = entry\n-        .remote_props\n-        .as_ref()\n-        .is_some_and(|item| !is_plain(item));\n-    remote_item || remote_props\n+    true /* ~ changed by cargo-mutants ~ */\n }\n \n fn has_local_marker(entry: &StatusEntry) -> bool {\n     entry.wc_locked\n         || entry.tree_conflicted\n         || entry.copied\n         || entry.switched\n         || entry.lock.is_some()\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "has_remote_change",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 235
+        },
+        "start": {
+          "column": 1,
+          "line": 225
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/wc_status.rs:226:5: replace has_remote_change -> bool with true",
+    "package": "dakedaduck-svn",
+    "replacement": "true",
+    "span": {
+      "end": {
+        "column": 32,
+        "line": 234
+      },
+      "start": {
+        "column": 5,
+        "line": 226
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ delete ! in has_remote_change\n@@ -225,17 +225,17 @@\n fn has_remote_change(entry: &StatusEntry) -> bool {\n     let remote_item = entry\n         .remote_item\n         .as_ref()\n         .is_some_and(|item| !is_plain(item));\n     let remote_props = entry\n         .remote_props\n         .as_ref()\n-        .is_some_and(|item| !is_plain(item));\n+        .is_some_and(|item|  /* ~ changed by cargo-mutants ~ */is_plain(item));\n     remote_item || remote_props\n }\n \n fn has_local_marker(entry: &StatusEntry) -> bool {\n     entry.wc_locked\n         || entry.tree_conflicted\n         || entry.copied\n         || entry.switched\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "has_remote_change",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 235
+        },
+        "start": {
+          "column": 1,
+          "line": 225
+        }
+      }
+    },
+    "genre": "UnaryOperator",
+    "name": "src/app/wc_status.rs:233:29: delete ! in has_remote_change",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 30,
+        "line": 233
+      },
+      "start": {
+        "column": 29,
+        "line": 233
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace has_local_marker -> bool with true\n@@ -230,21 +230,17 @@\n     let remote_props = entry\n         .remote_props\n         .as_ref()\n         .is_some_and(|item| !is_plain(item));\n     remote_item || remote_props\n }\n \n fn has_local_marker(entry: &StatusEntry) -> bool {\n-    entry.wc_locked\n-        || entry.tree_conflicted\n-        || entry.copied\n-        || entry.switched\n-        || entry.lock.is_some()\n+    true /* ~ changed by cargo-mutants ~ */\n }\n \n fn is_plain(item: &StatusItem) -> bool {\n     matches!(item, StatusItem::Normal | StatusItem::None)\n }\n \n fn is_normal(entry: &StatusEntry) -> bool {\n     let plain_locally = is_plain(&entry.item) && is_plain(&entry.props);\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "has_local_marker",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 243
+        },
+        "start": {
+          "column": 1,
+          "line": 237
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/wc_status.rs:238:5: replace has_local_marker -> bool with true",
+    "package": "dakedaduck-svn",
+    "replacement": "true",
+    "span": {
+      "end": {
+        "column": 32,
+        "line": 242
+      },
+      "start": {
+        "column": 5,
+        "line": 238
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace || with && in has_local_marker\n@@ -232,17 +232,17 @@\n         .as_ref()\n         .is_some_and(|item| !is_plain(item));\n     remote_item || remote_props\n }\n \n fn has_local_marker(entry: &StatusEntry) -> bool {\n     entry.wc_locked\n         || entry.tree_conflicted\n-        || entry.copied\n+        && /* ~ changed by cargo-mutants ~ */ entry.copied\n         || entry.switched\n         || entry.lock.is_some()\n }\n \n fn is_plain(item: &StatusItem) -> bool {\n     matches!(item, StatusItem::Normal | StatusItem::None)\n }\n \n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "has_local_marker",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 243
+        },
+        "start": {
+          "column": 1,
+          "line": 237
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/wc_status.rs:240:9: replace || with && in has_local_marker",
+    "package": "dakedaduck-svn",
+    "replacement": "&&",
+    "span": {
+      "end": {
+        "column": 11,
+        "line": 240
+      },
+      "start": {
+        "column": 9,
+        "line": 240
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace is_plain -> bool with false\n@@ -238,17 +238,17 @@\n     entry.wc_locked\n         || entry.tree_conflicted\n         || entry.copied\n         || entry.switched\n         || entry.lock.is_some()\n }\n \n fn is_plain(item: &StatusItem) -> bool {\n-    matches!(item, StatusItem::Normal | StatusItem::None)\n+    false /* ~ changed by cargo-mutants ~ */\n }\n \n fn is_normal(entry: &StatusEntry) -> bool {\n     let plain_locally = is_plain(&entry.item) && is_plain(&entry.props);\n     plain_locally && !has_remote_change(entry) && !has_local_marker(entry)\n }\n \n fn changed_folders(entries: &[StatusEntry], wc: &Path) -> Vec<String> {\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "is_plain",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 247
+        },
+        "start": {
+          "column": 1,
+          "line": 245
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/wc_status.rs:246:5: replace is_plain -> bool with false",
+    "package": "dakedaduck-svn",
+    "replacement": "false",
+    "span": {
+      "end": {
+        "column": 58,
+        "line": 246
+      },
+      "start": {
+        "column": 5,
+        "line": 246
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/wc_status.rs\n+++ replace is_normal -> bool with false\n@@ -242,18 +242,17 @@\n         || entry.lock.is_some()\n }\n \n fn is_plain(item: &StatusItem) -> bool {\n     matches!(item, StatusItem::Normal | StatusItem::None)\n }\n \n fn is_normal(entry: &StatusEntry) -> bool {\n-    let plain_locally = is_plain(&entry.item) && is_plain(&entry.props);\n-    plain_locally && !has_remote_change(entry) && !has_local_marker(entry)\n+    false /* ~ changed by cargo-mutants ~ */\n }\n \n fn changed_folders(entries: &[StatusEntry], wc: &Path) -> Vec<String> {\n     let folders: BTreeSet<String> = entries\n         .iter()\n         .filter(|entry| entry.item != StatusItem::Ignored)\n         .flat_map(|entry| Path::new(&entry.path).ancestors().skip(1))\n         .filter(|folder| folder.starts_with(wc))\n",
+    "file": "src/app/wc_status.rs",
+    "function": {
+      "function_name": "is_normal",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 252
+        },
+        "start": {
+          "column": 1,
+          "line": 249
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/wc_status.rs:250:5: replace is_normal -> bool with false",
+    "package": "dakedaduck-svn",
+    "replacement": "false",
+    "span": {
+      "end": {
+        "column": 75,
+        "line": 251
+      },
+      "start": {
+        "column": 5,
+        "line": 250
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/edit.rs\n+++ replace > with >= in FileService::write_text\n@@ -37,17 +37,17 @@\n \n     pub fn write_text(\n         &self,\n         file: &ScopedPath,\n         update: &TextUpdate,\n     ) -> Result<TextWritten, FileError> {\n         self.ensure_writable(file)?;\n         let bytes = encode_document(update);\n-        if bytes.len() as u64 > MAX_EDITABLE_BYTES {\n+        if bytes.len() as u64 >= /* ~ changed by cargo-mutants ~ */ MAX_EDITABLE_BYTES {\n             return Err(FileError::TooLarge);\n         }\n         let _lease = self\n             .manager\n             .try_lock_for_write(&self.lock_reference(file))?;\n         self.ensure_writable(file)?;\n         ensure_unchanged(file.as_path(), &update.expected_version)?;\n         let version = replace_atomically(file.as_path(), &bytes)?;\n",
+    "file": "src/app/files/edit.rs",
+    "function": {
+      "function_name": "FileService::write_text",
+      "return_type": "-> Result<TextWritten, FileError>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 56
+        },
+        "start": {
+          "column": 5,
+          "line": 38
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/files/edit.rs:45:31: replace > with >= in FileService::write_text",
+    "package": "dakedaduck-svn",
+    "replacement": ">=",
+    "span": {
+      "end": {
+        "column": 32,
+        "line": 45
+      },
+      "start": {
+        "column": 31,
+        "line": 45
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/edit.rs\n+++ replace + with * in read_bounded\n@@ -85,17 +85,17 @@\n             .parent()\n             .and_then(|dir| self.working_copy_root(dir))\n             .unwrap_or_else(|| file.as_path().to_path_buf())\n     }\n }\n \n fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>, FileError> {\n     let mut bytes = Vec::new();\n-    File::open(path)?.take(limit + 1).read_to_end(&mut bytes)?;\n+    File::open(path)?.take(limit * /* ~ changed by cargo-mutants ~ */ 1).read_to_end(&mut bytes)?;\n     if bytes.len() as u64 > limit {\n         return Err(FileError::TooLarge);\n     }\n     Ok(bytes)\n }\n \n fn ensure_unchanged(path: &Path, expected_version: &str) -> Result<(), FileError> {\n     match current_version(path) {\n",
+    "file": "src/app/files/edit.rs",
+    "function": {
+      "function_name": "read_bounded",
+      "return_type": "-> Result<Vec<u8>, FileError>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 98
+        },
+        "start": {
+          "column": 1,
+          "line": 91
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/files/edit.rs:93:34: replace + with * in read_bounded",
+    "package": "dakedaduck-svn",
+    "replacement": "*",
+    "span": {
+      "end": {
+        "column": 35,
+        "line": 93
+      },
+      "start": {
+        "column": 34,
+        "line": 93
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/edit.rs\n+++ replace match guard error.kind() == ErrorKind::AlreadyExists with true in create_temp\n@@ -132,17 +132,17 @@\n     file.write_all(bytes)?;\n     file.sync_all()\n }\n \n fn create_temp(target: &Path) -> io::Result<(File, PathBuf)> {\n     for _ in 0..MAX_TEMP_ATTEMPTS {\n         let temp = temp_name(target, NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed));\n         match OpenOptions::new().write(true).create_new(true).open(&temp) {\n-            Err(error) if error.kind() == ErrorKind::AlreadyExists => {}\n+            Err(error) if true /* ~ changed by cargo-mutants ~ */ => {}\n             opened => return opened.map(|file| (file, temp)),\n         }\n     }\n     Err(ErrorKind::AlreadyExists.into())\n }\n \n fn temp_name(target: &Path, id: u64) -> PathBuf {\n     let name = target.file_name().unwrap_or_default().to_string_lossy();\n",
+    "file": "src/app/files/edit.rs",
+    "function": {
+      "function_name": "create_temp",
+      "return_type": "-> io::Result<(File, PathBuf)>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 145
+        },
+        "start": {
+          "column": 1,
+          "line": 136
+        }
+      }
+    },
+    "genre": "MatchArmGuard",
+    "name": "src/app/files/edit.rs:140:27: replace match guard error.kind() == ErrorKind::AlreadyExists with true in create_temp",
+    "package": "dakedaduck-svn",
+    "replacement": "true",
+    "span": {
+      "end": {
+        "column": 67,
+        "line": 140
+      },
+      "start": {
+        "column": 27,
+        "line": 140
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/external.rs\n+++ replace <impl Launcher for SystemLauncher>::open -> io::Result<()> with Ok(())\n@@ -16,17 +16,17 @@\n pub trait Launcher: Send + Sync {\n     fn open(&self, path: &Path) -> io::Result<()>;\n }\n \n pub struct SystemLauncher;\n \n impl Launcher for SystemLauncher {\n     fn open(&self, path: &Path) -> io::Result<()> {\n-        opener::open(path).map_err(io::Error::other)\n+        Ok(()) /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n impl FileService {\n     pub fn can_open_external(&self, file: &ScopedPath) -> bool {\n         self.ensure_openable(file).is_ok()\n     }\n \n",
+    "file": "src/app/files/external.rs",
+    "function": {
+      "function_name": "<impl Launcher for SystemLauncher>::open",
+      "return_type": "-> io::Result<()>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 25
+        },
+        "start": {
+          "column": 5,
+          "line": 23
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/files/external.rs:24:9: replace <impl Launcher for SystemLauncher>::open -> io::Result<()> with Ok(())",
+    "package": "dakedaduck-svn",
+    "replacement": "Ok(())",
+    "span": {
+      "end": {
+        "column": 53,
+        "line": 24
+      },
+      "start": {
+        "column": 9,
+        "line": 24
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/text.rs\n+++ replace * with +\n@@ -1,16 +1,16 @@\n use serde::{Deserialize, Serialize};\n \n use super::FileError;\n use crate::app::sniff::{UTF8_BOM, UTF16_BE_BOM, UTF16_LE_BOM, UTF16_UNIT_BYTES};\n \n const BYTES_PER_KIB: u64 = 1024;\n pub const MAX_EDITABLE_MIB: u64 = 5;\n-pub const MAX_EDITABLE_BYTES: u64 = MAX_EDITABLE_MIB * BYTES_PER_KIB * BYTES_PER_KIB;\n+pub const MAX_EDITABLE_BYTES: u64 = MAX_EDITABLE_MIB + /* ~ changed by cargo-mutants ~ */ BYTES_PER_KIB * BYTES_PER_KIB;\n pub const HEX_CHUNK: usize = 64 * 1024;\n \n const CRLF: &str = \"\\r\\n\";\n const LF: &str = \"\\n\";\n const NUL: char = '\\0';\n const BOM_ENCODINGS: [Encoding; 3] = [Encoding::Utf16Le, Encoding::Utf16Be, Encoding::Utf8];\n \n #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]\n",
+    "file": "src/app/files/text.rs",
+    "function": null,
+    "genre": "BinaryOperator",
+    "name": "src/app/files/text.rs:8:54: replace * with +",
+    "package": "dakedaduck-svn",
+    "replacement": "+",
+    "span": {
+      "end": {
+        "column": 55,
+        "line": 8
+      },
+      "start": {
+        "column": 54,
+        "line": 8
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/text.rs\n+++ replace * with +\n@@ -1,17 +1,17 @@\n use serde::{Deserialize, Serialize};\n \n use super::FileError;\n use crate::app::sniff::{UTF8_BOM, UTF16_BE_BOM, UTF16_LE_BOM, UTF16_UNIT_BYTES};\n \n const BYTES_PER_KIB: u64 = 1024;\n pub const MAX_EDITABLE_MIB: u64 = 5;\n pub const MAX_EDITABLE_BYTES: u64 = MAX_EDITABLE_MIB * BYTES_PER_KIB * BYTES_PER_KIB;\n-pub const HEX_CHUNK: usize = 64 * 1024;\n+pub const HEX_CHUNK: usize = 64 + /* ~ changed by cargo-mutants ~ */ 1024;\n \n const CRLF: &str = \"\\r\\n\";\n const LF: &str = \"\\n\";\n const NUL: char = '\\0';\n const BOM_ENCODINGS: [Encoding; 3] = [Encoding::Utf16Le, Encoding::Utf16Be, Encoding::Utf8];\n \n #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]\n #[serde(rename_all = \"snake_case\")]\n",
+    "file": "src/app/files/text.rs",
+    "function": null,
+    "genre": "BinaryOperator",
+    "name": "src/app/files/text.rs:9:33: replace * with +",
+    "package": "dakedaduck-svn",
+    "replacement": "+",
+    "span": {
+      "end": {
+        "column": 34,
+        "line": 9
+      },
+      "start": {
+        "column": 33,
+        "line": 9
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/version.rs\n+++ replace ^ with | in fnv1a\n@@ -1,17 +1,17 @@\n use std::fs::Metadata;\n use std::os::windows::fs::MetadataExt;\n \n const FNV_OFFSET_BASIS: u64 = 0xcbf2_9ce4_8422_2325;\n const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;\n \n fn fnv1a(bytes: &[u8]) -> u64 {\n     bytes.iter().fold(FNV_OFFSET_BASIS, |hash, byte| {\n-        (hash ^ u64::from(*byte)).wrapping_mul(FNV_PRIME)\n+        (hash | /* ~ changed by cargo-mutants ~ */ u64::from(*byte)).wrapping_mul(FNV_PRIME)\n     })\n }\n \n pub(super) fn version_of(metadata: &Metadata, content: &[u8]) -> String {\n     format!(\n         \"{:x}-{:x}-{:016x}\",\n         metadata.len(),\n         metadata.last_write_time(),\n",
+    "file": "src/app/files/version.rs",
+    "function": {
+      "function_name": "fnv1a",
+      "return_type": "-> u64",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 11
+        },
+        "start": {
+          "column": 1,
+          "line": 7
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/files/version.rs:9:15: replace ^ with | in fnv1a",
+    "package": "dakedaduck-svn",
+    "replacement": "|",
+    "span": {
+      "end": {
+        "column": 16,
+        "line": 9
+      },
+      "start": {
+        "column": 15,
+        "line": 9
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/files/version.rs\n+++ replace ^ with & in fnv1a\n@@ -1,17 +1,17 @@\n use std::fs::Metadata;\n use std::os::windows::fs::MetadataExt;\n \n const FNV_OFFSET_BASIS: u64 = 0xcbf2_9ce4_8422_2325;\n const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;\n \n fn fnv1a(bytes: &[u8]) -> u64 {\n     bytes.iter().fold(FNV_OFFSET_BASIS, |hash, byte| {\n-        (hash ^ u64::from(*byte)).wrapping_mul(FNV_PRIME)\n+        (hash & /* ~ changed by cargo-mutants ~ */ u64::from(*byte)).wrapping_mul(FNV_PRIME)\n     })\n }\n \n pub(super) fn version_of(metadata: &Metadata, content: &[u8]) -> String {\n     format!(\n         \"{:x}-{:x}-{:016x}\",\n         metadata.len(),\n         metadata.last_write_time(),\n",
+    "file": "src/app/files/version.rs",
+    "function": {
+      "function_name": "fnv1a",
+      "return_type": "-> u64",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 11
+        },
+        "start": {
+          "column": 1,
+          "line": 7
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/files/version.rs:9:15: replace ^ with & in fnv1a",
+    "package": "dakedaduck-svn",
+    "replacement": "&",
+    "span": {
+      "end": {
+        "column": 16,
+        "line": 9
+      },
+      "start": {
+        "column": 15,
+        "line": 9
+      }
+    }
+  }
+]

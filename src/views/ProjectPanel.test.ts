@@ -11,7 +11,6 @@ vi.mock('../services/tauri', async (importOriginal) => ({
   opCancel: vi.fn(),
   wcUpdate: vi.fn(),
   wcCleanup: vi.fn(),
-  pickDirectory: vi.fn(),
 }));
 
 import * as service from '../services/tauri';
@@ -33,9 +32,10 @@ const errResult = (kind: string): OperationResult =>
 
 let wrapper: VueWrapper;
 
-async function mountOpenPanel() {
+async function mountOpenPanel(copyRoot: string | null = 'wc') {
   const pinia = createPinia();
   wrapper = mount(ProjectPanel, {
+    props: { copyRoot },
     global: { plugins: [pinia] },
     attachTo: document.body,
   });
@@ -137,7 +137,7 @@ describe('ProjectPanel busy state', () => {
       'Actualizar',
       'Confirmar',
       'Refrescar estado',
-      'Abrir',
+      'Hacer checkout',
     ]) {
       expect(button(label)?.attributes('disabled')).toBeDefined();
     }
@@ -200,45 +200,63 @@ describe('ProjectPanel cancel confirmation', () => {
   });
 });
 
-describe('ProjectPanel opening a copy', () => {
-  it('ignores an empty path and opens the typed one trimmed', async () => {
+describe('ProjectPanel without the open form', () => {
+  it('no longer asks for a path to open a copy', async () => {
     await mountOpenPanel();
-    vi.mocked(service.wcInfo).mockClear();
-    const form = wrapper
-      .findAll('form')
-      .find((item) => item.find('#open-path').exists())!;
-    await form.trigger('submit');
-    expect(service.wcInfo).not.toHaveBeenCalled();
-    await wrapper.find('#open-path').setValue('  otra  ');
-    await form.trigger('submit');
-    await flushPromises();
-    expect(service.wcInfo).toHaveBeenCalledWith('otra');
+    expect(wrapper.find('#open-path').exists()).toBe(false);
+    expect(button('Abrir')).toBeUndefined();
+    expect(button('Elegir carpeta')).toBeUndefined();
   });
 
-  it('disables the open button while a copy is still being read', async () => {
-    await mountOpenPanel();
-    vi.mocked(service.wcInfo).mockImplementationOnce(
-      () => new Promise(() => undefined),
-    );
-    void useProjectStore().open('otra');
-    await flushPromises();
-    expect(button('Abrir')?.attributes('disabled')).toBeDefined();
+  it('keeps the checkout form available with no copy at all', async () => {
+    await mountOpenPanel(null);
+    expect(wrapper.find('#checkout-url').exists()).toBe(true);
+    expect(wrapper.text()).toContain('no es una copia de trabajo');
+    expect(button('Actualizar')).toBeUndefined();
+  });
+});
+
+describe('ProjectPanel copy card', () => {
+  it('shows the card only for the copy the explorer is looking at', async () => {
+    await mountOpenPanel('wc');
+    expect(button('Actualizar')).toBeDefined();
+    await wrapper.setProps({ copyRoot: 'otra' });
+    expect(button('Actualizar')).toBeUndefined();
   });
 
-  it('fills the path from the folder picker and shows its failure', async () => {
-    vi.mocked(service.pickDirectory).mockResolvedValueOnce('C:\\elegida');
-    await mountOpenPanel();
-    await button('Elegir carpeta')?.trigger('click');
-    await flushPromises();
-    expect((wrapper.find('#open-path').element as HTMLInputElement).value).toBe(
-      'C:\\elegida',
-    );
-    vi.mocked(service.pickDirectory).mockRejectedValueOnce({
-      kind: 'io',
-      message: 'selector roto',
+  it('offers a highlighted Cleanup for a locked copy that could not be read', async () => {
+    vi.mocked(service.wcInfo).mockRejectedValue({
+      kind: 'working_copy_locked',
+      message: 'copia bloqueada',
     });
-    await button('Elegir carpeta')?.trigger('click');
+    await mountOpenPanel('wc-bloqueada');
+    const cleanup = button('Cleanup');
+    expect(cleanup?.classes()).toContain('btn--primary');
+    expect(wrapper.text()).toContain('Usa Cleanup para liberarla');
+    vi.mocked(service.wcInfo).mockResolvedValue({} as service.InfoEntry);
+    finishWith(okResult);
+    await cleanup?.trigger('click');
     await flushPromises();
-    expect(wrapper.text()).toContain('selector roto');
+    expect(service.wcCleanup).toHaveBeenCalledWith({ path: 'wc-bloqueada' });
+  });
+
+  it('explains an old-format copy without offering Cleanup', async () => {
+    vi.mocked(service.wcInfo).mockRejectedValue({
+      kind: 'working_copy_too_old',
+      message: 'formato antiguo',
+    });
+    await mountOpenPanel('wc-vieja');
+    expect(wrapper.text()).toContain('svn upgrade');
+    expect(button('Cleanup')).toBeUndefined();
+  });
+
+  it('counts a finished operation once it is fully done', async () => {
+    finishWith(okResult);
+    await mountOpenPanel();
+    const store = useProjectStore();
+    const before = store.finishedOperations;
+    await button('Actualizar')?.trigger('click');
+    await flushPromises();
+    expect(store.finishedOperations).toBe(before + 1);
   });
 });

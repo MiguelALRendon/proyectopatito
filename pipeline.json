@@ -3,7 +3,7 @@
     {
       "id": "build",
       "order": 1,
-      "cmd": "npx vue-tsc --noEmit",
+      "cmd": "npx vue-tsc --noEmit && npx vue-tsc -p tests/e2e/tsconfig.json --noEmit",
       "tier": "local",
       "blocking": "hard"
     },

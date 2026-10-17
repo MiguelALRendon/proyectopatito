@@ -7,7 +7,8 @@ use thiserror::Error;
 const VERBATIM_PREFIX: &str = r"\\?\";
 const VERBATIM_UNC_PREFIX: &str = r"\\?\UNC\";
 const UNC_PREFIX: &str = r"\\";
-const RESERVED_DEVICE_NAMES: [&str; 4] = ["CON", "PRN", "AUX", "NUL"];
+const RESERVED_DEVICE_NAMES: [&str; 7] =
+    ["CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$", "CLOCK$"];
 const NUMBERED_DEVICE_PREFIXES: [&str; 2] = ["COM", "LPT"];
 
 #[derive(Debug, Error)]
@@ -81,6 +82,16 @@ impl Workspace {
     pub fn revalidate(&self, scoped: &ScopedPath) -> Result<(), WorkspaceError> {
         let current = canonicalize_deepest_ancestor(scoped.as_path())?;
         self.ensure_contained(&current)
+    }
+
+    pub fn is_inside(&self, path: &Path) -> bool {
+        canonicalize_deepest_ancestor(path)
+            .is_ok_and(|resolved| self.ensure_contained(&resolved).is_ok())
+    }
+
+    pub(crate) fn relative_path(&self, path: &Path) -> PathBuf {
+        let root_depth = self.root.0.components().count();
+        path.components().skip(root_depth).collect()
     }
 
     fn ensure_contained(&self, candidate: &Path) -> Result<(), WorkspaceError> {
@@ -177,7 +188,7 @@ fn strip_verbatim(path: PathBuf) -> PathBuf {
     stripped.map_or(path, PathBuf::from)
 }
 
-fn component_keys(path: &Path) -> Vec<String> {
+pub(crate) fn component_keys(path: &Path) -> Vec<String> {
     path.components()
         .map(|component| component.as_os_str().to_string_lossy().to_lowercase())
         .collect()

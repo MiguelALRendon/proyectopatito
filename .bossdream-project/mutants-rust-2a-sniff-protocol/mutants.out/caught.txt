@@ -1,0 +1,2 @@
+src/app/sniff.rs:4:34: replace * with +
+src/app/sniff.rs:346:55: replace * with / in has_plausible_first_ico_entry

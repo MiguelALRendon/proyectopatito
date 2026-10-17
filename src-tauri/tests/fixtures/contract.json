@@ -13,7 +13,17 @@
     "timed_out",
     "svn_failed",
     "parse_failed",
-    "io"
+    "io",
+    "not_a_directory",
+    "forbidden_path",
+    "not_text",
+    "too_large",
+    "file_changed",
+    "read_only",
+    "file_locked",
+    "working_copy_busy",
+    "cloud_only",
+    "not_allowed"
   ],
   "events": {
     "progress_item": {
@@ -95,6 +105,57 @@
     },
     "cleanup": {
       "path": "copia"
+    },
+    "status_map": {
+      "wc_root": "proyecto",
+      "remote": true,
+      "refresh": true,
+      "username": "alice",
+      "password": null
+    },
+    "write_text": {
+      "path": "wc\\notas.txt",
+      "content": "uno\ndos\n",
+      "encoding": "utf8",
+      "has_bom": false,
+      "eol": "lf",
+      "expected_version": "9-1dc6d5f2a3b4c00-a430d84680aabd0b"
+    },
+    "ui_state_set": {
+      "version": 1,
+      "favorites": [
+        {
+          "path": "proyecto\\src",
+          "name": "Fuentes"
+        }
+      ],
+      "tabs": [
+        {
+          "id": "t1",
+          "kind": "folder",
+          "path": "proyecto",
+          "title": "proyecto"
+        },
+        {
+          "id": "t2",
+          "kind": "document",
+          "path": "proyecto\\notas.md",
+          "title": "notas.md"
+        }
+      ],
+      "active_tab": "t2",
+      "views": {
+        "proyecto\\src": {
+          "mode": "details",
+          "columns": [
+            "size",
+            "svn"
+          ],
+          "sort": "modified",
+          "sort_direction": "desc",
+          "updated_ms": 1760400000000
+        }
+      }
     }
   },
   "item_actions": [
@@ -141,6 +202,190 @@
     },
     "cleanup": {
       "path": "wc"
+    },
+    "status_map": {
+      "wc_root": "wc",
+      "remote": false,
+      "refresh": false,
+      "username": null,
+      "password": null
+    }
+  },
+  "probe_kinds": [
+    "text",
+    "image",
+    "pdf",
+    "binary",
+    "cloud"
+  ],
+  "encodings": [
+    "utf8",
+    "utf16_le",
+    "utf16_be"
+  ],
+  "eols": [
+    "lf",
+    "crlf"
+  ],
+  "status_map": {
+    "entries": [
+      {
+        "path": "proyecto\\bloqueado.txt",
+        "item": "normal",
+        "props": "none",
+        "revision": 3,
+        "remote_item": "none",
+        "remote_props": "none",
+        "wc_locked": false,
+        "tree_conflicted": false,
+        "copied": false,
+        "switched": false,
+        "lock": {
+          "owner": "alice",
+          "comment": null
+        }
+      },
+      {
+        "path": "proyecto\\copia",
+        "item": "added",
+        "props": "none",
+        "revision": null,
+        "remote_item": null,
+        "remote_props": null,
+        "wc_locked": true,
+        "tree_conflicted": true,
+        "copied": true,
+        "switched": true,
+        "lock": null
+      }
+    ],
+    "changed_folders": [
+      "proyecto"
+    ],
+    "truncated": true,
+    "against_revision": 4
+  },
+  "fs": {
+    "text_document": {
+      "content": "uno\r\ndos\r\n",
+      "encoding": "utf16_le",
+      "has_bom": true,
+      "eol": "crlf",
+      "eol_mixed": false,
+      "version": "1c-1dc6d5f2a3b4c00-cbf29ce484222325",
+      "len": 22
+    },
+    "text_written": {
+      "version": "1c-1dc6d5f2a3b4c10-af63bd4c8601b7df"
+    },
+    "listing": {
+      "path": "proyecto\\src",
+      "entries": [
+        {
+          "name": "logo.png",
+          "kind": "file",
+          "size": 68,
+          "modified_ms": 1760400000000,
+          "hidden": false,
+          "read_only": true,
+          "is_link": false,
+          "escapes_workspace": false,
+          "cloud_only": true
+        },
+        {
+          "name": "enlace",
+          "kind": "dir",
+          "size": 0,
+          "modified_ms": null,
+          "hidden": true,
+          "read_only": false,
+          "is_link": true,
+          "escapes_workspace": true,
+          "cloud_only": false
+        }
+      ],
+      "truncated": true,
+      "wc": {
+        "root": "proyecto",
+        "is_root": false
+      }
+    },
+    "probe": {
+      "kind": "image",
+      "mime": "image/png",
+      "len": 68,
+      "extension": "png"
+    }
+  },
+  "view_modes": [
+    "grid",
+    "list",
+    "details"
+  ],
+  "view_columns": [
+    "type",
+    "size",
+    "modified",
+    "svn"
+  ],
+  "sort_keys": [
+    "name",
+    "type",
+    "size",
+    "modified",
+    "status"
+  ],
+  "sort_directions": [
+    "asc",
+    "desc"
+  ],
+  "tab_kinds": [
+    "folder",
+    "document"
+  ],
+  "ui_state": {
+    "version": 1,
+    "favorites": [
+      {
+        "path": "proyecto\\src",
+        "name": "Fuentes",
+        "exists": true
+      },
+      {
+        "path": "viejo",
+        "name": "Viejo",
+        "exists": false
+      }
+    ],
+    "tabs": [
+      {
+        "id": "t1",
+        "kind": "folder",
+        "path": "proyecto",
+        "title": "proyecto",
+        "exists": true
+      },
+      {
+        "id": "t2",
+        "kind": "document",
+        "path": "proyecto\\notas.md",
+        "title": "notas.md",
+        "exists": false
+      }
+    ],
+    "active_tab": "t2",
+    "views": {
+      "proyecto\\src": {
+        "mode": "details",
+        "columns": [
+          "size",
+          "svn"
+        ],
+        "sort": "modified",
+        "sort_direction": "desc",
+        "updated_ms": 1760400000000,
+        "exists": true
+      }
     }
   }
 }

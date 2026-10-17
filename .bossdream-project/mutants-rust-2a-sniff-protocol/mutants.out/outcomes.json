@@ -1,0 +1,448 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 48.0019951,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.5139652,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/sniff.rs:4:34: replace * with +",
+          "package": "dakedaduck-svn",
+          "file": "src/app/sniff.rs",
+          "function": null,
+          "span": {
+            "start": {
+              "line": 4,
+              "column": 34
+            },
+            "end": {
+              "line": 4,
+              "column": 35
+            }
+          },
+          "replacement": "+",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__sniff.rs_line_4_col_34.log",
+      "diff_path": "diff/src__app__sniff.rs_line_4_col_34.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.6586367,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.4122581,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/sniff.rs:202:17: delete field bytes from struct Sample expression in is_text",
+          "package": "dakedaduck-svn",
+          "file": "src/app/sniff.rs",
+          "function": {
+            "function_name": "is_text",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 194,
+                "column": 1
+              },
+              "end": {
+                "line": 209,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 202,
+              "column": 17
+            },
+            "end": {
+              "line": 202,
+              "column": 29
+            }
+          },
+          "replacement": "",
+          "genre": "StructField"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/src__app__sniff.rs_line_202_col_17.log",
+      "diff_path": "diff/src__app__sniff.rs_line_202_col_17.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 27.5682597,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.8654958000000001,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(Vec::new()))",
+          "package": "dakedaduck-svn",
+          "file": "src/app/sniff.rs",
+          "function": {
+            "function_name": "skip_prolog_item",
+            "return_type": "-> Option<&[u8]>",
+            "span": {
+              "start": {
+                "line": 255,
+                "column": 1
+              },
+              "end": {
+                "line": 263,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 256,
+              "column": 5
+            },
+            "end": {
+              "line": 262,
+              "column": 7
+            }
+          },
+          "replacement": "Some(Vec::leak(Vec::new()))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Timeout",
+      "log_path": "log/src__app__sniff.rs_line_256_col_5.log",
+      "diff_path": "diff/src__app__sniff.rs_line_256_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.5789298,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 20.0369669,
+          "process_status": "Timeout",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![0]))",
+          "package": "dakedaduck-svn",
+          "file": "src/app/sniff.rs",
+          "function": {
+            "function_name": "skip_prolog_item",
+            "return_type": "-> Option<&[u8]>",
+            "span": {
+              "start": {
+                "line": 255,
+                "column": 1
+              },
+              "end": {
+                "line": 263,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 256,
+              "column": 5
+            },
+            "end": {
+              "line": 262,
+              "column": 7
+            }
+          },
+          "replacement": "Some(Vec::leak(vec![0]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Timeout",
+      "log_path": "log/src__app__sniff.rs_line_256_col_5_001.log",
+      "diff_path": "diff/src__app__sniff.rs_line_256_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 26.3613149,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 20.0354941,
+          "process_status": "Timeout",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![1]))",
+          "package": "dakedaduck-svn",
+          "file": "src/app/sniff.rs",
+          "function": {
+            "function_name": "skip_prolog_item",
+            "return_type": "-> Option<&[u8]>",
+            "span": {
+              "start": {
+                "line": 255,
+                "column": 1
+              },
+              "end": {
+                "line": 263,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 256,
+              "column": 5
+            },
+            "end": {
+              "line": 262,
+              "column": 7
+            }
+          },
+          "replacement": "Some(Vec::leak(vec![1]))",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Timeout",
+      "log_path": "log/src__app__sniff.rs_line_256_col_5_002.log",
+      "diff_path": "diff/src__app__sniff.rs_line_256_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 24.6184091,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 20.0231069,
+          "process_status": "Timeout",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "src/app/sniff.rs:346:55: replace * with / in has_plausible_first_ico_entry",
+          "package": "dakedaduck-svn",
+          "file": "src/app/sniff.rs",
+          "function": {
+            "function_name": "has_plausible_first_ico_entry",
+            "return_type": "-> bool",
+            "span": {
+              "start": {
+                "line": 345,
+                "column": 1
+              },
+              "end": {
+                "line": 353,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 346,
+              "column": 55
+            },
+            "end": {
+              "line": 346,
+              "column": 56
+            }
+          },
+          "replacement": "/",
+          "genre": "BinaryOperator"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/src__app__sniff.rs_line_346_col_55.log",
+      "diff_path": "diff/src__app__sniff.rs_line_346_col_55.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 29.8687937,
+          "process_status": "Success",
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.3105121,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "C:\\Users\\spook\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\bin\\cargo.exe",
+            "test",
+            "--verbose",
+            "--package=dakedaduck-svn@0.1.0",
+            "--lib",
+            "--test",
+            "sniff",
+            "--test",
+            "protocol"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 6,
+  "missed": 1,
+  "caught": 2,
+  "timeout": 3,
+  "unviable": 0,
+  "success": 0,
+  "start_time": "2026-10-17T08:01:23.4672802Z",
+  "end_time": "2026-10-17T08:06:36.2417705Z",
+  "cargo_mutants_version": "27.1.0"
+}

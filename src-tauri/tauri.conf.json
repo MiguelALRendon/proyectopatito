@@ -13,23 +13,29 @@
     "windows": [
       {
         "title": "Dakedaduck SVN",
-        "width": 800,
-        "height": 600
+        "width": 1280,
+        "height": 800,
+        "minWidth": 900,
+        "minHeight": 600
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://workspace-file.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://workspace-file.localhost; worker-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'",
+      "devCsp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://workspace-file.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://workspace-file.localhost ws://localhost:1420 http://localhost:1420; worker-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'"
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper" }
+    }
   }
 }

@@ -106,6 +106,24 @@ textarea.field__input {
   cursor: not-allowed;
 }
 
+.btn--pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 0;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xl);
+}
+
+.btn[aria-pressed="true"] {
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.btn[aria-pressed="true"]:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
 .btn--primary {
   background-color: var(--color-primary);
   color: var(--color-bg);
@@ -151,6 +169,12 @@ textarea.field__input {
   gap: var(--space-sm);
 }
 
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 .app__header {
   display: flex;
   align-items: center;
@@ -165,7 +189,10 @@ textarea.field__input {
 }
 
 .app__main {
+  flex: 1;
+  min-height: 0;
   padding: var(--space-md);
+  overflow: auto;
 }
 
 .app__main:focus {

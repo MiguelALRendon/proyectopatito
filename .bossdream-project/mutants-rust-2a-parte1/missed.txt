@@ -1,0 +1,4 @@
+src/app/files/mod.rs:38:60: replace | with ^
+src/app/files/mod.rs:268:25: replace + with * in FileService::working_copy_root
+src/app/range.rs:3:33: replace * with +
+src/app/range.rs:4:40: replace * with +

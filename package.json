@@ -3,20 +3,31 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "dev": "vite",
-    "dev:e2e": "vite --config vite.e2e.config.ts",
     "test": "vitest run",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vue-tsc --noEmit && vue-tsc -p tests/e2e/tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-dialog": "^2.8.2",
+    "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-dialog": "2.7.3",
+    "dompurify": "3.4.17",
+    "marked": "18.1.1",
     "monaco-editor": "^0.57.0",
+    "pdfjs-dist": "6.4.299",
     "pinia": "^4.0.3",
     "vue": "^3.5.13"
+  },
+  "overrides": {
+    "monaco-editor": {
+      "dompurify": "3.4.17"
+    }
   },
   "devDependencies": {
     "@stryker-mutator/core": "^10.0.0",
@@ -26,6 +37,7 @@
     "@vitest/coverage-v8": "^3.2.7",
     "@vue/test-utils": "^2.5.1",
     "happy-dom": "^21.0.1",
+    "playwright-core": "^1.64.1",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3",
     "vite": "^8.0.16",

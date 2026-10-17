@@ -1,0 +1,5 @@
+src/app/range.rs:117:64: replace > with >= in bounds
+src/app/ui_state.rs:147:52: replace > with >= in checked_tab
+src/app/ui_state.rs:152:9: delete field title from struct Tab expression in checked_tab
+src/app/ui_state.rs:173:47: replace > with == in keep_newest
+src/app/ui_state.rs:173:47: replace > with >= in keep_newest

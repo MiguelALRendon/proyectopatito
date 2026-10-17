@@ -1,11 +1,24 @@
 #![cfg(windows)]
 
-use dakedaduck_svn_lib::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, UpdateArgs};
+use dakedaduck_svn_lib::app::args::{
+    CheckoutArgs, CleanupArgs, CommitArgs, StatusMapArgs, UpdateArgs, WriteTextArgs,
+};
 use dakedaduck_svn_lib::app::error::{CommandError, CommandErrorKind};
+use dakedaduck_svn_lib::app::files::{
+    DirListing, Encoding, EntryKind, Eol, FileEntry, FileProbe, TextDocument, TextWritten,
+    WcLocation,
+};
 use dakedaduck_svn_lib::app::operations::OperationId;
+use dakedaduck_svn_lib::app::sniff::ProbeKind;
 use dakedaduck_svn_lib::app::state::OperationResult;
+use dakedaduck_svn_lib::app::ui_state::{Located, UiStateView};
+use dakedaduck_svn_lib::app::wc_status::WcStatusMap;
 use dakedaduck_svn_lib::commands::{DonePayload, ProgressPayload};
+use dakedaduck_svn_lib::config::{
+    Favorite, FolderView, SortDirection, SortKey, Tab, TabKind, UiState, ViewColumn, ViewMode,
+};
 use dakedaduck_svn_lib::svn::commands::Depth;
+use dakedaduck_svn_lib::svn::models::{StatusEntry, StatusItem, StatusLock};
 use dakedaduck_svn_lib::svn::progress::{ProgressAction, ProgressEvent};
 use serde_json::{Value, json};
 
@@ -32,10 +45,20 @@ fn kind_name(kind: CommandErrorKind) -> &'static str {
         CommandErrorKind::SvnFailed => "svn_failed",
         CommandErrorKind::ParseFailed => "parse_failed",
         CommandErrorKind::Io => "io",
+        CommandErrorKind::NotADirectory => "not_a_directory",
+        CommandErrorKind::ForbiddenPath => "forbidden_path",
+        CommandErrorKind::NotText => "not_text",
+        CommandErrorKind::TooLarge => "too_large",
+        CommandErrorKind::FileChanged => "file_changed",
+        CommandErrorKind::ReadOnly => "read_only",
+        CommandErrorKind::FileLocked => "file_locked",
+        CommandErrorKind::WorkingCopyBusy => "working_copy_busy",
+        CommandErrorKind::CloudOnly => "cloud_only",
+        CommandErrorKind::NotAllowed => "not_allowed",
     }
 }
 
-const ALL_KINDS: [CommandErrorKind; 14] = [
+const ALL_KINDS: [CommandErrorKind; 24] = [
     CommandErrorKind::NoWorkspace,
     CommandErrorKind::NoSvn,
     CommandErrorKind::OutsideWorkspace,
@@ -50,6 +73,16 @@ const ALL_KINDS: [CommandErrorKind; 14] = [
     CommandErrorKind::SvnFailed,
     CommandErrorKind::ParseFailed,
     CommandErrorKind::Io,
+    CommandErrorKind::NotADirectory,
+    CommandErrorKind::ForbiddenPath,
+    CommandErrorKind::NotText,
+    CommandErrorKind::TooLarge,
+    CommandErrorKind::FileChanged,
+    CommandErrorKind::ReadOnly,
+    CommandErrorKind::FileLocked,
+    CommandErrorKind::WorkingCopyBusy,
+    CommandErrorKind::CloudOnly,
+    CommandErrorKind::NotAllowed,
 ];
 
 fn progress(event: ProgressEvent) -> Value {
@@ -137,6 +170,11 @@ fn requests_sent_by_the_frontend_deserialize_into_the_backend_args() {
     assert_eq!(commit.username.as_deref(), Some("alice"));
     let cleanup: CleanupArgs = serde_json::from_value(requests["cleanup"].clone()).unwrap();
     assert_eq!(cleanup.path, "copia");
+    let status_map: StatusMapArgs = serde_json::from_value(requests["status_map"].clone()).unwrap();
+    assert_eq!(status_map.wc_root, "proyecto");
+    assert!(status_map.remote);
+    assert!(status_map.refresh);
+    assert_eq!(status_map.username.as_deref(), Some("alice"));
 }
 
 const ALL_ACTIONS: [ProgressAction; 11] = [
@@ -221,4 +259,298 @@ fn requests_the_ui_really_builds_deserialize_into_the_backend_args() {
     assert_eq!(commit.password, None);
     let cleanup: CleanupArgs = serde_json::from_value(requests["cleanup"].clone()).unwrap();
     assert_eq!(cleanup.path, "wc");
+    let status_map: StatusMapArgs = serde_json::from_value(requests["status_map"].clone()).unwrap();
+    assert_eq!(status_map.wc_root, "wc");
+    assert!(!status_map.remote);
+    assert!(!status_map.refresh);
+    assert_eq!(status_map.password, None);
+}
+
+const ALL_PROBE_KINDS: [ProbeKind; 5] = [
+    ProbeKind::Text,
+    ProbeKind::Image,
+    ProbeKind::Pdf,
+    ProbeKind::Binary,
+    ProbeKind::Cloud,
+];
+
+fn probe_kind_name(kind: ProbeKind) -> &'static str {
+    match kind {
+        ProbeKind::Text => "text",
+        ProbeKind::Image => "image",
+        ProbeKind::Pdf => "pdf",
+        ProbeKind::Binary => "binary",
+        ProbeKind::Cloud => "cloud",
+    }
+}
+
+#[test]
+fn serialized_probe_kinds_are_exactly_the_ones_the_frontend_lists() {
+    let serialized: Vec<Value> = ALL_PROBE_KINDS
+        .iter()
+        .map(|kind| serde_json::to_value(kind).unwrap())
+        .collect();
+    let named: Vec<Value> = ALL_PROBE_KINDS
+        .iter()
+        .map(|kind| json!(probe_kind_name(*kind)))
+        .collect();
+    assert_eq!(serialized, named);
+    assert_eq!(Value::Array(serialized), fixture()["probe_kinds"]);
+}
+
+fn entry(name: &str, kind: EntryKind) -> FileEntry {
+    FileEntry {
+        name: name.into(),
+        kind,
+        size: 0,
+        modified_ms: None,
+        hidden: false,
+        read_only: false,
+        is_link: false,
+        escapes_workspace: false,
+        cloud_only: false,
+    }
+}
+
+fn cloud_image_entry() -> FileEntry {
+    FileEntry {
+        size: 68,
+        modified_ms: Some(1_760_400_000_000),
+        read_only: true,
+        cloud_only: true,
+        ..entry("logo.png", EntryKind::File)
+    }
+}
+
+fn escaping_link_entry() -> FileEntry {
+    FileEntry {
+        hidden: true,
+        is_link: true,
+        escapes_workspace: true,
+        ..entry("enlace", EntryKind::Dir)
+    }
+}
+
+#[test]
+fn a_directory_listing_serializes_to_the_shape_the_frontend_reads() {
+    let listing = DirListing {
+        path: r"proyecto\src".into(),
+        entries: vec![cloud_image_entry(), escaping_link_entry()],
+        truncated: true,
+        wc: Some(WcLocation {
+            root: "proyecto".into(),
+            is_root: false,
+        }),
+    };
+    assert_eq!(
+        serde_json::to_value(listing).unwrap(),
+        fixture()["fs"]["listing"]
+    );
+}
+
+#[test]
+fn a_file_probe_serializes_to_the_shape_the_frontend_reads() {
+    let probe = FileProbe {
+        kind: ProbeKind::Image,
+        mime: "image/png",
+        len: 68,
+        extension: Some("png"),
+    };
+    assert_eq!(
+        serde_json::to_value(probe).unwrap(),
+        fixture()["fs"]["probe"]
+    );
+}
+
+#[test]
+fn a_text_document_serializes_to_the_shape_the_frontend_reads() {
+    let document = TextDocument {
+        content: "uno\r\ndos\r\n".into(),
+        encoding: Encoding::Utf16Le,
+        has_bom: true,
+        eol: Eol::CrLf,
+        eol_mixed: false,
+        version: "1c-1dc6d5f2a3b4c00-cbf29ce484222325".into(),
+        len: 22,
+    };
+    assert_eq!(
+        serde_json::to_value(document).unwrap(),
+        fixture()["fs"]["text_document"]
+    );
+    let written = TextWritten {
+        version: "1c-1dc6d5f2a3b4c10-af63bd4c8601b7df".into(),
+    };
+    assert_eq!(
+        serde_json::to_value(written).unwrap(),
+        fixture()["fs"]["text_written"]
+    );
+}
+
+#[test]
+fn every_encoding_and_line_ending_the_frontend_lists_is_accepted_and_none_is_missing() {
+    let encodings: Vec<Encoding> = serde_json::from_value(fixture()["encodings"].clone()).unwrap();
+    assert_eq!(
+        encodings,
+        [Encoding::Utf8, Encoding::Utf16Le, Encoding::Utf16Be]
+    );
+    let eols: Vec<Eol> = serde_json::from_value(fixture()["eols"].clone()).unwrap();
+    assert_eq!(eols, [Eol::Lf, Eol::CrLf]);
+}
+
+#[test]
+fn the_write_request_the_frontend_sends_deserializes_into_the_backend_args() {
+    let request = fixture()["requests"]["write_text"].clone();
+    let args: WriteTextArgs = serde_json::from_value(request).unwrap();
+    assert_eq!(args.path, r"wc\notas.txt");
+    assert_eq!(args.update.content, "uno\ndos\n");
+    assert_eq!(args.update.encoding, Encoding::Utf8);
+    assert!(!args.update.has_bom);
+    assert_eq!(args.update.eol, Eol::Lf);
+    assert_eq!(
+        args.update.expected_version,
+        "9-1dc6d5f2a3b4c00-a430d84680aabd0b"
+    );
+}
+
+fn status_entry(path: &str, item: StatusItem) -> StatusEntry {
+    StatusEntry {
+        path: path.into(),
+        item,
+        props: StatusItem::None,
+        revision: None,
+        remote_item: None,
+        remote_props: None,
+        wc_locked: false,
+        tree_conflicted: false,
+        copied: false,
+        switched: false,
+        lock: None,
+    }
+}
+
+#[test]
+fn a_status_map_serializes_to_the_shape_the_frontend_reads() {
+    let locked = StatusEntry {
+        revision: Some(3),
+        remote_item: Some(StatusItem::None),
+        remote_props: Some(StatusItem::None),
+        lock: Some(StatusLock {
+            owner: "alice".into(),
+            comment: None,
+        }),
+        ..status_entry(r"proyecto\bloqueado.txt", StatusItem::Normal)
+    };
+    let copied = StatusEntry {
+        wc_locked: true,
+        tree_conflicted: true,
+        copied: true,
+        switched: true,
+        ..status_entry(r"proyecto\copia", StatusItem::Added)
+    };
+    let map = WcStatusMap {
+        entries: vec![locked, copied],
+        changed_folders: vec!["proyecto".into()],
+        truncated: true,
+        against_revision: Some(4),
+    };
+    assert_eq!(serde_json::to_value(map).unwrap(), fixture()["status_map"]);
+}
+
+fn ui_view() -> FolderView {
+    FolderView {
+        mode: ViewMode::Details,
+        columns: vec![ViewColumn::Size, ViewColumn::Svn],
+        sort: SortKey::Modified,
+        sort_direction: SortDirection::Desc,
+        updated_ms: 1_760_400_000_000,
+    }
+}
+
+fn ui_tab(id: &str, kind: TabKind, path: &str, title: &str) -> Tab {
+    Tab {
+        id: id.into(),
+        kind,
+        path: path.into(),
+        title: title.into(),
+    }
+}
+
+#[test]
+fn every_ui_state_enum_the_frontend_lists_is_accepted_and_none_is_missing() {
+    let list = |key: &str| fixture()[key].clone();
+    let modes: Vec<ViewMode> = serde_json::from_value(list("view_modes")).unwrap();
+    assert_eq!(modes, [ViewMode::Grid, ViewMode::List, ViewMode::Details]);
+    let columns: Vec<ViewColumn> = serde_json::from_value(list("view_columns")).unwrap();
+    assert_eq!(
+        columns,
+        [
+            ViewColumn::Type,
+            ViewColumn::Size,
+            ViewColumn::Modified,
+            ViewColumn::Svn
+        ]
+    );
+    let keys: Vec<SortKey> = serde_json::from_value(list("sort_keys")).unwrap();
+    assert_eq!(
+        keys,
+        [
+            SortKey::Name,
+            SortKey::Type,
+            SortKey::Size,
+            SortKey::Modified,
+            SortKey::Status
+        ]
+    );
+    let directions: Vec<SortDirection> = serde_json::from_value(list("sort_directions")).unwrap();
+    assert_eq!(directions, [SortDirection::Asc, SortDirection::Desc]);
+    let kinds: Vec<TabKind> = serde_json::from_value(list("tab_kinds")).unwrap();
+    assert_eq!(kinds, [TabKind::Folder, TabKind::Document]);
+}
+
+#[test]
+fn the_ui_state_the_frontend_sends_deserializes_and_serializes_back_unchanged() {
+    let request = fixture()["requests"]["ui_state_set"].clone();
+    let state: UiState = serde_json::from_value(request.clone()).unwrap();
+    assert_eq!(state.favorites.len(), 1);
+    assert_eq!(state.tabs.len(), 2);
+    assert_eq!(state.active_tab.as_deref(), Some("t2"));
+    assert_eq!(state.views[r"proyecto\src"], ui_view());
+    assert_eq!(serde_json::to_value(state).unwrap(), request);
+}
+
+#[test]
+fn the_ui_state_view_serializes_to_the_shape_the_frontend_reads() {
+    let view = UiStateView {
+        version: 1,
+        favorites: vec![
+            located(
+                Favorite {
+                    path: r"proyecto\src".into(),
+                    name: "Fuentes".into(),
+                },
+                true,
+            ),
+            located(
+                Favorite {
+                    path: "viejo".into(),
+                    name: "Viejo".into(),
+                },
+                false,
+            ),
+        ],
+        tabs: vec![
+            located(ui_tab("t1", TabKind::Folder, "proyecto", "proyecto"), true),
+            located(
+                ui_tab("t2", TabKind::Document, r"proyecto\notas.md", "notas.md"),
+                false,
+            ),
+        ],
+        active_tab: Some("t2".into()),
+        views: [(r"proyecto\src".to_string(), located(ui_view(), true))].into(),
+    };
+    assert_eq!(serde_json::to_value(view).unwrap(), fixture()["ui_state"]);
+}
+
+fn located<T>(item: T, exists: bool) -> Located<T> {
+    Located { item, exists }
 }

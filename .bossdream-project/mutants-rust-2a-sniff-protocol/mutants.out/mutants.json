@@ -1,0 +1,181 @@
+[
+  {
+    "diff": "--- src/app/sniff.rs\n+++ replace * with +\n@@ -1,12 +1,12 @@\n use serde::Serialize;\n \n const BYTES_PER_KIB: usize = 1024;\n-pub const SNIFF_BYTES: usize = 8 * BYTES_PER_KIB;\n+pub const SNIFF_BYTES: usize = 8 + /* ~ changed by cargo-mutants ~ */ BYTES_PER_KIB;\n \n const MIME_TEXT: &str = \"text/plain\";\n const MIME_BINARY: &str = \"application/octet-stream\";\n const MIME_PDF: &str = \"application/pdf\";\n const MIME_SVG: &str = \"image/svg+xml\";\n const MIME_PNG: &str = \"image/png\";\n const MIME_JPEG: &str = \"image/jpeg\";\n const MIME_GIF: &str = \"image/gif\";\n",
+    "file": "src/app/sniff.rs",
+    "function": null,
+    "genre": "BinaryOperator",
+    "name": "src/app/sniff.rs:4:34: replace * with +",
+    "package": "dakedaduck-svn",
+    "replacement": "+",
+    "span": {
+      "end": {
+        "column": 35,
+        "line": 4
+      },
+      "start": {
+        "column": 34,
+        "line": 4
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/sniff.rs\n+++ delete field bytes from struct Sample expression in is_text\n@@ -194,17 +194,17 @@\n fn is_text(sample: Sample<'_>) -> bool {\n     let utf16 = UTF16_BOMS.iter().find_map(|(bom, decode)| {\n         let body = sample.bytes.strip_prefix(bom.as_slice())?;\n         Some((body, *decode))\n     });\n     match utf16 {\n         Some((body, decode)) => is_utf16_text(\n             Sample {\n-                bytes: body,\n+                 /* ~ changed by cargo-mutants ~ */\n                 ..sample\n             },\n             decode,\n         ),\n         None => is_utf8_text(sample),\n     }\n }\n \n",
+    "file": "src/app/sniff.rs",
+    "function": {
+      "function_name": "is_text",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 209
+        },
+        "start": {
+          "column": 1,
+          "line": 194
+        }
+      }
+    },
+    "genre": "StructField",
+    "name": "src/app/sniff.rs:202:17: delete field bytes from struct Sample expression in is_text",
+    "package": "dakedaduck-svn",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 202
+      },
+      "start": {
+        "column": 17,
+        "line": 202
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/sniff.rs\n+++ replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(Vec::new()))\n@@ -248,23 +248,17 @@\n         return false;\n     };\n     after_tag\n         .first()\n         .is_some_and(|next| next.is_ascii_whitespace() || SVG_TAG_TERMINATORS.contains(next))\n }\n \n fn skip_prolog_item(rest: &[u8]) -> Option<&[u8]> {\n-    PROLOG_ITEMS.iter().find_map(|(open, close)| {\n-        let body = rest.strip_prefix(*open)?;\n-        let end = body\n-            .windows(close.len())\n-            .position(|window| window == *close)?;\n-        Some(&body[end + close.len()..])\n-    })\n+    Some(Vec::leak(Vec::new())) /* ~ changed by cargo-mutants ~ */\n }\n \n fn u16_le(bytes: &[u8], at: usize) -> Option<u16> {\n     let field = bytes.get(at..at + size_of::<u16>())?;\n     Some(u16::from_le_bytes(field.try_into().ok()?))\n }\n \n fn u32_le(bytes: &[u8], at: usize) -> Option<u32> {\n",
+    "file": "src/app/sniff.rs",
+    "function": {
+      "function_name": "skip_prolog_item",
+      "return_type": "-> Option<&[u8]>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 263
+        },
+        "start": {
+          "column": 1,
+          "line": 255
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(Vec::new()))",
+    "package": "dakedaduck-svn",
+    "replacement": "Some(Vec::leak(Vec::new()))",
+    "span": {
+      "end": {
+        "column": 7,
+        "line": 262
+      },
+      "start": {
+        "column": 5,
+        "line": 256
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/sniff.rs\n+++ replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![0]))\n@@ -248,23 +248,17 @@\n         return false;\n     };\n     after_tag\n         .first()\n         .is_some_and(|next| next.is_ascii_whitespace() || SVG_TAG_TERMINATORS.contains(next))\n }\n \n fn skip_prolog_item(rest: &[u8]) -> Option<&[u8]> {\n-    PROLOG_ITEMS.iter().find_map(|(open, close)| {\n-        let body = rest.strip_prefix(*open)?;\n-        let end = body\n-            .windows(close.len())\n-            .position(|window| window == *close)?;\n-        Some(&body[end + close.len()..])\n-    })\n+    Some(Vec::leak(vec![0])) /* ~ changed by cargo-mutants ~ */\n }\n \n fn u16_le(bytes: &[u8], at: usize) -> Option<u16> {\n     let field = bytes.get(at..at + size_of::<u16>())?;\n     Some(u16::from_le_bytes(field.try_into().ok()?))\n }\n \n fn u32_le(bytes: &[u8], at: usize) -> Option<u32> {\n",
+    "file": "src/app/sniff.rs",
+    "function": {
+      "function_name": "skip_prolog_item",
+      "return_type": "-> Option<&[u8]>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 263
+        },
+        "start": {
+          "column": 1,
+          "line": 255
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![0]))",
+    "package": "dakedaduck-svn",
+    "replacement": "Some(Vec::leak(vec![0]))",
+    "span": {
+      "end": {
+        "column": 7,
+        "line": 262
+      },
+      "start": {
+        "column": 5,
+        "line": 256
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/sniff.rs\n+++ replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![1]))\n@@ -248,23 +248,17 @@\n         return false;\n     };\n     after_tag\n         .first()\n         .is_some_and(|next| next.is_ascii_whitespace() || SVG_TAG_TERMINATORS.contains(next))\n }\n \n fn skip_prolog_item(rest: &[u8]) -> Option<&[u8]> {\n-    PROLOG_ITEMS.iter().find_map(|(open, close)| {\n-        let body = rest.strip_prefix(*open)?;\n-        let end = body\n-            .windows(close.len())\n-            .position(|window| window == *close)?;\n-        Some(&body[end + close.len()..])\n-    })\n+    Some(Vec::leak(vec![1])) /* ~ changed by cargo-mutants ~ */\n }\n \n fn u16_le(bytes: &[u8], at: usize) -> Option<u16> {\n     let field = bytes.get(at..at + size_of::<u16>())?;\n     Some(u16::from_le_bytes(field.try_into().ok()?))\n }\n \n fn u32_le(bytes: &[u8], at: usize) -> Option<u32> {\n",
+    "file": "src/app/sniff.rs",
+    "function": {
+      "function_name": "skip_prolog_item",
+      "return_type": "-> Option<&[u8]>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 263
+        },
+        "start": {
+          "column": 1,
+          "line": 255
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/app/sniff.rs:256:5: replace skip_prolog_item -> Option<&[u8]> with Some(Vec::leak(vec![1]))",
+    "package": "dakedaduck-svn",
+    "replacement": "Some(Vec::leak(vec![1]))",
+    "span": {
+      "end": {
+        "column": 7,
+        "line": 262
+      },
+      "start": {
+        "column": 5,
+        "line": 256
+      }
+    }
+  },
+  {
+    "diff": "--- src/app/sniff.rs\n+++ replace * with / in has_plausible_first_ico_entry\n@@ -338,16 +338,16 @@\n         return false;\n     };\n     bytes.starts_with(ICO_SIGNATURE)\n         && (1..=ICO_MAX_IMAGES).contains(&count)\n         && has_plausible_first_ico_entry(bytes, count)\n }\n \n fn has_plausible_first_ico_entry(bytes: &[u8], count: u16) -> bool {\n-    let table_end = ICO_DIRECTORY_LEN + ICO_ENTRY_LEN * u32::from(count);\n+    let table_end = ICO_DIRECTORY_LEN + ICO_ENTRY_LEN / /* ~ changed by cargo-mutants ~ */ u32::from(count);\n     bytes.get(ICO_ENTRY_RESERVED_AT) == Some(&0)\n         && u16_le(bytes, ICO_ENTRY_PLANES_AT).is_some_and(|planes| planes <= ICO_MAX_PLANES)\n         && u16_le(bytes, ICO_ENTRY_BIT_DEPTH_AT)\n             .is_some_and(|depth| ICO_BIT_DEPTHS.contains(&depth))\n         && is_positive(u32_le(bytes, ICO_ENTRY_SIZE_AT))\n         && u32_le(bytes, ICO_ENTRY_OFFSET_AT).is_some_and(|offset| offset >= table_end)\n }\n",
+    "file": "src/app/sniff.rs",
+    "function": {
+      "function_name": "has_plausible_first_ico_entry",
+      "return_type": "-> bool",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 353
+        },
+        "start": {
+          "column": 1,
+          "line": 345
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/app/sniff.rs:346:55: replace * with / in has_plausible_first_ico_entry",
+    "package": "dakedaduck-svn",
+    "replacement": "/",
+    "span": {
+      "end": {
+        "column": 56,
+        "line": 346
+      },
+      "start": {
+        "column": 55,
+        "line": 346
+      }
+    }
+  }
+]

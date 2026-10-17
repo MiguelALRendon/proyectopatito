@@ -1,4 +1,4 @@
-/* CSS no admite var() en media queries: unico archivo con breakpoints literales (sm 640px, md 768px, lg 1024px) */
+/* var() no funciona en media queries: aqui los breakpoints van literales */
 @media (min-width: 640px) {
   .row {
     flex-wrap: nowrap;
@@ -29,6 +29,28 @@
 
   .app__main {
     padding: var(--space-lg);
+  }
+
+  .shell__topbar {
+    padding-inline: var(--space-lg);
+  }
+
+  .shell__body {
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  .shell__sidebar {
+    max-height: none;
+    inline-size: var(--shell-sidebar-size);
+  }
+
+  .shell__body > .resize-handle.shell__handle--sidebar {
+    display: flex;
+  }
+
+  .shell__center {
+    flex: 1 1 0;
   }
 }
 
