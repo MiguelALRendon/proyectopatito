@@ -4,6 +4,7 @@ import EditorWorker from 'monaco-editor/editor/editor.worker.js?worker';
 import HtmlWorker from 'monaco-editor/language/html/html.worker.js?worker';
 import JsonWorker from 'monaco-editor/language/json/json.worker.js?worker';
 import type { Theme } from '../../composables/useTheme';
+import { applyTheme, readToken } from './theme';
 
 export interface CursorPosition {
   line: number;
@@ -43,27 +44,6 @@ const WORKERS: Record<string, WorkerFactory> = {
   handlebars: HtmlWorker,
   razor: HtmlWorker,
 };
-const THEME_BASES: Record<Theme, 'vs' | 'vs-dark'> = {
-  light: 'vs',
-  dark: 'vs-dark',
-};
-const SELECTION_ALPHA = '40';
-const SELECTION_TOKEN = '--color-primary';
-const THEME_TOKENS: Record<string, string> = {
-  'editor.background': '--color-bg',
-  'editor.foreground': '--color-text',
-  'editorLineNumber.foreground': '--color-text-muted',
-  'editorLineNumber.activeForeground': '--color-text',
-  'editorGutter.background': '--color-bg-elevated',
-  'editor.lineHighlightBackground': '--color-bg-elevated',
-  'editorCursor.foreground': '--color-primary',
-  'minimap.background': '--color-bg-elevated',
-  'editorWidget.background': '--color-bg-elevated',
-  'editorWidget.border': '--color-border',
-  'input.background': '--color-bg',
-  'input.border': '--color-border',
-  focusBorder: '--color-primary',
-};
 const MODEL_SCHEME = 'dakedaduck';
 const READ_ONLY_MESSAGE = 'El archivo es de solo lectura y no se puede editar';
 
@@ -76,39 +56,6 @@ function configure() {
   self.MonacoEnvironment = {
     getWorker: (_workerId, label) => new (WORKERS[label] ?? EditorWorker)(),
   };
-}
-
-function readToken(name: string): string {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(name)
-    .trim();
-}
-
-function expandHex(color: string): string {
-  const isShort = /^#[0-9a-f]{3}$/i.test(color);
-  if (!isShort) return color;
-  return `#${[...color.slice(1)].map((digit) => digit + digit).join('')}`;
-}
-
-function themeColors(): Record<string, string> {
-  const colorOf = (token: string) => expandHex(readToken(token));
-  const colors = Object.fromEntries(
-    Object.entries(THEME_TOKENS).map(([key, token]) => [key, colorOf(token)]),
-  );
-  colors['editor.selectionBackground'] =
-    `${colorOf(SELECTION_TOKEN)}${SELECTION_ALPHA}`;
-  return colors;
-}
-
-function applyTheme(theme: Theme) {
-  const name = `${MODEL_SCHEME}-${theme}`;
-  monaco.editor.defineTheme(name, {
-    base: THEME_BASES[theme],
-    inherit: true,
-    rules: [],
-    colors: themeColors(),
-  });
-  monaco.editor.setTheme(name);
 }
 
 function createModel(path: string, content: string) {

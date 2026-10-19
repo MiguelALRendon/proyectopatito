@@ -9,7 +9,7 @@ use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use common::TestRepo;
+use common::{FakeSvn, TestRepo};
 use dakedaduck_svn_lib::app::operations::{
     CommitOutcome, OPERATION_TIMEOUT, OperationContext, OperationError, OperationId,
     OperationManager, Operations, ProgressSink,
@@ -21,7 +21,7 @@ use dakedaduck_svn_lib::svn::commands::{
     is_safe_checkout_url,
 };
 use dakedaduck_svn_lib::svn::error::SvnErrorKind;
-use dakedaduck_svn_lib::svn::message_file::MessageFile;
+use dakedaduck_svn_lib::svn::message_file::{MessageFile, purge_stale};
 use dakedaduck_svn_lib::svn::models::StatusItem;
 use dakedaduck_svn_lib::svn::progress::{
     ProgressAction, ProgressEvent, last_revision, parse_progress_line,
@@ -293,6 +293,25 @@ fn message_file_normalizes_line_endings_and_is_removed_on_drop() {
 }
 
 #[test]
+fn purge_stale_removes_only_old_commit_message_files() {
+    let dir = TempDir::new().unwrap();
+    let write = |name: &str, age: Duration| {
+        let path = dir.path().join(name);
+        fs::write(&path, "mensaje").unwrap();
+        let file = fs::File::options().write(true).open(&path).unwrap();
+        file.set_modified(std::time::SystemTime::now() - age)
+            .unwrap();
+        path
+    };
+    let old = write("dakedaduck-commit-1-0.txt", Duration::from_secs(3 * 3600));
+    let fresh = write("dakedaduck-commit-1-1.txt", Duration::from_secs(60));
+    let foreign = write("otro-viejo.txt", Duration::from_secs(3 * 3600));
+    purge_stale(dir.path(), Duration::from_secs(2 * 3600));
+    assert!(!old.exists());
+    assert!(fresh.exists() && foreign.exists());
+}
+
+#[test]
 fn manager_ids_are_unique_and_cancel_only_reaches_live_operations() {
     let manager = OperationManager::default();
     let (first, _) = manager.begin();
@@ -442,8 +461,8 @@ async fn two_simultaneous_updates_of_the_same_working_copy_both_succeed() {
         env.ops.update(&wc, update_request(), &first),
         env.ops.update(&wc, update_request(), &second)
     );
-    assert_eq!(a.unwrap(), 0);
-    assert_eq!(b.unwrap(), 0);
+    assert_eq!(a.unwrap(), Some(0));
+    assert_eq!(b.unwrap(), Some(0));
 }
 
 #[tokio::test]
@@ -460,7 +479,7 @@ async fn update_streams_progress_events_and_returns_the_new_revision() {
         ..env.context()
     };
     let revision = env.ops.update(&mine, update_request(), &ctx).await.unwrap();
-    assert_eq!(revision, 1);
+    assert_eq!(revision, Some(1));
     let seen = events.lock().unwrap();
     assert!(seen.iter().any(|event| matches!(
         event,
@@ -495,7 +514,38 @@ async fn checkout_into_a_fresh_working_copy_reports_revision_zero() {
         .checkout(&dest, checkout_request(&env.repo), &env.context())
         .await
         .unwrap();
-    assert_eq!(revision, 0);
+    assert_eq!(revision, Some(0));
+}
+
+#[tokio::test]
+async fn checkout_and_update_succeed_with_unknown_revision_when_svn_info_fails() {
+    let bin_dir = TempDir::new().unwrap();
+    let fake = FakeSvn {
+        stdout: "Checked out revision 5.
+",
+        ..FakeSvn::with_version("1.14.0")
+    };
+    let svn = fake.build(bin_dir.path());
+    let root = TempDir::new().unwrap();
+    let workspace = Workspace::new(root.path()).unwrap();
+    let ops = Operations::new(
+        workspace.clone(),
+        SvnClient::new(SvnRunner::new(svn)),
+        Arc::new(OperationManager::default()),
+    );
+    let dest = workspace.resolve(Path::new(WC_NAME), false).unwrap();
+    let ctx = || OperationContext {
+        id: ops.manager().begin().0,
+        progress: None,
+        password: None,
+    };
+    let repo = TestRepo::create();
+    let checked_out = ops
+        .checkout(&dest, checkout_request(&repo), &ctx())
+        .await
+        .unwrap();
+    let updated = ops.update(&dest, update_request(), &ctx()).await.unwrap();
+    assert_eq!((checked_out, updated), (None, None));
 }
 
 #[tokio::test]
@@ -508,7 +558,7 @@ async fn operation_waits_while_another_operation_holds_the_working_copy() {
     let early = tokio::time::timeout(LOCK_WAIT_PROOF, &mut pending).await;
     assert!(early.is_err(), "la operacion avanzo con la WC bloqueada");
     drop(held);
-    assert_eq!(pending.await.unwrap(), 0);
+    assert_eq!(pending.await.unwrap(), Some(0));
 }
 
 #[tokio::test]

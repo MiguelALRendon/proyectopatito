@@ -20,7 +20,12 @@ import {
   withoutFavorite,
   type FavoriteItem,
 } from '../utils/favoriteList';
-import { ROOT_FOLDER_LABEL } from '../utils/folderPaths';
+import {
+  ROOT_FOLDER_LABEL,
+  normalizedPath,
+  pathKey,
+  pathSegments,
+} from '../utils/folderPaths';
 
 export const MAX_TABS = 64;
 export const PERSIST_DELAY_MS = 400;
@@ -31,23 +36,13 @@ export const RESTORE_FAILED_NOTICE =
   'No se pudo restaurar la sesión de pestañas.';
 export const SAVE_FAILED_NOTICE = 'No se pudo guardar la sesión de pestañas.';
 
-const PATH_SEPARATOR = '\\';
-const PATH_SEPARATORS = /[\\/]/;
 const DISCARD_TITLE = 'Cambios sin guardar';
 const DISCARD_LABEL = 'Cerrar sin guardar';
 
 type Preserved = Pick<UiState, 'version' | 'views'>;
 
-export function cleanPath(path: string): string {
-  return path.split(PATH_SEPARATORS).filter(Boolean).join(PATH_SEPARATOR);
-}
-
-export function tabKey(path: string): string {
-  return cleanPath(path).toLowerCase();
-}
-
 export function tabTitle(path: string): string {
-  return cleanPath(path).split(PATH_SEPARATOR).pop() || ROOT_TAB_TITLE;
+  return pathSegments(path).pop() || ROOT_TAB_TITLE;
 }
 
 function byCount(count: number, singular: string, plural: string): string {
@@ -167,12 +162,12 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   function viewOf(path: string): FolderView | null {
-    const key = tabKey(path);
+    const key = pathKey(path);
     return localViews.get(key) ?? preserved?.views[key] ?? null;
   }
 
   function setView(path: string, view: FolderView) {
-    localViews.set(tabKey(path), view);
+    localViews.set(pathKey(path), view);
     save();
   }
 
@@ -233,9 +228,9 @@ export const useTabsStore = defineStore('tabs', () => {
     kind: TabKind = 'folder',
     title?: string,
   ): string | null {
-    const clean = cleanPath(path);
+    const clean = normalizedPath(path);
     const existing = tabs.value.find(
-      (tab) => tabKey(tab.path) === tabKey(clean),
+      (tab) => pathKey(tab.path) === pathKey(clean),
     );
     if (existing) {
       activate(existing.id);
@@ -255,7 +250,7 @@ export const useTabsStore = defineStore('tabs', () => {
   function navigate(id: string, path: string, title?: string) {
     const tab = tabs.value[indexOf(id)];
     if (!tab) return;
-    tab.path = cleanPath(path);
+    tab.path = normalizedPath(path);
     tab.title = title ?? tabTitle(tab.path);
     save();
   }

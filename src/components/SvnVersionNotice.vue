@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useWorkspaceStore } from '../stores/workspace';
+import SvnWarning from './SvnWarning.vue';
 
 const workspace = useWorkspaceStore();
+const isBundled = computed(() => workspace.svn?.binary?.origin === 'bundled');
 </script>
 
 <template>
   <template v-if="workspace.hasSvn">
-    <p class="notice">Subversion {{ workspace.svnVersion }} detectado.</p>
+    <p class="notice">
+      {{
+        isBundled
+          ? `Subversion incluido (versión ${workspace.svnVersion}).`
+          : `Subversion ${workspace.svnVersion} detectado.`
+      }}
+    </p>
+    <SvnWarning />
     <p v-if="workspace.svn?.error" class="banner banner--warning" role="alert">
       {{ workspace.svn.error }}
     </p>

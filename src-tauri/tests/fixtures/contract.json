@@ -23,7 +23,14 @@
     "file_locked",
     "working_copy_busy",
     "cloud_only",
-    "not_allowed"
+    "not_allowed",
+    "office_too_large",
+    "archive_corrupt",
+    "archive_encrypted",
+    "archive_limit",
+    "archive_unsupported",
+    "unsafe_entry",
+    "archive_needs_confirmation"
   ],
   "events": {
     "progress_item": {
@@ -215,6 +222,10 @@
     "text",
     "image",
     "pdf",
+    "office",
+    "audio",
+    "video",
+    "archive",
     "binary",
     "cloud"
   ],
@@ -314,7 +325,9 @@
       "kind": "image",
       "mime": "image/png",
       "len": 68,
-      "extension": "png"
+      "extension": "png",
+      "has_macros": false,
+      "version": null
     }
   },
   "view_modes": [
@@ -387,5 +400,19 @@
         "exists": true
       }
     }
+  },
+  "svn_origins": [
+    "configured",
+    "bundled",
+    "system"
+  ],
+  "svn_detection": {
+    "binary": {
+      "path": "C:/svn/svn.exe",
+      "version": "1.14.5",
+      "origin": "bundled"
+    },
+    "error": null,
+    "warning": "aviso"
   }
 }

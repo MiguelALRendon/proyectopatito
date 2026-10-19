@@ -10,12 +10,12 @@ use std::time::{Duration, Instant, SystemTime};
 
 use common::FakeSvn;
 
-use dakedaduck_svn_lib::app::svn_locator::{
-    LocatorError, MIN_VERSION, SvnVersion, default_search_dirs, locate, locate_in, parse_version,
-    search_dirs,
-};
 use dakedaduck_svn_lib::svn::error::{
     CODE_AUTH_REQUIRED, Captured, SvnError, SvnErrorKind, extract_codes, redact_command,
+};
+use dakedaduck_svn_lib::svn::locator::{
+    LocatorError, MIN_VERSION, SvnVersion, default_search_dirs, locate, locate_in, parse_version,
+    search_dirs,
 };
 use dakedaduck_svn_lib::svn::runner::{RunOptions, SvnRunner, decode_stderr};
 use tempfile::TempDir;
@@ -305,6 +305,11 @@ fn parse_version_ignores_vendor_suffix_and_whitespace() {
         patch: 2,
     };
     assert_eq!(parse_version("  1.14.2-SlikSvn\r\n"), Some(expected));
+}
+
+#[test]
+fn version_is_displayed_as_dotted_numbers() {
+    assert_eq!(parse_version("1.14.5").unwrap().to_string(), "1.14.5");
 }
 
 #[test]

@@ -17,7 +17,7 @@ Las fases salen de `propuesta.md` §127. La Fase 2 se dividió en dos planes (2A
 |---|---|---|---|
 | 1. Fundación | Tauri, Rust, frontend, workspace, filesystem, detección de `svn`, `info`, `status`, `checkout`, `update`, `commit` | **Hecha** (QA aceptado el 2026-10-14) | `plans/fase-1-fundacion` |
 | 2A. Explorador | Explorador, favoritos, pestañas, vistas, apertura de documentos, editores | **Hecha**: Increments 1 a 14. Pendientes el Increment 15 (esta documentación) y el 16 (QA Increment) | `plans/fase-2a-explorador` |
-| 2B. Documentos | Office, audio, vídeo, comprimidos, `svn.exe` empaquetado, instalador y máquina limpia | **Diferida**: planeada, sin código; depende de que la 2A esté implementada | [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/plan.md) |
+| 2B. Documentos | Office, audio, vídeo, comprimidos, `svn.exe` empaquetado, instalador y máquina limpia | **Implementada** (Increments 1 a 11); faltan el QA Increment y la máquina limpia del usuario (CA-13, CA-14) | [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/plan.md) |
 | 3. Marketplace | Repositorios, navegador de repositorio, metadatos remotos, descarga, checkout, export, detección de estado local | **Diferida**, sin plan | n/a |
 | 4. SVN avanzado | Log, diff, blame, revert, cleanup, propiedades, locks | **Diferida**, sin plan (cleanup ya existe desde la Fase 1) | n/a |
 | 5. Branching | Branch, tag, switch, merge, mergeinfo, gráfico de revisiones | **Diferida**, sin plan | n/a |
@@ -61,9 +61,9 @@ Según la spec de la 2A (`plans/fase-2a-explorador/spec.md`, «Fuera de alcance�
 - Diff, historial, conflictos y propiedades como pestañas (el modelo de pestañas hoy solo tiene los tipos `folder` y `document`).
 - Marketplace: la pestaña existe deshabilitada con un aviso (Fase 3).
 
-## Fase 2B: Documentos (diferida)
+## Fase 2B: Documentos (implementada, falta el QA Increment)
 
-Planeada en [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/spec.md) con 12 increments. Nada de lo siguiente existe en el código; los ADR 0010 a 0012 siguen en `proposed`.
+Planeada en [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/spec.md) con 12 increments. Hechos hasta ahora: el Increment 1 (spikes), el 2 (aislamiento de origen cruzado, ya activo en el código), el 3 (clasificación de Office, audio, vídeo y comprimidos por contenido, y `fs_write_bytes`), el 4 (hospedaje de ZetaOffice: protocolo `zeta-assets`, visor de Office en su pestaña, frontera del WebView desde Rust), el 5 (edición y guardado de Office con conflictos, un documento vivo que sobrevive a otras pestañas y el veto de comandos; el 5.7 queda parcial: las entradas vetadas siguen dibujadas activas) el 6 (reproductor de audio y vídeo con `media-src`) el 7 (listado y extracción segura de comprimidos en Rust) el 8 (visor de comprimidos y diálogo de extracción) el 9 (instalador NSIS medido y verificado en un perfil aislado; falta la máquina limpia), el 10 (SlikSVN 1.14.5 incluido y verificado por hash, aviso de CVE-2024-45720, «Acerca de» y licencias) y el 11 (documentación y `LICENSE`). Falta el 12 (QA Increment) y la evidencia de una máquina limpia, que es acción del usuario. Los ADR 0010 a 0012 están `accepted`; el 0013 sigue `proposed` hasta tener esa evidencia.
 
 | Increment | Contenido |
 |---|---|
@@ -73,8 +73,8 @@ Planeada en [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/spec.md) co
 | 4 y 5 | Hospedaje de ZetaOffice, apertura, edición y guardado de documentos Office |
 | 6 | Audio y vídeo |
 | 7 y 8 | Comprimidos en Rust, visor y extracción segura ([ADR 0011](adr/0011-comprimidos-leidos-y-extraidos-en-rust.md)) |
-| 9 | `svn.exe` empaquetado, versión 1.14.4 o superior ([ADR 0012](adr/0012-svn-exe-como-recurso-del-instalador.md); contexto de CVE-2024-45720 en [integración con Subversion](svn-integration.md#contexto-diferido-svnexe-empaquetado-y-cve-2024-45720)) |
-| 10 | Instalador y prueba en máquina limpia (Windows 11) |
+| 9 | Instalador (NSIS) y verificación parcial en esta máquina |
+| 10 | `svn.exe` empaquetado, versión 1.14.4 o superior ([ADR 0012](adr/0012-svn-exe-como-recurso-del-instalador.md); contexto de CVE-2024-45720 en [integración con Subversion](svn-integration.md#svnexe-empaquetado-y-cve-2024-45720-increment-10)) y prueba en máquina limpia (Windows 11) |
 | 11 | Documentación |
 | 12 | QA Increment |
 

@@ -73,6 +73,12 @@
   --size-checker: 16px;
   --size-page-input: 6ch;
   --size-viewer-min-height: 320px;
+  --size-office-min-height: 360px;
+  --size-media-seek-min: 12ch;
+  --size-media-volume: 10ch;
+  --size-archive-row: 2rem;
+  --size-licenses-max-height: 40vh;
+  --size-progress-height: 0.75rem;
 }
 
 @media (prefers-color-scheme: dark) {

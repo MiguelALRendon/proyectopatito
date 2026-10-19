@@ -1,0 +1,12 @@
+{
+  "corrupto.wav": "tarjeta",
+  "video.avi": "tarjeta",
+  "ruido.mp3": "tarjeta",
+  "sonido.wav": "reproduce",
+  "sonido.mp3": "reproduce",
+  "sonido.flac": "reproduce",
+  "pista.webm": "reproduce",
+  "clip.webm": "reproduce",
+  "clip.mp4": "reproduce",
+  "clip.mkv": "reproduce"
+}

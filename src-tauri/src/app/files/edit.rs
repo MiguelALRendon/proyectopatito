@@ -1,5 +1,6 @@
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, ErrorKind, Read, Seek, SeekFrom, Write};
+use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
 use std::process;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -7,8 +8,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use super::text::{decode_document, encode_document};
 use super::version::version_of;
 use super::{
-    FileError, FileService, HEX_CHUNK, MAX_EDITABLE_BYTES, TEMP_SUFFIX, TextDocument, TextUpdate,
-    TextWritten,
+    FILE_ATTRIBUTE_HIDDEN, FileError, FileService, HEX_CHUNK, MAX_EDITABLE_BYTES, MAX_OFFICE_BYTES,
+    TEMP_SUFFIX, TextDocument, TextUpdate, TextWritten,
 };
 use crate::app::workspace::ScopedPath;
 
@@ -21,6 +22,8 @@ const LOCKED_BY_OTHER_PROCESS: [i32; 3] = [
     ERROR_LOCK_VIOLATION,
 ];
 const MAX_TEMP_ATTEMPTS: usize = 8;
+const FILE_ATTRIBUTE_SYSTEM: u32 = 0x4;
+const PRESERVED_ATTRIBUTES: u32 = FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM;
 
 static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -49,8 +52,28 @@ impl FileService {
             .manager
             .try_lock_for_write(&self.lock_reference(file))?;
         self.ensure_writable(file)?;
-        ensure_unchanged(file.as_path(), &update.expected_version)?;
+        ensure_unchanged(file.as_path(), &update.expected_version, MAX_EDITABLE_BYTES)?;
         let version = replace_atomically(file.as_path(), &bytes)?;
+        self.statuses.invalidate(file.as_path());
+        Ok(TextWritten { version })
+    }
+
+    pub fn write_bytes(
+        &self,
+        file: &ScopedPath,
+        expected_version: &str,
+        bytes: &[u8],
+    ) -> Result<TextWritten, FileError> {
+        self.ensure_writable(file)?;
+        if bytes.len() as u64 > MAX_OFFICE_BYTES {
+            return Err(FileError::OfficeTooLarge);
+        }
+        let _lease = self
+            .manager
+            .try_lock_for_write(&self.lock_reference(file))?;
+        self.ensure_writable(file)?;
+        ensure_unchanged(file.as_path(), expected_version, MAX_OFFICE_BYTES)?;
+        let version = replace_atomically(file.as_path(), bytes)?;
         self.statuses.invalidate(file.as_path());
         Ok(TextWritten { version })
     }
@@ -88,7 +111,7 @@ impl FileService {
     }
 }
 
-fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>, FileError> {
+pub(super) fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>, FileError> {
     let mut bytes = Vec::new();
     File::open(path)?.take(limit + 1).read_to_end(&mut bytes)?;
     if bytes.len() as u64 > limit {
@@ -97,17 +120,17 @@ fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>, FileError> {
     Ok(bytes)
 }
 
-fn ensure_unchanged(path: &Path, expected_version: &str) -> Result<(), FileError> {
-    match current_version(path) {
+fn ensure_unchanged(path: &Path, expected_version: &str, limit: u64) -> Result<(), FileError> {
+    match current_version(path, limit) {
         Ok(version) if version == expected_version => Ok(()),
         Ok(_) | Err(FileError::TooLarge) => Err(FileError::FileChanged),
         Err(error) => Err(error),
     }
 }
 
-fn current_version(path: &Path) -> Result<String, FileError> {
+fn current_version(path: &Path, limit: u64) -> Result<String, FileError> {
     let metadata = fs::symlink_metadata(path)?;
-    let bytes = read_bounded(path, MAX_EDITABLE_BYTES)?;
+    let bytes = read_bounded(path, limit)?;
     Ok(version_of(&metadata, &bytes))
 }
 
@@ -133,10 +156,17 @@ fn fill_temp(mut file: File, bytes: &[u8]) -> io::Result<()> {
     file.sync_all()
 }
 
+fn preserved_attributes(target: &Path) -> u32 {
+    fs::metadata(target).map_or(0, |meta| meta.file_attributes() & PRESERVED_ATTRIBUTES)
+}
+
 fn create_temp(target: &Path) -> io::Result<(File, PathBuf)> {
+    let attributes = preserved_attributes(target);
     for _ in 0..MAX_TEMP_ATTEMPTS {
         let temp = temp_name(target, NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed));
-        match OpenOptions::new().write(true).create_new(true).open(&temp) {
+        let mut options = OpenOptions::new();
+        options.write(true).create_new(true).attributes(attributes);
+        match options.open(&temp) {
             Err(error) if error.kind() == ErrorKind::AlreadyExists => {}
             opened => return opened.map(|file| (file, temp)),
         }

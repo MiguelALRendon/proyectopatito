@@ -15,6 +15,8 @@ const PROBE: FileProbe = {
   mime: 'application/pdf',
   len: 1000,
   extension: 'pdf',
+  has_macros: false,
+  version: null,
 };
 
 let wrapper: VueWrapper;

@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "create": false,
         "title": "Dakedaduck SVN",
         "width": 1280,
         "height": 800,
@@ -20,13 +21,21 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://workspace-file.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://workspace-file.localhost; worker-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'",
-      "devCsp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://workspace-file.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://workspace-file.localhost ws://localhost:1420 http://localhost:1420; worker-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://workspace-file.localhost; media-src 'self' http://workspace-file.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://workspace-file.localhost; worker-src 'self'; object-src 'none'; frame-src http://zeta-assets.localhost; base-uri 'none'",
+      "devCsp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://workspace-file.localhost; media-src 'self' http://workspace-file.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://workspace-file.localhost ws://localhost:1420 http://localhost:1420; worker-src 'self'; object-src 'none'; frame-src http://zeta-assets.localhost; base-uri 'none'",
+      "headers": {
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp"
+      }
     }
   },
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "resources": {
+      "resources/zetaoffice": "zetaoffice",
+      "resources/svn": "svn"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -35,7 +44,8 @@
       "icons/icon.ico"
     ],
     "windows": {
-      "webviewInstallMode": { "type": "downloadBootstrapper" }
+      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "nsis": { "installMode": "currentUser" }
     }
   }
 }

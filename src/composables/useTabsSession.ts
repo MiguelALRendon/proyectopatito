@@ -1,11 +1,10 @@
 import { onScopeDispose, watch, type Ref } from 'vue';
-import { useDocumentsStore } from '../stores/documents';
+import { confirmWindowClose } from '../documents/windowClose';
 import { useTabsStore } from '../stores/tabs';
 import { registerCloseGuard } from './useWindowClose';
 
 export function useTabsSession(isReady: Ref<boolean>): void {
   const tabs = useTabsStore();
-  const documents = useDocumentsStore();
   watch(
     isReady,
     (ready) => {
@@ -13,5 +12,5 @@ export function useTabsSession(isReady: Ref<boolean>): void {
     },
     { immediate: true },
   );
-  onScopeDispose(registerCloseGuard(documents.confirmWindowClose));
+  onScopeDispose(registerCloseGuard(confirmWindowClose));
 }

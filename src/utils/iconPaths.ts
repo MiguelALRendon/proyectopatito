@@ -1,4 +1,4 @@
-// Iconos Solar de 480 Design (CC BY 4.0), los de DocuMalia, salvo `save`, dibujado a mano y propio del proyecto
+// Iconos Solar de 480 Design (CC BY 4.0), los de DocuMalia, salvo `save`, `play`, `pause`, `volume`, `volume-off` y `expand`, dibujados a mano y propios del proyecto
 export interface IconPart {
   d: string;
   opacity?: string;
@@ -377,6 +377,46 @@ export const ICON_PATHS = {
     },
     {
       d: 'M7 14.5A1.5 1.5 0 0 1 8.5 13h7a1.5 1.5 0 0 1 1.5 1.5V22H7v-7.5Z',
+    },
+  ],
+  play: [
+    {
+      d: 'M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5Z',
+    },
+  ],
+  pause: [
+    {
+      d: 'M7 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z',
+    },
+    {
+      d: 'M14 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z',
+    },
+  ],
+  volume: [
+    {
+      d: 'M4 9.5v5a1 1 0 0 0 1 1h3l4.4 3.9a1 1 0 0 0 1.6-.75V5.35a1 1 0 0 0-1.6-.75L8 8.5H5a1 1 0 0 0-1 1Z',
+    },
+
+    {
+      d: 'M15.3 7.8a1 1 0 0 1 1.4 0 5.9 5.9 0 0 1 0 8.4 1 1 0 0 1-1.4-1.4 3.9 3.9 0 0 0 0-5.6 1 1 0 0 1 0-1.4Z',
+    },
+  ],
+  'volume-off': [
+    {
+      d: 'M4 9.5v5a1 1 0 0 0 1 1h3l4.4 3.9a1 1 0 0 0 1.6-.75V5.35a1 1 0 0 0-1.6-.75L8 8.5H5a1 1 0 0 0-1 1Z',
+    },
+    {
+      d: 'M16.3 9.3a1 1 0 0 1 1.4 0l1.3 1.3 1.3-1.3a1 1 0 1 1 1.4 1.4L20.4 12l1.3 1.3a1 1 0 0 1-1.4 1.4L19 13.4l-1.3 1.3a1 1 0 0 1-1.4-1.4l1.3-1.3-1.3-1.3a1 1 0 0 1 0-1.4Z',
+    },
+  ],
+  expand: [
+    { d: 'M4 4h5a1 1 0 0 1 0 2H6v3a1 1 0 0 1-2 0V5a1 1 0 0 1 1-1Z' },
+    { d: 'M15 4h4a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0V6h-3a1 1 0 0 1 0-2Z' },
+    {
+      d: 'M5 15a1 1 0 0 1 1 1v3h3a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1Z',
+    },
+    {
+      d: 'M19 15a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 1 0-2h3v-3a1 1 0 0 1 1-1Z',
     },
   ],
   flag: [

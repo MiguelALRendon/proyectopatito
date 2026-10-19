@@ -1,0 +1,44 @@
+{
+  "name": "ZetaOffice (LibreOffice 24.2 WebAssembly) y zetajs",
+  "baseUrl": "https://cdn.zetaoffice.net/zetaoffice_latest/",
+  "immutableUrl": false,
+  "lastModified": "Tue, 13 May 2025 15:18:07 GMT",
+  "sourceBranch": "distro/allotropia/zeta-24-2",
+  "files": [
+    {
+      "name": "soffice.js",
+      "bytes": 858124,
+      "sha256": "5143e5354f470b87f86ba272bcfef857bd13e6f07b59666e48a7ccb89643cd77",
+      "source": "cdn",
+      "license": "MPL-2.0"
+    },
+    {
+      "name": "soffice.wasm",
+      "bytes": 161667499,
+      "sha256": "9ebd9a487e849a24b9c69f843ebdb451709c27b7722c010e36846433474a5bd4",
+      "source": "cdn",
+      "license": "MPL-2.0 y LGPL-3.0 (Qt), ver THIRD_PARTY_LICENSES.md"
+    },
+    {
+      "name": "soffice.data",
+      "bytes": 99520604,
+      "sha256": "3dab0a5448e599dccc1b1e69f4f86ea9eb30777c3f1ed7b9c386a5f4163e361c",
+      "source": "cdn",
+      "license": "MPL-2.0 y SIL OFL 1.1 (fuentes), ver THIRD_PARTY_LICENSES.md"
+    },
+    {
+      "name": "soffice.data.js.metadata",
+      "bytes": 215180,
+      "sha256": "5d9d909d0b9b38443c0f19704032d0fc12d654f6c9c24c2c3b237739c4848ae3",
+      "source": "cdn",
+      "license": "MPL-2.0"
+    },
+    {
+      "name": "zeta.js",
+      "bytes": 42946,
+      "sha256": "b70ee7022908822c512535bbf43c4e44c297acc364e7542abba0d3071f5f9bfd",
+      "source": "npm:zetajs@1.2.0/source/zeta.js",
+      "license": "MIT (allotropia software GmbH and contributors)"
+    }
+  ]
+}

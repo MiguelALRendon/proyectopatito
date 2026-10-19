@@ -1,3 +1,4 @@
+import { clamp } from '../utils/clamp';
 import { BYTES_PER_ROW, HEX_CHUNK } from './limits';
 
 export const ROW_HEIGHT_PX = 20;
@@ -9,7 +10,7 @@ export const UNLOADED_CHAR = ' ';
 export const UNPRINTABLE_CHAR = '.';
 
 const HEX_RADIX = 16;
-const BYTE_DIGITS = 2;
+export const BYTE_DIGITS = 2;
 const FIRST_PRINTABLE = 0x20;
 const LAST_PRINTABLE = 0x7e;
 
@@ -42,10 +43,6 @@ export const spacerHeightOf = (totalRows: number): number =>
 const visibleRowsOf = (viewportHeight: number): number =>
   Math.ceil(viewportHeight / ROW_HEIGHT_PX);
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
 function firstRowOf(input: WindowInput): number {
   const lastFirstRow = Math.max(
     input.totalRows - visibleRowsOf(input.viewportHeight),
@@ -74,7 +71,7 @@ export function chunkIndexesOf(window: ScrollWindow): number[] {
   return Array.from({ length: last - first + 1 }, (_, i) => first + i);
 }
 
-const toHex = (value: number, digits: number): string =>
+export const toHex = (value: number, digits: number): string =>
   value.toString(HEX_RADIX).toUpperCase().padStart(digits, '0');
 
 export const formatOffset = (offset: number): string =>

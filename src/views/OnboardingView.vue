@@ -12,6 +12,7 @@ const svnPathInput = ref(workspace.svn?.binary?.path ?? '');
 const pickerError = ref<string | null>(null);
 const wasRootSubmitted = ref(false);
 
+const isBundled = computed(() => workspace.svn?.binary?.origin === 'bundled');
 const trimmedRoot = computed(() => rootInput.value.trim());
 const rootError = computed(() =>
   trimmedRoot.value ? null : 'Indica la carpeta raíz del workspace.',
@@ -130,31 +131,36 @@ function detectSvnAgain() {
     <form class="card" @submit.prevent="saveSvnPath">
       <h2>2. Subversion</h2>
       <SvnVersionNotice />
-      <div class="row">
-        <div class="field">
-          <label class="field__label" for="svn-path">
-            Ruta de svn.exe (opcional)
-          </label>
-          <input
-            id="svn-path"
-            v-model="svnPathInput"
-            class="field__input"
-            type="text"
-            autocomplete="off"
-          />
+      <component :is="isBundled ? 'details' : 'div'" class="onboarding__path">
+        <summary v-if="isBundled">Usar otro svn.exe (opcional)</summary>
+        <div class="row">
+          <div class="field">
+            <label class="field__label" for="svn-path">
+              Ruta de svn.exe (opcional)
+            </label>
+            <input
+              id="svn-path"
+              v-model="svnPathInput"
+              class="field__input"
+              type="text"
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="btn" :disabled="pendingAction !== null">
+            {{ pendingAction === 'svnPath' ? 'Guardando…' : 'Usar esta ruta' }}
+          </button>
+          <button
+            type="button"
+            class="btn"
+            :disabled="pendingAction !== null"
+            @click="detectSvnAgain"
+          >
+            {{
+              pendingAction === 'detect' ? 'Detectando…' : 'Detectar de nuevo'
+            }}
+          </button>
         </div>
-        <button type="submit" class="btn" :disabled="pendingAction !== null">
-          {{ pendingAction === 'svnPath' ? 'Guardando…' : 'Usar esta ruta' }}
-        </button>
-        <button
-          type="button"
-          class="btn"
-          :disabled="pendingAction !== null"
-          @click="detectSvnAgain"
-        >
-          {{ pendingAction === 'detect' ? 'Detectando…' : 'Detectar de nuevo' }}
-        </button>
-      </div>
+      </component>
       <p class="onboarding__saved" role="status">{{ svnStatus }}</p>
     </form>
 
@@ -163,6 +169,11 @@ function detectSvnAgain() {
 </template>
 
 <style scoped>
+.onboarding__path summary {
+  cursor: pointer;
+  margin-block-end: var(--space-sm);
+}
+
 .onboarding__saved {
   margin: 0;
   color: var(--color-success);

@@ -1,12 +1,13 @@
 use serde::Serialize;
 
+use crate::app::archive::ArchiveError;
 use crate::app::files::FileError;
 use crate::app::operations::OperationError;
-use crate::app::svn_locator::LocatorError;
 use crate::app::ui_state::UiStateError;
 use crate::app::workspace::WorkspaceError;
 use crate::svn::client::SvnClientError;
 use crate::svn::error::{SvnError, SvnErrorKind};
+use crate::svn::locator::LocatorError;
 
 const MESSAGE_INVALID_URL: &str =
     "la URL no es válida: use http, https, svn, svn+ssh o file, sin contraseña incrustada";
@@ -39,6 +40,13 @@ pub enum CommandErrorKind {
     WorkingCopyBusy,
     CloudOnly,
     NotAllowed,
+    OfficeTooLarge,
+    ArchiveCorrupt,
+    ArchiveEncrypted,
+    ArchiveLimit,
+    ArchiveUnsupported,
+    UnsafeEntry,
+    ArchiveNeedsConfirmation,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -88,6 +96,7 @@ impl From<FileError> for CommandError {
             FileError::ForbiddenPath => CommandErrorKind::ForbiddenPath,
             FileError::NotText => CommandErrorKind::NotText,
             FileError::TooLarge => CommandErrorKind::TooLarge,
+            FileError::OfficeTooLarge => CommandErrorKind::OfficeTooLarge,
             FileError::FileChanged => CommandErrorKind::FileChanged,
             FileError::ReadOnly => CommandErrorKind::ReadOnly,
             FileError::FileLocked => CommandErrorKind::FileLocked,
@@ -97,6 +106,31 @@ impl From<FileError> for CommandError {
             FileError::Io(_) => CommandErrorKind::Io,
         };
         Self::new(kind, error.to_string())
+    }
+}
+
+impl From<ArchiveError> for CommandError {
+    fn from(error: ArchiveError) -> Self {
+        let message = error.to_string();
+        let kind = match error {
+            ArchiveError::Workspace(error) => return error.into(),
+            ArchiveError::Corrupt(_) => CommandErrorKind::ArchiveCorrupt,
+            ArchiveError::Encrypted => CommandErrorKind::ArchiveEncrypted,
+            ArchiveError::Limit(_) => CommandErrorKind::ArchiveLimit,
+            ArchiveError::Unsupported(_) => CommandErrorKind::ArchiveUnsupported,
+            ArchiveError::UnsafeEntry(_) => CommandErrorKind::UnsafeEntry,
+            ArchiveError::Cancelled => CommandErrorKind::Cancelled,
+            ArchiveError::Busy(_) => CommandErrorKind::WorkingCopyBusy,
+            ArchiveError::Io(_) => CommandErrorKind::Io,
+            ArchiveError::NeedsConfirmation(suspicions) => {
+                let codes = suspicions.iter().map(|s| s.code().to_owned()).collect();
+                return Self {
+                    codes,
+                    ..Self::new(CommandErrorKind::ArchiveNeedsConfirmation, message)
+                };
+            }
+        };
+        Self::new(kind, message)
     }
 }
 

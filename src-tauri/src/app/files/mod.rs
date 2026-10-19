@@ -14,8 +14,9 @@ use std::time::UNIX_EPOCH;
 use serde::Serialize;
 use thiserror::Error;
 
+use crate::app::inspect::{Inspected, inspect};
 use crate::app::operations::{OperationManager, WorkingCopyBusy};
-use crate::app::sniff::{CLOUD_PLACEHOLDER, ProbeKind, SNIFF_BYTES, Sample, Sniffed, classify};
+use crate::app::sniff::{CLOUD_PLACEHOLDER, ProbeKind, SNIFF_BYTES};
 use crate::app::wc_status::StatusCache;
 use crate::app::workspace::{ScopedPath, Workspace, WorkspaceError, component_keys};
 
@@ -27,6 +28,8 @@ pub use text::{
 };
 
 pub const MAX_LIST_ENTRIES: usize = 20_000;
+pub const MAX_OFFICE_MIB: u64 = 32;
+pub const MAX_OFFICE_BYTES: u64 = MAX_OFFICE_MIB * 1024 * 1024;
 
 pub const FILE_ATTRIBUTE_READONLY: u32 = 0x1;
 pub const FILE_ATTRIBUTE_HIDDEN: u32 = 0x2;
@@ -58,6 +61,11 @@ pub enum FileError {
         MAX_EDITABLE_MIB
     )]
     TooLarge,
+    #[error(
+        "el documento supera el tamaño máximo que admite el visor de Office ({} MiB)",
+        MAX_OFFICE_MIB
+    )]
+    OfficeTooLarge,
     #[error("el archivo cambió en disco desde que se abrió")]
     FileChanged,
     #[error("el archivo es de solo lectura")]
@@ -122,15 +130,23 @@ pub struct FileProbe {
     pub mime: &'static str,
     pub len: u64,
     pub extension: Option<&'static str>,
+    pub has_macros: bool,
+    pub version: Option<String>,
 }
 
 impl FileProbe {
-    fn new(sniffed: Sniffed, len: u64) -> Self {
+    fn new(inspected: Inspected, len: u64) -> Self {
+        let Inspected {
+            sniffed,
+            has_macros,
+        } = inspected;
         Self {
             kind: sniffed.kind,
             mime: sniffed.mime,
             len,
             extension: sniffed.extension,
+            has_macros,
+            version: None,
         }
     }
 }
@@ -198,7 +214,24 @@ impl FileService {
             len: metadata.len(),
             attributes: metadata.file_attributes(),
         };
-        Ok(probe_facts(file.as_path(), facts, allow_download)?)
+        let probe = probe_facts(file.as_path(), facts, allow_download)?;
+        self.with_office_version(probe, file, &metadata)
+    }
+
+    fn with_office_version(
+        &self,
+        probe: FileProbe,
+        file: &ScopedPath,
+        metadata: &Metadata,
+    ) -> Result<FileProbe, FileError> {
+        if probe.kind != ProbeKind::Office || probe.len > MAX_OFFICE_BYTES {
+            return Ok(probe);
+        }
+        let bytes = edit::read_bounded(file.as_path(), MAX_OFFICE_BYTES)?;
+        Ok(FileProbe {
+            version: Some(version::version_of(metadata, &bytes)),
+            ..probe
+        })
     }
 
     fn guard(&self, scoped: &ScopedPath) -> Result<(), FileError> {
@@ -292,15 +325,17 @@ pub fn is_cloud_only(attributes: u32) -> bool {
 
 pub fn probe_facts(path: &Path, facts: FileFacts, allow_download: bool) -> io::Result<FileProbe> {
     if is_cloud_only(facts.attributes) && !allow_download {
-        return Ok(FileProbe::new(CLOUD_PLACEHOLDER, facts.len));
+        return Ok(FileProbe::new(
+            Inspected::plain(CLOUD_PLACEHOLDER),
+            facts.len,
+        ));
     }
     let head = read_head(path)?;
     let truncated = facts.len > head.len() as u64;
-    let sniffed = classify(Sample {
-        bytes: &head,
-        truncated,
-    });
-    Ok(FileProbe::new(sniffed, facts.len))
+    Ok(FileProbe::new(
+        inspect(path, facts.len, &head, truncated)?,
+        facts.len,
+    ))
 }
 
 fn read_head(path: &Path) -> io::Result<Vec<u8>> {

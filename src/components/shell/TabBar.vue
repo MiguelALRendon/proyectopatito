@@ -9,10 +9,11 @@ import {
   KEY_DELETE,
   MIDDLE_BUTTON,
   MOVE_STEPS,
-  focusTarget,
+  TAB_FOCUS,
   isMenuKey,
 } from './tabKeys';
 import { tabMenuItems } from './tabMenuItems';
+import { focusTarget } from '../../utils/listFocus';
 
 interface OpenMenu {
   id: string;
@@ -126,7 +127,7 @@ async function moveWithKeyboard(id: string, index: number, step: number) {
 }
 
 function focusNeighbour(key: string, index: number): boolean {
-  const target = focusTarget(key, index, tabs.tabs.length);
+  const target = focusTarget(key, index, tabs.tabs.length, TAB_FOCUS);
   if (target === null) return false;
   focusTab(tabs.tabs[target].id);
   return true;

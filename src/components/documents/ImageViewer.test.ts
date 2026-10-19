@@ -17,6 +17,8 @@ function probe(extra: Partial<FileProbe> = {}): FileProbe {
     mime: 'image/png',
     len: 68,
     extension: 'png',
+    has_macros: false,
+    version: null,
     ...extra,
   };
 }

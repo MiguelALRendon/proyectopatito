@@ -6,12 +6,13 @@ import {
   MAX_FAVORITE_NAME_CHARS,
   type FavoriteItem,
 } from '../../utils/favoriteList';
+import { focusTarget } from '../../utils/listFocus';
 import AppIcon from '../icons/AppIcon.vue';
 import {
   KEY_DELETE,
   KEY_RENAME,
+  FAVORITE_FOCUS,
   MOVE_STEPS,
-  favoriteFocusTarget,
 } from './favoriteKeys';
 
 const EMPTY_SPAN = { start: 0, end: 0 };
@@ -138,7 +139,7 @@ function runKey(event: KeyboardEvent, item: FavoriteItem, index: number) {
 }
 
 function focusNeighbour(key: string, index: number): boolean {
-  const target = favoriteFocusTarget(key, index, items.value.length);
+  const target = focusTarget(key, index, items.value.length, FAVORITE_FOCUS);
   if (target === null) return false;
   void focusLink(items.value[target].path);
   return true;

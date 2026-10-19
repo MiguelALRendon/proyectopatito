@@ -47,7 +47,10 @@
   function fakeResponse(fake) {
     return new Response(JSON.stringify(fake.body), {
       status: 200,
-      headers: { 'content-type': 'application/json', 'Tauri-Response': 'ok' },
+      headers: {
+        'content-type': 'application/json',
+        'Tauri-Response': fake.isError ? 'error' : 'ok',
+      },
     });
   }
 
@@ -102,6 +105,7 @@
       const fake = parsed ? fakeFor(parsed.cmd, parsed.payload) : null;
       if (fake) {
         recordFake(parsed.cmd, 'postMessage');
+        if (fake.isError) return failCallback(parsed.error);
         return succeedCallback(parsed.callback, fake.body);
       }
       if (!parsed || !isManaged(parsed.cmd)) {

@@ -21,6 +21,7 @@ vi.mock('../explorer/FolderExplorer.vue', () => ({
 }));
 
 import { uiStateGet, type UiStateView } from '../../services/filesApi';
+import { useOfficeStore } from '../../stores/office';
 import { useTabsStore } from '../../stores/tabs';
 import TabContent from './TabContent.vue';
 
@@ -114,5 +115,72 @@ describe('TabContent', () => {
     const panel = wrapper.get('[role="tabpanel"]');
     expect(panel.attributes('id')).toBe('tab-panel');
     expect(panel.attributes('aria-labelledby')).toBe(`tab-${id}`);
+  });
+});
+
+describe('TabContent con un documento de Office vivo', () => {
+  function liveOffice() {
+    const store = mountContent();
+    const office = useOfficeStore();
+    const folder = store.open('wc', 'folder') as string;
+    const document = store.open('wc\\informe.docx', 'document') as string;
+    office.attach({
+      tabId: document,
+      path: 'wc\\informe.docx',
+      docId: 'doc-1',
+      ext: 'docx',
+      kind: 'writer',
+      version: 'v1',
+    });
+    return { store, office, folder, document };
+  }
+
+  it('al ir a otra pestaña el documento vivo sigue montado, oculto y sin recrearse', async () => {
+    const { store, folder } = liveOffice();
+    await wrapper.vm.$nextTick();
+    const before = wrapper.get('#host-stub').element;
+    store.activate(folder);
+    await wrapper.vm.$nextTick();
+    const panes = wrapper.findAll('.tab-content__pane');
+    expect(panes).toHaveLength(2);
+    expect(wrapper.get('#host-stub').element).toBe(before);
+    const hidden = panes.filter((pane) =>
+      pane.attributes('style')?.includes('display: none'),
+    );
+    expect(hidden).toHaveLength(1);
+    expect(hidden[0].find('#host-stub').exists()).toBe(true);
+    expect(wrapper.get('#explorer-stub').isVisible()).toBe(true);
+  });
+
+  it('al volver al documento solo queda ese panel y es el mismo elemento', async () => {
+    const { store, folder, document } = liveOffice();
+    await wrapper.vm.$nextTick();
+    const before = wrapper.get('#host-stub').element;
+    store.activate(folder);
+    await wrapper.vm.$nextTick();
+    store.activate(document);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.get('#host-stub').element).toBe(before);
+    expect(wrapper.get('#host-stub').isVisible()).toBe(true);
+  });
+
+  it('sin documento vivo, al cambiar de pestaña solo existe la activa', async () => {
+    const store = mountContent();
+    const folder = store.open('wc', 'folder') as string;
+    store.open('wc\\notas.txt', 'document');
+    await wrapper.vm.$nextTick();
+    store.activate(folder);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll('.tab-content__pane')).toHaveLength(1);
+    expect(wrapper.find('#host-stub').exists()).toBe(false);
+  });
+
+  it('al soltar el documento vivo desaparece su panel oculto', async () => {
+    const { store, office, folder, document } = liveOffice();
+    store.activate(folder);
+    await wrapper.vm.$nextTick();
+    office.detach(document);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll('.tab-content__pane')).toHaveLength(1);
   });
 });

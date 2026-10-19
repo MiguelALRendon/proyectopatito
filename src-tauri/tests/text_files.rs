@@ -1,7 +1,7 @@
 #![cfg(windows)]
 
 use std::fs::{self, OpenOptions};
-use std::os::windows::fs::OpenOptionsExt;
+use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
@@ -17,6 +17,7 @@ use dakedaduck_svn_lib::app::workspace::{Workspace, WorkspaceError};
 use tempfile::TempDir;
 
 const FILE_SHARE_READ: u32 = 1;
+const HIDDEN_AND_SYSTEM: u32 = 0x2 | 0x4;
 const UTF8_BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];
 const UTF16_LE_BOM: [u8; 2] = [0xFF, 0xFE];
 const UTF16_BE_BOM: [u8; 2] = [0xFE, 0xFF];
@@ -640,6 +641,18 @@ fn a_failed_write_never_leaves_a_temporary_file_behind() {
     }
     drop(held);
     assert_eq!(fx.names_in(""), [NOTES]);
+}
+
+#[test]
+fn a_write_keeps_the_hidden_and_system_attributes_of_the_original() {
+    let fx = fixture();
+    let path = fx.put(NOTES, b"abc");
+    assert!(run_cmd(&["attrib", "+h", "+s", &path.to_string_lossy()]));
+    let version = fx.current_version(NOTES);
+    fx.write(NOTES, &update("nuevo", &version)).unwrap();
+    let attributes = fs::metadata(&path).unwrap().file_attributes();
+    assert_eq!(attributes & HIDDEN_AND_SYSTEM, HIDDEN_AND_SYSTEM);
+    assert_eq!(fs::read(&path).unwrap(), b"nuevo");
 }
 
 #[test]

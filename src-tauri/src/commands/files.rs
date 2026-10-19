@@ -1,10 +1,11 @@
 use std::path::Path;
 
+use percent_encoding::percent_decode_str;
 use tauri::State;
-use tauri::ipc::Response;
+use tauri::ipc::{InvokeBody, Request, Response};
 
 use crate::app::args::WriteTextArgs;
-use crate::app::error::CommandError;
+use crate::app::error::{CommandError, CommandErrorKind};
 use crate::app::files::{DirListing, FileError, FileProbe, FileService, TextDocument, TextWritten};
 use crate::app::state::{AppState, blocking};
 
@@ -46,6 +47,49 @@ pub async fn fs_write_text(
     run_blocking(&state, move |service| {
         let file = service.scope(Path::new(&req.path))?;
         service.write_text(&file, &req.update)
+    })
+    .await
+}
+
+const PATH_HEADER: &str = "path";
+const VERSION_HEADER: &str = "expected-version";
+
+fn bad_request(message: &str) -> CommandError {
+    CommandError::new(CommandErrorKind::InvalidPath, message)
+}
+
+fn header_text(request: &Request<'_>, name: &str) -> Result<String, CommandError> {
+    let value = request
+        .headers()
+        .get(name)
+        .and_then(|value| value.to_str().ok());
+    value
+        .map(str::to_owned)
+        .ok_or_else(|| bad_request(&format!("falta la cabecera {name}")))
+}
+
+fn decoded_path(request: &Request<'_>) -> Result<String, CommandError> {
+    let encoded = header_text(request, PATH_HEADER)?;
+    let decoded = percent_decode_str(&encoded).decode_utf8();
+    decoded
+        .map(|path| path.into_owned())
+        .map_err(|_| bad_request("la ruta no es UTF-8 válido"))
+}
+
+#[tauri::command]
+pub async fn fs_write_bytes(
+    request: Request<'_>,
+    state: State<'_, AppState>,
+) -> Result<TextWritten, CommandError> {
+    let InvokeBody::Raw(body) = request.body() else {
+        return Err(bad_request("el contenido debe viajar como bytes crudos"));
+    };
+    let path = decoded_path(&request)?;
+    let expected_version = header_text(&request, VERSION_HEADER)?;
+    let bytes = body.clone();
+    run_blocking(&state, move |service| {
+        let file = service.scope(Path::new(&path))?;
+        service.write_bytes(&file, &expected_version, &bytes)
     })
     .await
 }

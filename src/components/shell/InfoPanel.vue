@@ -4,6 +4,7 @@ import { useExplorerStore } from '../../stores/explorer';
 import { useProjectStore } from '../../stores/project';
 import { useWorkspaceStore } from '../../stores/workspace';
 import { isUnderOneDrive } from '../../utils/folderPaths';
+import SvnWarning from '../SvnWarning.vue';
 import ProjectPanel from '../../views/ProjectPanel.vue';
 
 const ONEDRIVE_NOTICE =
@@ -46,6 +47,7 @@ watch(
     <p v-if="isOnOneDrive" class="banner banner--warning" role="status">
       {{ ONEDRIVE_NOTICE }}
     </p>
+    <SvnWarning />
     <ProjectPanel :copy-root="copyRoot" />
   </div>
 </template>

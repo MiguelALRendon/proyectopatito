@@ -189,7 +189,7 @@ impl Operations {
         dest: &ScopedPath,
         req: CheckoutRequest,
         ctx: &OperationContext,
-    ) -> Result<u64, OperationError> {
+    ) -> Result<Option<u64>, OperationError> {
         if !is_safe_checkout_url(&req.url) {
             return Err(OperationError::InvalidUrl);
         }
@@ -199,7 +199,7 @@ impl Operations {
         };
         self.guarded(dest, ctx, |options| async move {
             self.client.checkout(&req, options).await?;
-            self.revision_of(dest).await
+            Ok(self.revision_of(dest).await)
         })
         .await
     }
@@ -209,14 +209,14 @@ impl Operations {
         target: &ScopedPath,
         req: UpdateRequest,
         ctx: &OperationContext,
-    ) -> Result<u64, OperationError> {
+    ) -> Result<Option<u64>, OperationError> {
         let req = UpdateRequest {
             target: target.as_path().to_path_buf(),
             ..req
         };
         self.guarded(target, ctx, |options| async move {
             self.client.update(&req, options).await?;
-            self.revision_of(target).await
+            Ok(self.revision_of(target).await)
         })
         .await
     }
@@ -323,12 +323,12 @@ impl Operations {
         }
     }
 
-    async fn revision_of(&self, target: &ScopedPath) -> Result<u64, SvnClientError> {
+    async fn revision_of(&self, target: &ScopedPath) -> Option<u64> {
         let req = InfoRequest {
             target: target.as_path().to_path_buf(),
         };
-        let entry = self.client.info(&req, RunOptions::default()).await?;
-        Ok(entry.revision)
+        let entry = self.client.info(&req, RunOptions::default()).await.ok()?;
+        Some(entry.revision)
     }
 }
 

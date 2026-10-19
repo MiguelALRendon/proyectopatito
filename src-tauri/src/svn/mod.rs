@@ -1,6 +1,8 @@
+pub mod bundled;
 pub mod client;
 pub mod commands;
 pub mod error;
+pub mod locator;
 pub mod message_file;
 pub mod models;
 pub mod parsers;

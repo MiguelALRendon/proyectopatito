@@ -39,6 +39,8 @@ describe('isVectorImage', () => {
     mime,
     len: 1,
     extension,
+    has_macros: false,
+    version: null,
   });
 
   it('un PNG no es vectorial', () => {

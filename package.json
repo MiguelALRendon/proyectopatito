@@ -12,7 +12,8 @@
     "build": "vue-tsc --noEmit && vue-tsc -p tests/e2e/tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts"
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "fetch:zetaoffice": "pwsh -NoProfile -File scripts/fetch-zetaoffice.ps1"
   },
   "dependencies": {
     "@tauri-apps/api": "2.11.1",
@@ -22,7 +23,8 @@
     "monaco-editor": "^0.57.0",
     "pdfjs-dist": "6.4.299",
     "pinia": "^4.0.3",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "zetajs": "1.2.0"
   },
   "overrides": {
     "monaco-editor": {

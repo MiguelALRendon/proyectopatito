@@ -96,7 +96,7 @@ fn method_not_allowed() -> Response<Vec<u8>> {
     response
 }
 
-fn without_body(mut response: Response<Vec<u8>>) -> Response<Vec<u8>> {
+pub(super) fn without_body(mut response: Response<Vec<u8>>) -> Response<Vec<u8>> {
     response.body_mut().clear();
     response
 }
@@ -139,7 +139,7 @@ fn open(service: &FileService, request: &Request<Vec<u8>>) -> Result<Served, Sta
         .map_err(|error| status_of(&error))
 }
 
-fn requested_range(headers: &HeaderMap) -> Result<Option<Range>, StatusCode> {
+pub(super) fn requested_range(headers: &HeaderMap) -> Result<Option<Range>, StatusCode> {
     let Some(value) = headers.get(header::RANGE) else {
         return Ok(None);
     };
@@ -197,7 +197,7 @@ fn io_status(error: &io::Error) -> StatusCode {
     }
 }
 
-fn served_response(served: Served) -> Response<Vec<u8>> {
+pub(super) fn served_response(served: Served) -> Response<Vec<u8>> {
     match served.outcome {
         Outcome::Full(_) => with_body(StatusCode::OK, served),
         Outcome::Partial(slice) => {
@@ -229,7 +229,7 @@ fn with_body(status: StatusCode, served: Served) -> Response<Vec<u8>> {
     response
 }
 
-fn status_only(status: StatusCode) -> Response<Vec<u8>> {
+pub(super) fn status_only(status: StatusCode) -> Response<Vec<u8>> {
     let mut response = Response::new(Vec::new());
     *response.status_mut() = status;
     response

@@ -6,6 +6,7 @@ export type IpcTransport = 'fetch' | 'postMessage';
 
 export interface IpcFake {
   body: unknown;
+  isError?: boolean;
   pathSuffix?: string;
   args?: Record<string, unknown>;
 }

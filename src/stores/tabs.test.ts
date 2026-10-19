@@ -17,6 +17,7 @@ import {
   type UiStateView,
 } from '../services/filesApi';
 import { MAX_FAVORITES } from '../utils/favoriteList';
+import { normalizedPath, pathKey } from '../utils/folderPaths';
 import {
   FAVORITES_LIMIT_NOTICE,
   LIMIT_NOTICE,
@@ -24,9 +25,7 @@ import {
   PERSIST_DELAY_MS,
   RESTORE_FAILED_NOTICE,
   SAVE_FAILED_NOTICE,
-  cleanPath,
   omittedNotice,
-  tabKey,
   tabTitle,
   useTabsStore,
 } from './tabs';
@@ -92,13 +91,13 @@ afterEach(() => vi.useRealTimers());
 
 describe('path helpers', () => {
   it('normalizes separators, repeated separators and trailing separators', () => {
-    expect(cleanPath('\\a//b\\\\c\\')).toBe('a\\b\\c');
-    expect(cleanPath('')).toBe('');
-    expect(cleanPath('///')).toBe('');
+    expect(normalizedPath('\\a//b\\\\c\\')).toBe('a\\b\\c');
+    expect(normalizedPath('')).toBe('');
+    expect(normalizedPath('///')).toBe('');
   });
 
   it('builds a lowercase key that ignores separator style', () => {
-    expect(tabKey('Docs/Sub')).toBe(tabKey('docs\\SUB\\'));
+    expect(pathKey('Docs/Sub')).toBe(pathKey('docs\\SUB\\'));
   });
 
   it('titles a tab by its last segment and the root by the shell name', () => {

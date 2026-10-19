@@ -5,6 +5,8 @@ use std::sync::{Arc, Mutex};
 
 use serde::Serialize;
 
+use crate::app::archive::service::ArchiveService;
+use crate::app::archive::tasks::ArchiveTasks;
 use crate::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, StatusMapArgs, UpdateArgs};
 use crate::app::error::{CommandError, CommandErrorKind};
 use crate::app::files::{FileService, Launcher, SystemLauncher};
@@ -12,14 +14,18 @@ use crate::app::operations::{
     OperationContext, OperationError, OperationId, OperationManager, Operations, ProgressSink,
     locked,
 };
-use crate::app::svn_locator::{LocatorError, SVN_EXE, SvnBinary, locate};
 use crate::app::ui_state::{UiStateView, describe, normalize};
 use crate::app::wc_status::{StatusCache, StatusQuery, WcStatusMap, WcStatusReader};
 use crate::app::workspace::{ScopedPath, Workspace};
 use crate::config::{AppConfig, ConfigStore, UiState};
+use crate::svn::bundled::{BUNDLE_DIR, MANIFEST_JSON};
 use crate::svn::client::SvnClient;
 use crate::svn::commands::{
     CheckoutRequest, CommitRequest, InfoRequest, StatusRequest, UpdateRequest, is_safe_checkout_url,
+};
+use crate::svn::locator::{
+    Bundle, Located, LocatorError, RECOMMENDED_VERSION, SVN_EXE, SvnBinary, SvnOrigin, SvnVersion,
+    default_search_dirs, locate, locate_full,
 };
 use crate::svn::models::{InfoEntry, StatusReport};
 use crate::svn::runner::{Password, RunOptions, SvnRunner};
@@ -75,22 +81,25 @@ impl From<Result<Option<u64>, OperationError>> for OperationResult {
 pub struct SvnBinaryInfo {
     pub path: String,
     pub version: String,
+    pub origin: SvnOrigin,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct SvnDetection {
     pub binary: Option<SvnBinaryInfo>,
     pub error: Option<String>,
+    pub warning: Option<String>,
 }
 
-impl From<Result<SvnBinary, LocatorError>> for SvnDetection {
-    fn from(result: Result<SvnBinary, LocatorError>) -> Self {
+impl From<Result<Located, LocatorError>> for SvnDetection {
+    fn from(result: Result<Located, LocatorError>) -> Self {
         match result {
-            Ok(binary) => Self::found(&binary),
-            Err(error) => Self {
-                binary: None,
-                error: Some(error.to_string()),
-            },
+            Ok(located) => {
+                let mut detection = Self::found(&located.binary);
+                detection.warning = bundle_warning(&located).or(detection.warning);
+                detection
+            }
+            Err(error) => Self::failed(error),
         }
     }
 }
@@ -101,10 +110,36 @@ impl SvnDetection {
             binary: Some(SvnBinaryInfo {
                 path: binary.path.to_string_lossy().into_owned(),
                 version: binary.version.to_string(),
+                origin: binary.origin,
             }),
             error: None,
+            warning: outdated_warning(binary.version),
         }
     }
+
+    fn failed(error: LocatorError) -> Self {
+        Self {
+            binary: None,
+            error: Some(error.to_string()),
+            warning: None,
+        }
+    }
+}
+
+fn outdated_warning(version: SvnVersion) -> Option<String> {
+    (version < RECOMMENDED_VERSION).then(|| {
+        format!(
+            "svn {version} es anterior a {RECOMMENDED_VERSION}: tiene una vulnerabilidad conocida de inyección de argumentos en Windows (CVE-2024-45720). Se puede usar, pero conviene actualizarlo o usar el svn incluido con la aplicación."
+        )
+    })
+}
+
+fn bundle_warning(located: &Located) -> Option<String> {
+    located.skipped_bundle.as_ref().map(|problem| {
+        format!(
+            "El svn incluido con la aplicación se ignoró porque {problem}; se usa otro svn.exe."
+        )
+    })
 }
 
 #[derive(Clone)]
@@ -164,9 +199,11 @@ impl UiCommit {
 pub struct AppState {
     config: ConfigHandle,
     workspace: Arc<Mutex<Option<Workspace>>>,
-    svn: Mutex<Option<SvnBinary>>,
+    svn: Arc<Mutex<Option<SvnBinary>>>,
+    bundle_dir: Option<PathBuf>,
     manager: Arc<OperationManager>,
     statuses: Arc<StatusCache>,
+    archives: Arc<ArchiveTasks>,
     launcher: Arc<dyn Launcher>,
 }
 
@@ -179,10 +216,19 @@ impl AppState {
         Self {
             config,
             workspace: Arc::new(Mutex::new(workspace)),
-            svn: Mutex::new(None),
+            svn: Arc::default(),
+            bundle_dir: None,
             manager: Arc::default(),
             statuses: Arc::default(),
+            archives: Arc::default(),
             launcher: Arc::new(SystemLauncher),
+        }
+    }
+
+    pub fn with_bundled_svn(self, resource_dir: &Path) -> Self {
+        Self {
+            bundle_dir: Some(resource_dir.join(BUNDLE_DIR)),
+            ..self
         }
     }
 
@@ -217,11 +263,11 @@ impl AppState {
 
     pub fn svn_set_path(&self, path: &Path) -> SvnDetection {
         if !is_svn_executable(path) {
-            return SvnDetection::from(Err(LocatorError::Invalid(path.to_path_buf())));
+            return SvnDetection::failed(LocatorError::Invalid(path.to_path_buf()));
         }
         match locate(Some(path)) {
             Ok(binary) => self.adopt_svn(binary, path),
-            Err(error) => SvnDetection::from(Err(error)),
+            Err(error) => SvnDetection::failed(error),
         }
     }
 
@@ -279,6 +325,15 @@ impl AppState {
         Ok(service.with_statuses(self.statuses.clone()))
     }
 
+    pub fn archive_service(&self) -> Result<ArchiveService, CommandError> {
+        let service = ArchiveService::new(self.workspace()?, self.manager.clone());
+        Ok(service.with_statuses(self.statuses.clone()))
+    }
+
+    pub fn archive_tasks(&self) -> Arc<ArchiveTasks> {
+        self.archives.clone()
+    }
+
     pub fn start_checkout(
         &self,
         args: CheckoutArgs,
@@ -299,7 +354,7 @@ impl AppState {
         };
         let launch = launch(sinks, args.password, self.stale(&dest));
         Ok(spawn_operation(ops, launch, move |ops, ctx| async move {
-            ops.checkout(&dest, req, &ctx).await.map(Some)
+            ops.checkout(&dest, req, &ctx).await
         }))
     }
 
@@ -318,7 +373,7 @@ impl AppState {
         };
         let launch = launch(sinks, args.password, self.stale(&target));
         Ok(spawn_operation(ops, launch, move |ops, ctx| async move {
-            ops.update(&target, req, &ctx).await.map(Some)
+            ops.update(&target, req, &ctx).await
         }))
     }
 
@@ -370,14 +425,22 @@ impl AppState {
         }
     }
 
-    fn detect(&self) -> Result<SvnBinary, LocatorError> {
-        let manual = self.config.read(|config| config.svn_path.clone());
-        let located = match manual.as_deref() {
-            Some(path) => locate(Some(path)).or_else(|error| locate(None).map_err(|_| error)),
-            None => locate(None),
-        };
-        *locked(&self.svn) = located.as_ref().ok().cloned();
-        located
+    pub async fn warm_svn(&self) {
+        if locked(&self.svn).is_some() {
+            return;
+        }
+        let (config, slot, bundle) = (
+            self.config.clone(),
+            self.svn.clone(),
+            self.bundle_dir.clone(),
+        );
+        blocking(move || detect_svn(&config, &slot, bundle.as_deref()))
+            .await
+            .ok();
+    }
+
+    fn detect(&self) -> Result<Located, LocatorError> {
+        detect_svn(&self.config, &self.svn, self.bundle_dir.as_deref())
     }
 
     fn adopt_svn(&self, binary: SvnBinary, path: &Path) -> SvnDetection {
@@ -394,7 +457,7 @@ impl AppState {
 
     fn svn_binary(&self) -> Result<SvnBinary, CommandError> {
         let cached = locked(&self.svn).clone();
-        cached.map_or_else(|| Ok(self.detect()?), Ok)
+        cached.map_or_else(|| Ok(self.detect()?.binary), Ok)
     }
 
     fn workspace(&self) -> Result<Workspace, CommandError> {
@@ -423,6 +486,26 @@ impl AppState {
             target: target.as_path().to_path_buf(),
         }
     }
+}
+
+fn detect_svn(
+    config: &ConfigHandle,
+    slot: &Mutex<Option<SvnBinary>>,
+    bundle_dir: Option<&Path>,
+) -> Result<Located, LocatorError> {
+    let manual = config.read(|config| config.svn_path.clone());
+    let bundle = bundle_dir.map(|dir| Bundle {
+        dir,
+        manifest: MANIFEST_JSON,
+    });
+    let dirs = default_search_dirs();
+    let located = match manual.as_deref() {
+        Some(path) => locate_full(Some(path), bundle, &dirs)
+            .or_else(|error| locate_full(None, bundle, &dirs).map_err(|_| error)),
+        None => locate_full(None, bundle, &dirs),
+    };
+    *locked(slot) = located.as_ref().ok().map(|found| found.binary.clone());
+    located
 }
 
 pub(crate) async fn blocking<T, F>(job: F) -> Result<T, CommandError>

@@ -20,6 +20,7 @@ function parsePolicy(text: string): Policy {
 }
 
 const WORKSPACE_FILE = 'http://workspace-file.localhost';
+const ZETA_ASSETS = 'http://zeta-assets.localhost';
 const DEV_ORIGINS = ['ws://localhost:1420', 'http://localhost:1420'];
 const production = parsePolicy(csp);
 const development = parsePolicy(devCsp);
@@ -30,11 +31,12 @@ describe('CSP de producción', () => {
     ['script-src', ["'self'"]],
     ['worker-src', ["'self'"]],
     ['object-src', ["'none'"]],
-    ['frame-src', ["'none'"]],
+    ['frame-src', [ZETA_ASSETS]],
     ['base-uri', ["'none'"]],
     ['font-src', ["'self'"]],
     ['style-src', ["'self'", "'unsafe-inline'"]],
     ['img-src', ["'self'", 'data:', 'blob:', WORKSPACE_FILE]],
+    ['media-src', ["'self'", WORKSPACE_FILE]],
     ['connect-src', ['ipc:', 'http://ipc.localhost', WORKSPACE_FILE]],
   ])('%s es exactamente %j', (directive, sources) => {
     expect(production[directive]).toEqual(sources);
@@ -48,6 +50,7 @@ describe('CSP de producción', () => {
       'font-src',
       'frame-src',
       'img-src',
+      'media-src',
       'object-src',
       'script-src',
       'style-src',
@@ -60,6 +63,14 @@ describe('CSP de producción', () => {
     expect(production['script-src']).not.toContain("'unsafe-inline'");
     expect(csp).not.toContain('unsafe-eval');
     expect(csp).not.toMatch(/\*|https?:\/\/[^ ;]*\*/);
+  });
+
+  it('el origen de ZetaOffice solo puede ser un marco, nunca script, conexión ni worker', () => {
+    const withZeta = Object.entries(production)
+      .filter(([, sources]) => sources.includes(ZETA_ASSETS))
+      .map(([directive]) => directive);
+    expect(withZeta).toEqual(['frame-src']);
+    expect(csp).not.toContain('wasm-unsafe-eval');
   });
 
   it('solo style-src admite estilos en línea', () => {

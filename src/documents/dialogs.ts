@@ -4,6 +4,7 @@ import { EOL_LABELS } from './labels';
 
 export type ConflictChoice = 'reload' | 'overwrite';
 export type CloseChoice = 'save' | 'discard';
+export type SwitchChoice = 'save' | 'discard';
 
 const CANCEL = 'cancel';
 const CLOSE_ANYWAY = 'close-anyway';
@@ -68,6 +69,33 @@ export async function askWindowClose(
       { value: CANCEL, label: 'Cancelar' },
       { value: 'discard', label: 'Cerrar sin guardar', tone: 'danger' },
       { value: 'save', label: 'Guardar y cerrar', tone: 'primary' },
+    ],
+  });
+  return pickedOrNull(answer);
+}
+
+export async function askLegacyFidelity(fileName: string): Promise<boolean> {
+  const answer = await choose<'proceed' | typeof CANCEL>({
+    title: 'Posible pérdida de formato',
+    message: `«${fileName}» está en un formato antiguo de Office. Al guardarlo con este visor puede perderse parte del formato (estilos, objetos o macros). Si quieres conservar el original, cancela y haz antes una copia.`,
+    options: [
+      { value: CANCEL, label: 'Cancelar' },
+      { value: 'proceed', label: 'Guardar de todos modos', tone: 'primary' },
+    ],
+  });
+  return answer === 'proceed';
+}
+
+export async function askSwitchOffice(
+  fileName: string,
+): Promise<SwitchChoice | null> {
+  const answer = await choose<SwitchChoice | typeof CANCEL>({
+    title: 'Hay un documento de Office con cambios',
+    message: `«${fileName}» tiene cambios sin guardar y solo puede haber un documento de Office abierto a la vez. Si continúas sin guardarlo, los cambios se perderán.`,
+    options: [
+      { value: CANCEL, label: 'Cancelar' },
+      { value: 'discard', label: 'Descartar los cambios', tone: 'danger' },
+      { value: 'save', label: 'Guardar y continuar', tone: 'primary' },
     ],
   });
   return pickedOrNull(answer);

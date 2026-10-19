@@ -13,10 +13,15 @@ import * as service from '../services/tauri';
 import { useWorkspaceStore } from './workspace';
 
 const found = (version: string) => ({
-  binary: { path: 'C:\\svn.exe', version },
+  binary: { path: 'C:\\svn.exe', version, origin: 'system' as const },
   error: null,
+  warning: null,
 });
-const absent = { binary: null, error: 'no se encontró svn.exe' };
+const absent = {
+  binary: null,
+  error: 'no se encontró svn.exe',
+  warning: null,
+};
 
 beforeEach(() => {
   setActivePinia(createPinia());

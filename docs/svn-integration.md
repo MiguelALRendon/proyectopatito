@@ -25,13 +25,13 @@ Solo Rust, y solo el módulo `src-tauri/src/svn/` ([ADR 0001](adr/0001-sin-tauri
 | `svn/client.rs` | `SvnClient`: `info`, `status`, `checkout`, `update`, `commit`, `cleanup` |
 | `svn/error.rs` | `SvnError` y `SvnErrorKind` por código `E######` |
 | `svn/progress.rs`, `svn/message_file.rs` | Progreso a partir de la salida y archivo temporal del mensaje de commit |
-| `app/svn_locator.rs` | Localiza `svn.exe` y comprueba su versión |
+| `svn/locator.rs`, `svn/bundled.rs` | Localiza `svn.exe` (configurado, incluido y verificado por hash, sistema) y comprueba su versión |
 | `app/operations.rs` | `Operations` y `OperationManager` |
 | `app/wc_status.rs` | `wc_status_map` |
 
 ## Localizador y versión mínima
 
-`locate(manual)` (`src-tauri/src/app/svn_locator.rs`):
+`locate(manual)` (`src-tauri/src/svn/locator.rs`):
 
 - Con ruta manual, solo prueba esa ruta. Sin ella recorre `PATH` y luego `%ProgramFiles%\TortoiseSVN\bin`, `SlikSvn\bin` y `Apache Subversion\bin` (en ese orden, `search_dirs`).
 - Cada candidato se prueba con `svn --version --quiet` (sin ventana, plazo `PROBE_TIMEOUT` de 5 s). `parse_version` exige tres números y descarta el sufijo.
@@ -124,10 +124,14 @@ Pruebas: `tests/svn_operations.rs` contra un repositorio real.
 
 Decisión del usuario ([ADR 0003](adr/0003-credenciales-por-ui-y-stdin.md)): como todo corre con `--non-interactive`, cuando falta autenticación la interfaz pide usuario y contraseña (`CredentialsModal`) y reintenta. La aplicación no guarda la contraseña ni la pasa en argumentos; no usa `--no-auth-cache`, así que la credencial puede quedar en el auth cache de Subversion según su configuración. Detalle de seguridad en [seguridad](security.md).
 
-## Contexto diferido: `svn.exe` empaquetado y CVE-2024-45720
+## `svn.exe` empaquetado y CVE-2024-45720 (Increment 10)
 
-Nada de esta sección existe en el código; hoy `svn.exe` lo instala el usuario y la aplicación lo localiza.
+El instalador lleva **SlikSVN 1.14.5** ([ADR 0012](adr/0012-svn-exe-como-recurso-del-instalador.md)) en la carpeta `svn` de los recursos: `svn.exe`, 19 DLL de SlikSVN (OpenSSL 3, Berkeley DB 4.4, APR, SASL, gettext y las `libsvn_*`) y `vcruntime140.dll`, `vcruntime140_1.dll` y `msvcp140.dll` del redistribuible de Visual C++ (14.51.36247.0), más los textos de licencia en `svn/licenses`. Se prepara con `scripts/bundle-svn.ps1` (descarga el zip fijado en `third_party/svn.lock.json`, comprueba su SHA-256, extrae el MSI con `msiexec /a`, copia solo esos 23 archivos y, con `-WriteManifest`, escribe `third_party/svn.manifest.json`); el contenido de `src-tauri/resources/svn` no se commitea, el manifiesto con el hash de cada archivo sí.
 
-- La Fase 2B planea empaquetar `svn.exe` como recurso del instalador ([ADR 0012](adr/0012-svn-exe-como-recurso-del-instalador.md), `proposed`; `plans/fase-2b-documentos`, Increment 9). El localizador pasaría a probar: `svn_path`, el svn empaquetado (con verificación de hash), carpetas conocidas y `PATH`.
-- Hallazgo recogido en el ADR y en la spec de la 2B (CA-13): Subversion 1.14.3 y anteriores en Windows son vulnerables a **CVE-2024-45720** (inyección de argumentos por la conversión «best fit»), así que la versión que se distribuya debe ser 1.14.4 o superior; la SlikSVN 1.14.2 de esta máquina de pruebas no sirve para distribuir. Decisión del usuario en esa spec: un `svn` anterior a 1.14.4 del sistema se acepta con un aviso persistente.
-- Estado actual: el localizador solo exige 1.10 y no avisa por versiones anteriores a 1.14.4 (no hay referencia a esa versión en `src-tauri/src` ni en `src`).
+**Orden del localizador** (`locate_full`, `src-tauri/src/svn/locator.rs`): 1) el `svn_path` de `config.json`; 2) el svn incluido; 3) `PATH` y las carpetas conocidas de `ProgramFiles`. Si el `svn_path` falla se sigue con los demás (`detect_svn`). El svn incluido solo se usa si `svn/bundled.rs::verify` comprueba, contra el manifiesto embebido con `include_str!`, que **cada** archivo existe, tiene el tamaño y el SHA-256 esperados y que la carpeta no contiene ningún archivo que el manifiesto no liste (una DLL de más es un riesgo de carga lateral); las subcarpetas (`licenses`) se ignoran. Si falla, se ignora con el motivo (`SvnDetection.warning`) y, si no hay otro `svn.exe`, el error es `BundleDamaged`. Esto es una **comprobación de integridad** (instalación corrupta o incompleta), no una defensa frente a otro proceso del mismo usuario, que puede escribir en la carpeta de instalación.
+
+`AppState::with_bundled_svn(resource_dir)` recibe la carpeta desde `lib.rs` (`app.path().resource_dir()`), y `setup` lanza `warm_svn` en segundo plano para que la primera detección no bloquee un comando (paga **T-5**). En desarrollo, `tauri build`/`tauri dev` dejan los recursos junto al ejecutable (`target/<perfil>/svn`).
+
+**Aviso por versión.** Un `svn` anterior a 1.14.4 (`RECOMMENDED_VERSION`) se acepta (la mínima sigue siendo 1.10, decisión del usuario) pero `SvnDetection.warning` lleva un aviso persistente con el motivo (CVE-2024-45720: inyección de argumentos por la conversión «best fit» de Windows) y la versión; lo muestran el onboarding, el panel de información y «Acerca de». `SvnDetection.binary.origin` es `configured`, `bundled` o `system`.
+
+Pruebas: `src-tauri/tests/svn_bundled.rs` (20), contrato en `contract.rs`/`contract.test.ts`, `AboutDialog.test.ts` y `installed.e2e.ts` (instalación en un perfil aislado sin Subversion).

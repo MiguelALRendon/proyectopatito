@@ -229,7 +229,8 @@ function New-ExternalOpenFixtures([string]$Wc) {
     $dir = Join-Path $Wc $ExternalOpenDir
     New-Item -ItemType Directory -Path $dir | Out-Null
     $docx = [ordered]@{ '[Content_Types].xml' = $ContentTypesXml; '_rels/.rels' = $PackageRelsXml; 'word/document.xml' = $DocumentXml }
-    $permitted = @{ 'informe.docx' = (New-ZipBytes $docx); 'PAQUETE.ZIP' = (New-ZipBytes ([ordered]@{ 'leeme.txt' = 'datos' })) }
+    $cardOnlyDocx = [ordered]@{ '[Content_Types].xml' = $ContentTypesXml; '_rels/.rels' = $PackageRelsXml }
+    $permitted = @{ 'informe.docx' = (New-ZipBytes $cardOnlyDocx); 'PAQUETE.ZIP' = (New-ZipBytes ([ordered]@{ 'leeme.txt' = 'datos' })) }
     $macro = New-ZipBytes $docx
     $mz = New-HeaderBytes $MzSignature $DosHeaderBytes
     $withNul = [Text.Encoding]::ASCII.GetBytes("contenido`0binario")

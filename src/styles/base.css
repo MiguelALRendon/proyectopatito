@@ -183,6 +183,11 @@ textarea.field__input {
   background-color: var(--color-bg-elevated);
 }
 
+.app__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
 .app__brand {
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);

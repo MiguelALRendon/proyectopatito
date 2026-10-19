@@ -6,9 +6,12 @@ import {
   BINARY_SCORE,
   TEXT_SCORE,
   VIEWER_SCORE,
+  matchesArchive,
   matchesBinary,
   matchesImage,
   matchesMarkdown,
+  matchesMedia,
+  matchesOffice,
   matchesPdf,
   matchesText,
   registerBuiltinProviders,
@@ -31,6 +34,8 @@ function probe(kind: ProbeKind, extra: Partial<FileProbe> = {}): FileProbe {
     mime: 'application/octet-stream',
     len: 100,
     extension: null,
+    has_macros: false,
+    version: null,
     ...extra,
   };
 }
@@ -127,6 +132,55 @@ describe('puntaje de los proveedores integrados', () => {
       VIEWER_SCORE,
     );
     expect(matchesPdf({ path: 'a', probe: probe('pdf') })).toBe(VIEWER_SCORE);
+  });
+
+  it('un documento de Office elige el visor de Office y solo con su tipo', () => {
+    expect(matchesOffice({ path: 'a.docx', probe: probe('office') })).toBe(
+      VIEWER_SCORE,
+    );
+    for (const kind of ['pdf', 'text', 'binary', 'archive', 'cloud'] as const) {
+      expect(matchesOffice({ path: 'a.docx', probe: probe(kind) })).toBe(
+        NO_MATCH,
+      );
+    }
+    expect(chosenId('a.docx', probe('office'))).toBe('office');
+    expect(chosenId('a.docx', probe('binary'))).toBe('binary');
+  });
+
+  it('un comprimido elige el visor de comprimidos y solo con su tipo', () => {
+    expect(matchesArchive({ path: 'a.zip', probe: probe('archive') })).toBe(
+      VIEWER_SCORE,
+    );
+    expect(chosenId('a.zip', probe('archive'))).toBe('archive');
+    for (const kind of ['pdf', 'text', 'binary', 'office', 'cloud'] as const) {
+      expect(matchesArchive({ path: 'a.zip', probe: probe(kind) })).toBe(
+        NO_MATCH,
+      );
+    }
+    expect(chosenId('a.zip', probe('binary'))).toBe('binary');
+    expect(chosenId('a.docx', probe('office'))).toBe('office');
+  });
+
+  it('audio y vídeo eligen el reproductor y solo con su tipo', () => {
+    for (const kind of ['audio', 'video'] as const) {
+      expect(matchesMedia({ path: 'a.mp3', probe: probe(kind) })).toBe(
+        VIEWER_SCORE,
+      );
+      expect(chosenId('a.mp3', probe(kind))).toBe('media');
+    }
+    for (const kind of [
+      'pdf',
+      'text',
+      'binary',
+      'archive',
+      'office',
+      'cloud',
+    ] as const) {
+      expect(matchesMedia({ path: 'a.mp3', probe: probe(kind) })).toBe(
+        NO_MATCH,
+      );
+    }
+    expect(chosenId('a.mp3', probe('binary'))).toBe('binary');
   });
 
   it('una imagen o un PDF solo en la nube no coinciden con ningún proveedor', () => {

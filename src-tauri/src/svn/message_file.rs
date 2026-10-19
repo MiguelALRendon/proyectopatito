@@ -1,13 +1,16 @@
-use std::fs::{self, OpenOptions};
+use std::ffi::OsStr;
+use std::fs::{self, DirEntry, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::Duration;
 
 const FILE_PREFIX: &str = "dakedaduck-commit-";
 const FILE_SUFFIX: &str = ".txt";
 const CRLF: &str = "\r\n";
 const CR: &str = "\r";
 const LF: &str = "\n";
+const STALE_AFTER: Duration = Duration::from_secs(2 * 60 * 60);
 
 static NEXT_FILE: AtomicU64 = AtomicU64::new(0);
 
@@ -50,4 +53,33 @@ fn unique_path() -> PathBuf {
 // svn rechaza mensajes con finales de linea mezclados (E135000)
 fn normalize_line_endings(message: &str) -> String {
     message.replace(CRLF, LF).replace(CR, LF)
+}
+
+pub fn purge_stale_in_temp() {
+    purge_stale(&std::env::temp_dir(), STALE_AFTER);
+}
+
+pub fn purge_stale(dir: &Path, max_age: Duration) {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
+    entries
+        .flatten()
+        .filter(|entry| is_message_file(&entry.file_name()) && is_older_than(entry, max_age))
+        .for_each(|entry| {
+            fs::remove_file(entry.path()).ok();
+        });
+}
+
+fn is_message_file(name: &OsStr) -> bool {
+    name.to_str()
+        .is_some_and(|name| name.starts_with(FILE_PREFIX) && name.ends_with(FILE_SUFFIX))
+}
+
+fn is_older_than(entry: &DirEntry, max_age: Duration) -> bool {
+    let modified = entry.metadata().and_then(|meta| meta.modified());
+    modified
+        .ok()
+        .and_then(|modified| modified.elapsed().ok())
+        .is_some_and(|age| age > max_age)
 }

@@ -23,6 +23,8 @@ function probe(extra: Partial<FileProbe> = {}): FileProbe {
     mime: 'application/octet-stream',
     len: 2048,
     extension: null,
+    has_macros: false,
+    version: null,
     ...extra,
   };
 }
@@ -127,6 +129,19 @@ describe('BinaryCard: contenido', () => {
     mountCard('a.pdf', probe({ kind: 'pdf', mime: 'application/pdf' }));
     expect(wrapper.text()).toContain('Documento PDF (.pdf)');
   });
+
+  it.each([
+    ['office', 'a.docx', 'Documento de Office (.docx)'],
+    ['audio', 'a.mp3', 'Audio (.mp3)'],
+    ['video', 'a.mp4', 'Vídeo (.mp4)'],
+    ['archive', 'a.zip', 'Archivo comprimido (.zip)'],
+  ] as const)(
+    'etiqueta el tipo %s mientras no exista su visor',
+    (kind, name, label) => {
+      mountCard(name, probe({ kind }));
+      expect(wrapper.text()).toContain(label);
+    },
+  );
 
   it('alterna el visor hexadecimal con aria-expanded', async () => {
     mountCard('a\\datos.bin', probe());

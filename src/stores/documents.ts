@@ -1,6 +1,6 @@
 import { reactive, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { askLineEnding, askWindowClose } from '../documents/dialogs';
+import { askLineEnding } from '../documents/dialogs';
 import {
   fsReadText,
   fsWriteText,
@@ -290,24 +290,6 @@ export const useDocumentsStore = defineStore('documents', () => {
     return save(tabId);
   }
 
-  async function saveAll(): Promise<boolean> {
-    for (const session of dirtySessions()) {
-      if (isSettled(await saveResolvingLineEnding(session.tabId))) continue;
-      tabs.activate(session.tabId);
-      return false;
-    }
-    return true;
-  }
-
-  async function confirmWindowClose(): Promise<boolean> {
-    await tabs.flush();
-    const dirtyCount = dirtySessions().length;
-    if (dirtyCount === 0) return true;
-    const choice = await askWindowClose(dirtyCount);
-    if (choice === 'save') return saveAll();
-    return choice === 'discard';
-  }
-
   function dropMissing(openIds: string[]) {
     Object.keys(sessions)
       .filter((tabId) => !openIds.includes(tabId))
@@ -331,7 +313,6 @@ export const useDocumentsStore = defineStore('documents', () => {
     save,
     saveResolvingLineEnding,
     overwrite,
-    saveAll,
-    confirmWindowClose,
+    dirtySessions,
   };
 });

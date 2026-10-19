@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isAllowedRequest, isProcessAlive } from './harness';
+import {
+  isAllowedRequest,
+  isolationProblems,
+  isPolicyBlock,
+  isProcessAlive,
+} from './harness';
 
 describe('isAllowedRequest', () => {
   it('rechaza hosts externos', () => {
@@ -36,6 +41,49 @@ describe('isAllowedRequest', () => {
       true,
     );
     expect(isAllowedRequest('data:image/png;base64,AAAA', 'debug')).toBe(true);
+  });
+
+  it('acepta el host de los recursos de ZetaOffice y no uno parecido', () => {
+    expect(
+      isAllowedRequest('http://zeta-assets.localhost/host.html', 'debug'),
+    ).toBe(true);
+    expect(
+      isAllowedRequest('http://zeta-assets.localhost.evil.com/x', 'debug'),
+    ).toBe(false);
+  });
+});
+
+describe('isPolicyBlock', () => {
+  it('reconoce el bloqueo por COEP o CORP', () => {
+    expect(isPolicyBlock('net::ERR_BLOCKED_BY_RESPONSE.NotSameOrigin')).toBe(
+      true,
+    );
+  });
+
+  it('ignora otros fallos y la ausencia de texto', () => {
+    expect(isPolicyBlock('net::ERR_ABORTED')).toBe(false);
+    expect(isPolicyBlock('net::ERR_BLOCKED_BY_CSP')).toBe(false);
+    expect(isPolicyBlock(undefined)).toBe(false);
+  });
+});
+
+describe('isolationProblems', () => {
+  const isolated = {
+    crossOriginIsolated: true,
+    sharedArrayBuffer: true,
+    sharedMemory: true,
+  };
+
+  it('no reporta nada en una ventana aislada', () => {
+    expect(isolationProblems(isolated)).toEqual([]);
+  });
+
+  it.each([
+    ['crossOriginIsolated', 'crossOriginIsolated no es true'],
+    ['sharedArrayBuffer', 'SharedArrayBuffer no existe'],
+    ['sharedMemory', 'WebAssembly.Memory compartida no se pudo crear'],
+  ])('reporta %s cuando falta', (key, problem) => {
+    expect(isolationProblems({ ...isolated, [key]: false })).toEqual([problem]);
   });
 });
 

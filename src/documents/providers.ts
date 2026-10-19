@@ -1,6 +1,9 @@
+import ArchiveViewer from '../components/documents/ArchiveViewer.vue';
 import BinaryCard from '../components/documents/BinaryCard.vue';
 import ImageViewer from '../components/documents/ImageViewer.vue';
 import MarkdownEditor from '../components/documents/MarkdownEditor.vue';
+import MediaPlayer from '../components/documents/MediaPlayer.vue';
+import OfficeViewer from '../components/documents/OfficeViewer.vue';
 import PdfViewer from '../components/documents/PdfViewer.vue';
 import TextEditor from '../components/documents/TextEditor.vue';
 import { isTooLarge } from './limits';
@@ -36,6 +39,19 @@ export function matchesPdf({ probe }: DocumentContext): number {
   return probe.kind === 'pdf' ? VIEWER_SCORE : NO_MATCH;
 }
 
+export function matchesOffice({ probe }: DocumentContext): number {
+  return probe.kind === 'office' ? VIEWER_SCORE : NO_MATCH;
+}
+
+export function matchesMedia({ probe }: DocumentContext): number {
+  const isMedia = probe.kind === 'audio' || probe.kind === 'video';
+  return isMedia ? VIEWER_SCORE : NO_MATCH;
+}
+
+export function matchesArchive({ probe }: DocumentContext): number {
+  return probe.kind === 'archive' ? VIEWER_SCORE : NO_MATCH;
+}
+
 export function matchesBinary({ probe }: DocumentContext): number {
   return probe.kind === 'cloud' ? NO_MATCH : BINARY_SCORE;
 }
@@ -64,6 +80,24 @@ export function registerBuiltinProviders(): void {
     label: 'PDF',
     matches: matchesPdf,
     component: PdfViewer,
+  });
+  registerProvider({
+    id: 'office',
+    label: 'Documento de Office',
+    matches: matchesOffice,
+    component: OfficeViewer,
+  });
+  registerProvider({
+    id: 'media',
+    label: 'Audio y vídeo',
+    matches: matchesMedia,
+    component: MediaPlayer,
+  });
+  registerProvider({
+    id: 'archive',
+    label: 'Archivo comprimido',
+    matches: matchesArchive,
+    component: ArchiveViewer,
   });
   registerProvider({
     id: 'binary',

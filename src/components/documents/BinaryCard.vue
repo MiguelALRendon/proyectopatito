@@ -14,6 +14,10 @@ const KIND_LABELS: Record<ProbeKind, string> = {
   text: 'Texto',
   image: 'Imagen',
   pdf: 'Documento PDF',
+  office: 'Documento de Office',
+  audio: 'Audio',
+  video: 'Vídeo',
+  archive: 'Archivo comprimido',
   binary: 'Archivo binario',
   cloud: 'Solo en la nube',
 };
@@ -27,6 +31,7 @@ const props = defineProps<{
   path: string;
   probe: FileProbe | null;
   notice?: string;
+  extraFacts?: [string, string][];
 }>();
 
 const isHexVisible = ref(false);
@@ -69,6 +74,10 @@ const noticeText = computed(() => {
       <dd>{{ sizeLabel }}</dd>
       <dt>MIME</dt>
       <dd>{{ probe.mime }}</dd>
+      <template v-for="[label, value] in extraFacts" :key="label">
+        <dt>{{ label }}</dt>
+        <dd>{{ value }}</dd>
+      </template>
     </dl>
     <div class="binary-card__actions">
       <button

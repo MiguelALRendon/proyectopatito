@@ -31,7 +31,9 @@ const IPC_ORIGIN = 'http://ipc.localhost';
 const CAN_OPEN_URL = `${IPC_ORIGIN}/fs_can_open_external`;
 const OPEN_COMMAND = 'fs_open_external';
 const OPEN_BUTTON = 'Abrir con la aplicación predeterminada';
-const PERMITTED = ['informe.docx', 'PAQUETE.ZIP'];
+const PERMITTED = ['informe.docx'];
+const PERMITTED_ARCHIVE = 'PAQUETE.ZIP';
+const ARCHIVE_TABLE = { name: 'Contenido del archivo comprimido' };
 const REFUSED = [
   'programa.exe',
   'factura.pdf.exe',
@@ -138,6 +140,20 @@ describe('apertura externa en la ventana real: formatos permitidos', () => {
       await closeDocument(app.page, name);
     },
   );
+
+  it('un comprimido permitido abre el visor y conserva el botón de apertura externa', async () => {
+    const { page } = app;
+    await page.getByRole('tab').first().click();
+    await fileRow(page, PERMITTED_ARCHIVE).dblclick();
+    await page
+      .getByRole('table', ARCHIVE_TABLE)
+      .waitFor({ timeout: VISIBLE_TIMEOUT_MS });
+    await page
+      .getByRole('button', { name: OPEN_BUTTON, exact: true })
+      .waitFor({ timeout: VISIBLE_TIMEOUT_MS });
+    expect(await launchedCommands()).toEqual([]);
+    await closeDocument(page, PERMITTED_ARCHIVE);
+  });
 
   it('el clic usa la respuesta simulada de la compuerta y no llega a Rust', async () => {
     const { card } = await openCard(PERMITTED[0]);

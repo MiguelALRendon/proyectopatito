@@ -8,7 +8,7 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['src/views/**/*.test.ts', 'happy-dom'],
       [
-        'src/composables/{useFocusTrap,useModalIsolation,useResizablePanel,useSelection,useWindowClose}.test.ts',
+        'src/composables/{useArchiveExtraction,useFocusTrap,useModalIsolation,useResizablePanel,useSelection,useWindowClose}.test.ts',
         'happy-dom',
       ],
       ['src/{components,documents}/**/*.test.ts', 'happy-dom'],

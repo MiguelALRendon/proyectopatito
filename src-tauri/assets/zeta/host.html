@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Documento de Office</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        block-size: 100%;
+        overflow: hidden;
+        user-select: none;
+      }
+      #qtcanvas {
+        position: absolute;
+        inset-inline-start: 0;
+        inset-block-start: -26px;
+        inline-size: 100vw;
+        block-size: calc(100vh + 26px);
+        padding: 0;
+        border: 0;
+        outline: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="qtcanvas" contenteditable="true"></canvas>
+    <script src="host.js"></script>
+  </body>
+</html>

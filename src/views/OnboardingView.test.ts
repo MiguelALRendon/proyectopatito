@@ -60,8 +60,9 @@ describe('OnboardingView workspace root', () => {
 describe('OnboardingView svn detection', () => {
   it('re-detects svn on demand and reports it', async () => {
     vi.mocked(service.svnDetect).mockResolvedValue({
-      binary: { path: 'C:\\svn.exe', version: '1.14.2' },
+      binary: { path: 'C:\\svn.exe', version: '1.14.2', origin: 'system' },
       error: null,
+      warning: null,
     });
     await button('Detectar de nuevo')?.trigger('click');
     await flushPromises();
@@ -70,11 +71,33 @@ describe('OnboardingView svn detection', () => {
   });
 });
 
+describe('OnboardingView with the bundled svn', () => {
+  it('muestra Subversion incluido y deja el campo de otra ruta plegado', async () => {
+    vi.mocked(service.svnDetect).mockResolvedValue({
+      binary: { path: 'C:\app\svn.exe', version: '1.14.5', origin: 'bundled' },
+      error: null,
+      warning: null,
+    });
+    await button('Detectar de nuevo')?.trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Subversion incluido (versión 1.14.5).');
+    const details = wrapper.find('details.onboarding__path');
+    expect(details.exists()).toBe(true);
+    expect(details.attributes('open')).toBeUndefined();
+    expect(details.find('#svn-path').exists()).toBe(true);
+  });
+});
+
 describe('OnboardingView manual svn path', () => {
   it('ignores an empty path and saves the typed one trimmed', async () => {
     vi.mocked(service.svnSetPath).mockResolvedValue({
-      binary: { path: 'C:\\svn\\svn.exe', version: '1.14.2' },
+      binary: {
+        path: 'C:\\svn\\svn.exe',
+        version: '1.14.2',
+        origin: 'configured',
+      },
       error: null,
+      warning: null,
     });
     const form = wrapper.findAll('form')[1];
     await form.trigger('submit');
@@ -88,7 +111,11 @@ describe('OnboardingView manual svn path', () => {
 });
 
 describe('OnboardingView failed svn detection', () => {
-  const found = { path: 'C:\\svn\\svn.exe', version: '1.14.2' };
+  const found = {
+    path: 'C:\\svn\\svn.exe',
+    version: '1.14.2',
+    origin: 'configured' as const,
+  };
 
   async function saveManualPath() {
     await wrapper.find('#svn-path').setValue('C:\\svn\\svn.exe');
@@ -100,6 +127,7 @@ describe('OnboardingView failed svn detection', () => {
     vi.mocked(service.svnSetPath).mockResolvedValue({
       binary: null,
       error: 'svn 1.9.7 es anterior a la mínima requerida',
+      warning: null,
     });
     await saveManualPath();
     expect(wrapper.text()).not.toContain('Ruta de svn.exe guardada.');
@@ -110,6 +138,7 @@ describe('OnboardingView failed svn detection', () => {
     vi.mocked(service.svnSetPath).mockResolvedValue({
       binary: found,
       error: 'no se pudo guardar la configuración',
+      warning: null,
     });
     await saveManualPath();
     expect(wrapper.text()).not.toContain('Ruta de svn.exe guardada.');
@@ -121,6 +150,7 @@ describe('OnboardingView failed svn detection', () => {
     vi.mocked(service.svnDetect).mockResolvedValue({
       binary: null,
       error: 'No se encontró svn.exe',
+      warning: null,
     });
     await wrapper
       .findAll('button')

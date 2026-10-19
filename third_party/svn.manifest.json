@@ -1,0 +1,121 @@
+{
+  "version": "1.14.5",
+  "runtime": "14.51.36247.0",
+  "files": [
+    {
+      "name": "msvcp140.dll",
+      "bytes": 643512,
+      "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+    },
+    {
+      "name": "SlikSvn-DB44-20-x64.dll",
+      "bytes": 900096,
+      "sha256": "b129bfd13bd5670df96bf0397d177efa9ad5b9fa91621c97c90004812414becb"
+    },
+    {
+      "name": "SlikSvn-libapr-1.dll",
+      "bytes": 229376,
+      "sha256": "9cbfed910b3fb430eb4b61291789bde267f4d3092a2208802c2767a3aac63949"
+    },
+    {
+      "name": "SlikSvn-libaprutil-1.dll",
+      "bytes": 310272,
+      "sha256": "2bd71134611e9272da9c1ff6092b2165985bd532d76bcc4ad505eb3c8b0951c3"
+    },
+    {
+      "name": "SlikSvn-libcrypto-3-x64.dll",
+      "bytes": 5208064,
+      "sha256": "716e5f8c8d8137c011d00a1f6523889c196818397bc52eea14aa78e422eea1c3"
+    },
+    {
+      "name": "SlikSvn-libintl.dll",
+      "bytes": 62976,
+      "sha256": "0c4157d7baeba7f86f77fc328e8a691532e6a4ec36a36da51b2373e67653624c"
+    },
+    {
+      "name": "SlikSvn-libsasl21.dll",
+      "bytes": 216576,
+      "sha256": "6e4dbf1efbb79809b251b7c52969c884d610a9543ccd1f16781e7e58480ab510"
+    },
+    {
+      "name": "SlikSvn-libssl-3-x64.dll",
+      "bytes": 765952,
+      "sha256": "ab5efd7d65de64dcc6c4e2e95132b4121f172db9732896f3504579682884420a"
+    },
+    {
+      "name": "SlikSvn-libsvn_client-1.dll",
+      "bytes": 710656,
+      "sha256": "858250c5c29c55c65e07cccd9967352af0bc7c309b7395aee6c7f2a6e50d9de4"
+    },
+    {
+      "name": "SlikSvn-libsvn_delta-1.dll",
+      "bytes": 148992,
+      "sha256": "975effba24809ad1f147177185b0c9c63a40b1061470f4f7f834e55503a323fe"
+    },
+    {
+      "name": "SlikSvn-libsvn_diff-1.dll",
+      "bytes": 114688,
+      "sha256": "c54cedfb3f1eadd6041f33c4c3cfba02db6159eccfc78a5ce050a7fb16f37a8b"
+    },
+    {
+      "name": "SlikSvn-libsvn_fs_base-1.dll",
+      "bytes": 220672,
+      "sha256": "372ebba0d4d5accb10740a7fe9663e3c8665dc5259dbbc9728004996c0ebfb68"
+    },
+    {
+      "name": "SlikSvn-libsvn_fs_fs-1.dll",
+      "bytes": 400384,
+      "sha256": "5d8c506a7eb80cb213b7ecd3561ca95fb76744fb58909fa89495978ccda84a90"
+    },
+    {
+      "name": "SlikSvn-libsvn_fs_util-1.dll",
+      "bytes": 29696,
+      "sha256": "9d4d5a58c9bbc5e69e9fe01a2d8178d4bc4c9028175fce2686c869866705bae7"
+    },
+    {
+      "name": "SlikSvn-libsvn_fs_x-1.dll",
+      "bytes": 380928,
+      "sha256": "48b75956165dbe942490cede7892dab6bb52670acee9027f44d4a899031668e9"
+    },
+    {
+      "name": "SlikSvn-libsvn_fs-1.dll",
+      "bytes": 70144,
+      "sha256": "e634ee8a101ba346fb247a6372a991686a687061b87c09624d3992efec17ef77"
+    },
+    {
+      "name": "SlikSvn-libsvn_ra-1.dll",
+      "bytes": 540672,
+      "sha256": "a9ffe2294a096e67b3d0d2efc4863620ad22fe85f531259105ca5c2a733af8da"
+    },
+    {
+      "name": "SlikSvn-libsvn_repos-1.dll",
+      "bytes": 289280,
+      "sha256": "58a5785830ded90a25dc5adb31762ac7517024e508849b7d8aa8b3e99fb2e02a"
+    },
+    {
+      "name": "SlikSvn-libsvn_subr-1.dll",
+      "bytes": 2233344,
+      "sha256": "8110c65db3b6aedcd7493a20d0c738a1c3bfb53f14c184d06629228606a253b3"
+    },
+    {
+      "name": "SlikSvn-libsvn_wc-1.dll",
+      "bytes": 871936,
+      "sha256": "2e06518de783feb649b58bc9c133f06ee44da36881e0d875f371ef4c800461ff"
+    },
+    {
+      "name": "svn.exe",
+      "bytes": 452608,
+      "sha256": "916151f9bb570efe36000cfab907c6737f83e7c82b915044b48b2d616dbe437a"
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "bytes": 50112,
+      "sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+    },
+    {
+      "name": "vcruntime140.dll",
+      "bytes": 178616,
+      "sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+    }
+  ]
+}

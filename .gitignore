@@ -49,3 +49,13 @@ src-tauri/target-e2e
 .bossdream-project/mutants-rust-2a*/**/debug.log
 .bossdream-project/mutants-rust-2a*/**/diff/
 .bossdream-project/mutants-rust-2a*/**/log/
+
+spikes/
+
+src-tauri/resources/zetaoffice/*
+!src-tauri/resources/zetaoffice/.gitkeep
+src-tauri/resources/svn/*
+!src-tauri/resources/svn/.gitkeep
+
+src-tauri/target-release
+.bossdream-project/screenshots/

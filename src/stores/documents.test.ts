@@ -18,7 +18,6 @@ vi.mock('../composables/useConfirm', () => ({ confirm: vi.fn() }));
 vi.mock('./explorer', () => ({ useExplorerStore: () => ({ refreshStatus }) }));
 
 import { confirm } from '../composables/useConfirm';
-import { askLineEnding, askWindowClose } from '../documents/dialogs';
 import {
   fsReadText,
   fsWriteText,
@@ -623,114 +622,6 @@ describe('documents: suciedad', () => {
     await tabs.close(tabId);
     await nextTick();
     expect(documents.sessionOf(tabId)).toBeNull();
-  });
-});
-
-describe('documents: cierre de la ventana', () => {
-  it('sin cambios vacía lo pendiente y deja cerrar sin preguntar', async () => {
-    const { tabs, documents } = await openDocument();
-    const flush = vi.spyOn(tabs, 'flush');
-
-    expect(await documents.confirmWindowClose()).toBe(true);
-    expect(flush).toHaveBeenCalledTimes(1);
-    expect(askWindowClose).not.toHaveBeenCalled();
-  });
-
-  it('con cambios y cancelar no cierra ni pierde nada', async () => {
-    const { tabs, documents, tabId } = await openDocument();
-    documents.edit(tabId, EDITED);
-    vi.mocked(askWindowClose).mockResolvedValue(null);
-
-    expect(await documents.confirmWindowClose()).toBe(false);
-
-    expect(askWindowClose).toHaveBeenCalledWith(1);
-    expect(fsWriteText).not.toHaveBeenCalled();
-    expect(documents.sessionOf(tabId)?.current).toBe(EDITED);
-    expect(tabs.isDirty(tabId)).toBe(true);
-  });
-
-  it('descartar deja cerrar sin escribir', async () => {
-    const { documents, tabId } = await openDocument();
-    documents.edit(tabId, EDITED);
-    vi.mocked(askWindowClose).mockResolvedValue('discard');
-
-    expect(await documents.confirmWindowClose()).toBe(true);
-    expect(fsWriteText).not.toHaveBeenCalled();
-  });
-
-  it('guardar y cerrar escribe todas las pestañas sucias antes de dejar cerrar', async () => {
-    const { tabs, documents, tabId } = await openDocument();
-    documents.edit(tabId, EDITED);
-    vi.mocked(askWindowClose).mockResolvedValue('save');
-    vi.mocked(fsWriteText).mockResolvedValue({ version: 'v2' });
-
-    expect(await documents.confirmWindowClose()).toBe(true);
-
-    expect(lastWrite().content).toBe(EDITED);
-    expect(tabs.hasDirtyTabs).toBe(false);
-  });
-
-  it('si al guardar falla una pestaña no cierra, la activa y conserva sus cambios', async () => {
-    const { tabs, documents, tabId } = await openDocument();
-    const other = tabs.open('wc\\b.txt', 'document') as string;
-    vi.mocked(fsReadText).mockResolvedValueOnce(textDocument());
-    await documents.open(other, 'wc\\b.txt');
-    documents.edit(tabId, EDITED);
-    tabs.activate(other);
-    vi.mocked(askWindowClose).mockResolvedValue('save');
-    vi.mocked(fsWriteText).mockRejectedValue(failure('file_changed'));
-
-    expect(await documents.confirmWindowClose()).toBe(false);
-
-    expect(tabs.activeId).toBe(tabId);
-    expect(documents.sessionOf(tabId)?.hasConflict).toBe(true);
-    expect(documents.sessionOf(tabId)?.current).toBe(EDITED);
-  });
-
-  it('un archivo con final de línea mixto sin decidir impide el cierre en vez de normalizar a escondidas', async () => {
-    const { documents, tabId } = await openDocument({ eol_mixed: true });
-    documents.edit(tabId, EDITED);
-    vi.mocked(askWindowClose).mockResolvedValue('save');
-
-    expect(await documents.confirmWindowClose()).toBe(false);
-    expect(fsWriteText).not.toHaveBeenCalled();
-  });
-
-  it('un final de línea mixto en «Guardar y cerrar» pregunta con el mismo diálogo y guarda con la elección', async () => {
-    const { documents, tabId } = await openDocument({
-      content: 'a\r\nb\n',
-      eol_mixed: true,
-    });
-    documents.edit(tabId, 'a\r\nb\nc\n');
-    vi.mocked(askWindowClose).mockResolvedValue('save');
-    vi.mocked(askLineEnding).mockResolvedValue('crlf');
-    vi.mocked(fsWriteText).mockResolvedValue({ version: 'v2' });
-
-    expect(await documents.confirmWindowClose()).toBe(true);
-
-    expect(askLineEnding).toHaveBeenCalledWith('notas.txt', 'lf');
-    expect(lastWrite().eol).toBe('crlf');
-  });
-
-  it('cancelar la pregunta del final de línea cancela el cierre, activa la pestaña y no escribe', async () => {
-    const { tabs, documents, tabId } = await openDocument({ eol_mixed: true });
-    const other = tabs.open('wc\\b.txt', 'document') as string;
-    tabs.activate(other);
-    documents.edit(tabId, EDITED);
-    vi.mocked(askWindowClose).mockResolvedValue('save');
-    vi.mocked(askLineEnding).mockResolvedValue(null);
-
-    expect(await documents.confirmWindowClose()).toBe(false);
-
-    expect(tabs.activeId).toBe(tabId);
-    expect(fsWriteText).not.toHaveBeenCalled();
-    expect(documents.sessionOf(tabId)?.isDirty).toBe(true);
-  });
-
-  it('saveAll sin nada sucio es verdadero y no escribe', async () => {
-    const { documents } = await openDocument();
-    expect(await documents.saveAll()).toBe(true);
-    expect(fsWriteText).not.toHaveBeenCalled();
   });
 });
 

@@ -127,7 +127,7 @@ fn is_plain_prefix(kind: Prefix<'_>) -> bool {
     matches!(kind, Prefix::Disk(_) | Prefix::UNC(..))
 }
 
-fn is_reserved_device_name(name: &OsStr) -> bool {
+pub(crate) fn is_reserved_device_name(name: &OsStr) -> bool {
     let name = name.to_string_lossy();
     let stem = name.split('.').next().unwrap_or_default().trim_end();
     let upper = stem.to_uppercase();

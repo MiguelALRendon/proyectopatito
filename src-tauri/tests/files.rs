@@ -22,6 +22,30 @@ const PNG_HEADER: [u8; 33] = [
 ];
 const FAKE_BITMAP: &[u8] = b"BM\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 const MISSING_ATTRIBUTES: u32 = 0;
+const ALLOW_SKIPPED_ENV_VAR: &str = "DAKEDADUCK_ALLOW_SKIPPED_ENV_TESTS";
+const ALLOW_SKIPPED_ENV_VALUE: &str = "1";
+
+fn is_skip_allowed(value: Option<&std::ffi::OsStr>) -> bool {
+    value.is_some_and(|value| value == ALLOW_SKIPPED_ENV_VALUE)
+}
+
+fn skip_unavailable_environment(reason: &str) {
+    let value = std::env::var_os(ALLOW_SKIPPED_ENV_VAR);
+    assert!(
+        is_skip_allowed(value.as_deref()),
+        "{reason}: la prueba no puede verificar nada; use un entorno que lo permita o          defina {ALLOW_SKIPPED_ENV_VAR}={ALLOW_SKIPPED_ENV_VALUE} para saltarla"
+    );
+    eprintln!("{reason}: prueba saltada por {ALLOW_SKIPPED_ENV_VAR}");
+}
+
+#[test]
+fn a_test_may_be_skipped_only_when_the_opt_out_variable_is_exactly_one() {
+    use std::ffi::OsStr;
+    assert!(!is_skip_allowed(None));
+    assert!(!is_skip_allowed(Some(OsStr::new("0"))));
+    assert!(!is_skip_allowed(Some(OsStr::new(""))));
+    assert!(is_skip_allowed(Some(OsStr::new("1"))));
+}
 
 struct Fixture {
     _guard: TempDir,
@@ -222,7 +246,7 @@ fn a_symlink_that_escapes_the_root_is_rejected_when_the_system_allows_creating_i
     fs::create_dir(&outside).unwrap();
     let link = fixture.root.join("simbolico");
     if std::os::windows::fs::symlink_dir(&outside, &link).is_err() {
-        eprintln!("sin privilegio para crear symlinks: se cubre solo la junction");
+        skip_unavailable_environment("sin privilegio para crear symlinks");
         return;
     }
     assert!(outside_workspace(fixture.list("simbolico")));
@@ -282,7 +306,7 @@ fn the_8_3_short_name_of_svn_is_expanded_and_forbidden() {
     let fixture = fixture();
     fixture.write(r"wc\.svn\wc.db", b"sqlite");
     let Some(short) = short_name_of(&fixture.root.join("wc"), ".svn") else {
-        eprintln!("el volumen de pruebas no genera nombres cortos 8.3");
+        skip_unavailable_environment("el volumen de pruebas no genera nombres cortos 8.3");
         return;
     };
     assert!(matches!(

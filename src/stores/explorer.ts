@@ -20,14 +20,20 @@ import {
   type InfoEntry,
 } from '../services/tauri';
 import { visibleEntries } from '../utils/entryOrder';
-import { isSamePath, joinPath, parentPath } from '../utils/folderPaths';
+import {
+  isSamePath,
+  joinPath,
+  normalizedPath,
+  parentPath,
+} from '../utils/folderPaths';
+import { createTicketGate } from '../utils/ticketGate';
 import { badgesRank, type StateBadge } from '../utils/svnBadges';
 import {
   badgesAt,
   buildStatusIndex,
   type StatusIndex,
 } from '../utils/statusIndex';
-import { ROOT_TAB_TITLE, cleanPath, useTabsStore } from './tabs';
+import { ROOT_TAB_TITLE, useTabsStore } from './tabs';
 
 export const DEFAULT_VIEW: FolderView = {
   mode: 'grid',
@@ -212,23 +218,15 @@ function toggledColumns(
 export const useExplorerStore = defineStore('explorer', () => {
   const tabs = useTabsStore();
   const folders = ref<Record<string, FolderState>>({});
-  const tickets = new Map<string, number>();
+  const { next: nextTicket, isCurrent, drop } = createTicketGate();
 
   const stateOf = (tabId: string): FolderState | null =>
     folders.value[tabId] ?? null;
   const activeState = computed(() => stateOf(tabs.activeId ?? ''));
   const activeWc = computed(() => activeState.value?.listing?.wc ?? null);
 
-  const nextTicket = (key: string): number => {
-    const ticket = (tickets.get(key) ?? 0) + 1;
-    tickets.set(key, ticket);
-    return ticket;
-  };
-  const isCurrent = (key: string, ticket: number) =>
-    tickets.get(key) === ticket;
-
   function newState(path: string): FolderState {
-    const location = cleanPath(path);
+    const location = normalizedPath(path);
     return {
       location,
       listing: null,
@@ -562,9 +560,9 @@ export const useExplorerStore = defineStore('explorer', () => {
 
   function discard(tabId: string) {
     delete folders.value[tabId];
-    tickets.delete(tabId);
-    tickets.delete(`${tabId}${HEADER_TICKET_SUFFIX}`);
-    tickets.delete(`${tabId}${STATUS_TICKET_SUFFIX}`);
+    drop(tabId);
+    drop(`${tabId}${HEADER_TICKET_SUFFIX}`);
+    drop(`${tabId}${STATUS_TICKET_SUFFIX}`);
   }
 
   watch(

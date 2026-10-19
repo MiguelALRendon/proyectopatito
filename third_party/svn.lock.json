@@ -1,0 +1,46 @@
+{
+  "name": "Subversion para Windows (SlikSVN) empaquetado con la aplicación",
+  "version": "1.14.5",
+  "zip": {
+    "url": "https://sliksvn.com/pub/Slik-Subversion-1.14.5-x64.zip",
+    "bytes": 7701022,
+    "sha256": "77d4fe02999dda3bdc3a20e86243ae6ede99aaf072b4c12b0cdedb54d88e954a"
+  },
+  "files": [
+    "svn.exe",
+    "SlikSvn-DB44-20-x64.dll",
+    "SlikSvn-libapr-1.dll",
+    "SlikSvn-libaprutil-1.dll",
+    "SlikSvn-libcrypto-3-x64.dll",
+    "SlikSvn-libintl.dll",
+    "SlikSvn-libsasl21.dll",
+    "SlikSvn-libssl-3-x64.dll",
+    "SlikSvn-libsvn_client-1.dll",
+    "SlikSvn-libsvn_delta-1.dll",
+    "SlikSvn-libsvn_diff-1.dll",
+    "SlikSvn-libsvn_fs_base-1.dll",
+    "SlikSvn-libsvn_fs_fs-1.dll",
+    "SlikSvn-libsvn_fs_util-1.dll",
+    "SlikSvn-libsvn_fs_x-1.dll",
+    "SlikSvn-libsvn_fs-1.dll",
+    "SlikSvn-libsvn_ra-1.dll",
+    "SlikSvn-libsvn_repos-1.dll",
+    "SlikSvn-libsvn_subr-1.dll",
+    "SlikSvn-libsvn_wc-1.dll"
+  ],
+  "runtimeVersion": "14.51.36247.0",
+  "runtime": [
+    {
+      "name": "vcruntime140.dll",
+      "sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+    },
+    {
+      "name": "msvcp140.dll",
+      "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+    }
+  ]
+}

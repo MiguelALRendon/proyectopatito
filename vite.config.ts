@@ -11,6 +11,10 @@ const PDFJS_ASSETS = /node_modules[\/]pdfjs-dist[\/]/;
 const PDFJS_ASSET_FILES = 'assets/pdfjs/[name][extname]';
 const DEFAULT_ASSET_FILES = 'assets/[name]-[hash][extname]';
 const host = process.env.TAURI_DEV_HOST;
+const ISOLATION_HEADERS = {
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+};
 const isPdfjsAsset = (names: readonly string[] | undefined) =>
   (names ?? []).some((name) => PDFJS_ASSETS.test(name));
 export default defineConfig(() => ({
@@ -31,7 +35,9 @@ export default defineConfig(() => ({
     },
   },
   clearScreen: false,
+  preview: { headers: ISOLATION_HEADERS },
   server: {
+    headers: ISOLATION_HEADERS,
     port: 1420,
     strictPort: true,
     host: host || false,

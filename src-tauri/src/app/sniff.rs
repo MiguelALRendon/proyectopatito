@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::app::media::classify_media;
+
 const BYTES_PER_KIB: usize = 1024;
 pub const SNIFF_BYTES: usize = 8 * BYTES_PER_KIB;
 
@@ -79,6 +81,10 @@ pub enum ProbeKind {
     Text,
     Image,
     Pdf,
+    Office,
+    Audio,
+    Video,
+    Archive,
     Binary,
     Cloud,
 }
@@ -94,6 +100,7 @@ pub struct Sniffed {
 pub struct Sample<'a> {
     pub bytes: &'a [u8],
     pub truncated: bool,
+    pub extension: Option<&'a str>,
 }
 
 struct ImageFormat {
@@ -171,6 +178,9 @@ pub fn classify(sample: Sample<'_>) -> Sniffed {
     }
     if is_pdf(sample.bytes) {
         return PDF;
+    }
+    if let Some(found) = classify_media(sample.bytes, sample.extension) {
+        return found;
     }
     if !is_text(sample) {
         return BINARY;

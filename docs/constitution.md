@@ -21,7 +21,7 @@ dakedaduck svn es un cliente de escritorio para Windows (Tauri 2 + Rust + Vue 3)
 
 ## Restricciones
 
-- Windows 10/11 x64 primero; sin sacrificar UX de Windows por portabilidad prematura.
+- Windows 11 x64 primero (Windows 10 y anteriores quedan fuera); sin sacrificar UX de Windows por portabilidad prematura.
 - No modificar servidores ni repositorios existentes; no crear API propia entre cliente y servidor.
 - No asumir estructura trunk/branches/tags, ni cliente == servidor en versión, ni que TortoiseSVN está instalado.
 - Adaptar características por versión de cliente (`svn --version --quiet`): shelving es experimental en 1.14.

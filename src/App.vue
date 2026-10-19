@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import AboutDialog from './components/AboutDialog.vue';
 import ChoiceDialog from './components/ChoiceDialog.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import ExplorerSidebar from './components/explorer/ExplorerSidebar.vue';
@@ -14,6 +15,7 @@ import { useWorkspaceStore } from './stores/workspace';
 import OnboardingView from './views/OnboardingView.vue';
 
 const workspace = useWorkspaceStore();
+const isAboutOpen = ref(false);
 const { resolvedTheme, toggleTheme } = useTheme();
 useWindowClose();
 const isShellVisible = computed(
@@ -28,9 +30,14 @@ onMounted(() => workspace.load());
   <div class="app">
     <header class="app__header">
       <span class="app__brand">dakedaduck svn</span>
-      <button type="button" class="btn" @click="toggleTheme">
-        {{ resolvedTheme === 'dark' ? 'Tema claro' : 'Tema oscuro' }}
-      </button>
+      <div class="app__actions">
+        <button type="button" class="btn" @click="isAboutOpen = true">
+          Acerca de
+        </button>
+        <button type="button" class="btn" @click="toggleTheme">
+          {{ resolvedTheme === 'dark' ? 'Tema claro' : 'Tema oscuro' }}
+        </button>
+      </div>
     </header>
     <AppShell v-if="isShellVisible">
       <template #sidebar><ExplorerSidebar /></template>
@@ -42,6 +49,7 @@ onMounted(() => workspace.load());
       <p v-if="!workspace.isLoaded" role="status">Cargando…</p>
       <OnboardingView v-else />
     </main>
+    <AboutDialog v-if="isAboutOpen" @close="isAboutOpen = false" />
     <ConfirmDialog />
     <ChoiceDialog />
   </div>

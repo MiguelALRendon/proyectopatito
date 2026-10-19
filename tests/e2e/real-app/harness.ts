@@ -15,10 +15,13 @@ const ALLOWED_HOSTS = [
   'tauri.localhost',
   'ipc.localhost',
   'workspace-file.localhost',
+  'zeta-assets.localhost',
 ];
 const DEV_HOSTS = ['localhost:1420'];
 const ALLOWED_SCHEMES = ['blob:', 'data:', 'about:'];
 const CSP_VIOLATION_KEY = '__cspViolations';
+const POLICY_BLOCK_ERROR = 'ERR_BLOCKED_BY_RESPONSE';
+const BLOCKED_PREFIX = 'BLOCKED ';
 const SCREENSHOT_DIR = resolve('.bossdream-project/screenshots');
 const EXIT_POLL_MS = 100;
 const PORT_PROBE_MS = 500;
@@ -30,15 +33,24 @@ export type AppMode = 'debug' | 'release' | 'dev';
 
 export interface LaunchOptions {
   configDir: string;
+  exe?: string;
+  isolatedRoot?: string;
   mode?: AppMode;
   userDataDir?: string;
   port?: number;
+}
+
+export interface IsolationState {
+  crossOriginIsolated: boolean;
+  sharedArrayBuffer: boolean;
+  sharedMemory: boolean;
 }
 
 export interface AppSession {
   page: Page;
   externalRequests: string[];
   cspViolations: () => Promise<string[]>;
+  isolation: () => Promise<IsolationState>;
   reload: () => Promise<void>;
   closeMainWindow: () => void;
   isRunning: () => boolean;
@@ -63,7 +75,11 @@ function resolveMode(options: LaunchOptions): AppMode {
 function launchArgs(options: LaunchOptions, stateFile: string): string[] {
   const userData =
     options.userDataDir ?? mkdtempSync(join(tmpdir(), 'dakedaduck-wv2-'));
+  const installed = options.exe
+    ? ['-ExePath', options.exe, '-IsolatedRoot', options.isolatedRoot ?? '']
+    : [];
   return [
+    ...installed,
     '-Mode',
     resolveMode(options),
     '-ConfigDir',
@@ -83,6 +99,19 @@ export function isAllowedRequest(url: string, mode: AppMode): boolean {
   const hosts =
     mode === 'dev' ? [...ALLOWED_HOSTS, ...DEV_HOSTS] : ALLOWED_HOSTS;
   return hosts.includes(host);
+}
+
+export function isPolicyBlock(errorText: string | undefined): boolean {
+  return (errorText ?? '').includes(POLICY_BLOCK_ERROR);
+}
+
+export function isolationProblems(state: IsolationState): string[] {
+  const checks: [boolean, string][] = [
+    [state.crossOriginIsolated, 'crossOriginIsolated no es true'],
+    [state.sharedArrayBuffer, 'SharedArrayBuffer no existe'],
+    [state.sharedMemory, 'WebAssembly.Memory compartida no se pudo crear'],
+  ];
+  return checks.filter(([holds]) => !holds).map(([, problem]) => problem);
 }
 
 async function findAppPage(browser: Browser): Promise<Page> {
@@ -112,6 +141,11 @@ function trackRequests(page: Page, mode: AppMode): string[] {
   const external: string[] = [];
   page.on('request', (request) => {
     if (!isAllowedRequest(request.url(), mode)) external.push(request.url());
+  });
+  page.on('requestfailed', (request) => {
+    if (isPolicyBlock(request.failure()?.errorText)) {
+      external.push(BLOCKED_PREFIX + request.url());
+    }
   });
   return external;
 }
@@ -175,6 +209,28 @@ function readCspViolations(page: Page): Promise<string[]> {
   );
 }
 
+function readIsolation(page: Page): Promise<IsolationState> {
+  return page.evaluate(() => ({
+    crossOriginIsolated: window.crossOriginIsolated === true,
+    sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
+    sharedMemory: (() => {
+      try {
+        new WebAssembly.Memory({ initial: 1, maximum: 2, shared: true });
+        return true;
+      } catch {
+        return false;
+      }
+    })(),
+  }));
+}
+
+async function assertIsolated(page: Page): Promise<void> {
+  const problems = isolationProblems(await readIsolation(page));
+  if (problems.length > 0) {
+    throw new Error(`La ventana no está aislada: ${problems.join('; ')}`);
+  }
+}
+
 async function attachSession(
   state: AppState,
   mode: AppMode,
@@ -185,10 +241,12 @@ async function attachSession(
   await installIpcGate(page.context());
   const externalRequests = trackRequests(page, mode);
   await page.reload();
+  await assertIsolated(page);
   return {
     page,
     externalRequests,
     cspViolations: () => readCspViolations(page),
+    isolation: () => readIsolation(page),
     reload: () => page.reload().then(() => undefined),
     closeMainWindow: () =>
       void runPowerShell(START_SCRIPT, [

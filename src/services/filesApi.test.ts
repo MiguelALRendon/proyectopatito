@@ -14,6 +14,7 @@ import {
   fsProbe,
   fsReadChunk,
   fsReadText,
+  fsWriteBytes,
   fsWriteText,
   uiStateGet,
   uiStateSet,
@@ -111,6 +112,30 @@ describe('filesApi', () => {
       req: SAVE,
     });
   });
+
+  it('sends the bytes raw with the path encoded and the version in headers', async () => {
+    const bytes = new Uint8Array([1, 2, 3]);
+    vi.mocked(invoke).mockResolvedValue({ version: '9-1' });
+    await expect(
+      fsWriteBytes('wc/informe #1 ñ.docx', '5-2-ab', bytes),
+    ).resolves.toEqual({ version: '9-1' });
+    expect(vi.mocked(invoke)).toHaveBeenCalledWith('fs_write_bytes', bytes, {
+      headers: {
+        path: encodeURIComponent('wc/informe #1 ñ.docx'),
+        'expected-version': '5-2-ab',
+      },
+    });
+  });
+
+  it.each(['office_too_large', 'file_changed', 'read_only', 'file_locked'])(
+    'keeps the %s error kind of a rejected binary save',
+    async (kind) => {
+      vi.mocked(invoke).mockRejectedValue({ kind, message: 'no' });
+      await expect(
+        fsWriteBytes('a.docx', 'v', new Uint8Array()),
+      ).rejects.toMatchObject({ kind });
+    },
+  );
 
   it('reads a window of bytes with snake_case parameters', async () => {
     const bytes = new Uint8Array([1, 2]).buffer;

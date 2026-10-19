@@ -8,6 +8,7 @@ fn classify_complete(bytes: &[u8]) -> Sniffed {
     classify(Sample {
         bytes,
         truncated: false,
+        extension: None,
     })
 }
 
@@ -15,6 +16,7 @@ fn classify_cut(bytes: &[u8]) -> Sniffed {
     classify(Sample {
         bytes,
         truncated: true,
+        extension: None,
     })
 }
 

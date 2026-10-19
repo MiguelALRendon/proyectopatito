@@ -1,7 +1,11 @@
+mod about;
+mod archive;
 mod files;
 pub mod protocol;
 mod ui;
+pub mod webview;
 mod window;
+pub mod zeta_protocol;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -17,6 +21,8 @@ use crate::app::wc_status::WcStatusMap;
 use crate::svn::models::{InfoEntry, StatusReport};
 use crate::svn::progress::ProgressEvent;
 
+pub use about::*;
+pub use archive::*;
 pub use files::*;
 pub use ui::*;
 pub use window::*;
@@ -70,6 +76,7 @@ pub fn svn_set_path(path: String, state: State<'_, AppState>) -> SvnDetection {
 
 #[tauri::command]
 pub async fn wc_info(path: String, state: State<'_, AppState>) -> Result<InfoEntry, CommandError> {
+    state.warm_svn().await;
     state.wc_info(&path).await
 }
 
@@ -79,6 +86,7 @@ pub async fn wc_status(
     remote: bool,
     state: State<'_, AppState>,
 ) -> Result<StatusReport, CommandError> {
+    state.warm_svn().await;
     state.wc_status(&path, remote).await
 }
 
@@ -87,6 +95,7 @@ pub async fn wc_status_map(
     req: StatusMapArgs,
     state: State<'_, AppState>,
 ) -> Result<WcStatusMap, CommandError> {
+    state.warm_svn().await;
     state.wc_status_map(req).await
 }
 
@@ -96,6 +105,7 @@ pub async fn svn_checkout(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<OperationId, CommandError> {
+    state.warm_svn().await;
     state.start_checkout(req, sinks(app))
 }
 
@@ -105,6 +115,7 @@ pub async fn wc_update(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<OperationId, CommandError> {
+    state.warm_svn().await;
     state.start_update(req, sinks(app))
 }
 
@@ -114,6 +125,7 @@ pub async fn wc_commit(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<OperationId, CommandError> {
+    state.warm_svn().await;
     state.start_commit(req, sinks(app))
 }
 
@@ -123,6 +135,7 @@ pub async fn wc_cleanup(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<OperationId, CommandError> {
+    state.warm_svn().await;
     state.start_cleanup(req, sinks(app))
 }
 

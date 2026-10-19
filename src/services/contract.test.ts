@@ -15,6 +15,7 @@ vi.mock('@tauri-apps/plugin-dialog', () => ({ open: vi.fn() }));
 
 import { invoke } from '@tauri-apps/api/core';
 import * as gateway from './tauri';
+import * as archiveApi from './archiveApi';
 import * as filesApi from './filesApi';
 import {
   CHECKOUT_DEPTHS,
@@ -29,7 +30,9 @@ import {
   type CommitRequest,
   type OperationResult,
   type ProgressEvent,
+  type SvnDetection,
   type UpdateRequest,
+  SVN_ORIGINS,
 } from './tauri';
 import {
   LINE_ENDINGS,
@@ -62,6 +65,8 @@ const rawCommands = Object.values(commandSources).join('\n');
 
 interface Contract {
   error_kinds: string[];
+  svn_origins: string[];
+  svn_detection: SvnDetection;
   probe_kinds: string[];
   encodings: string[];
   eols: string[];
@@ -103,10 +108,13 @@ const HELPERS = [
   'runOperation',
   'pickDirectory',
   'onCloseRequested',
+  'onEvent',
+  'onArchiveProgress',
+  'newArchiveTaskId',
 ];
 
 function backendParameters(): Record<string, string[]> {
-  const injected = ['state', 'app'];
+  const injected = ['state', 'app', 'request'];
   const entries = [
     ...rawCommands.matchAll(/pub (?:async )?fn (\w+)\(([^)]*)\)/g),
   ].map(([, name, params]) => [
@@ -167,6 +175,20 @@ describe('contract with the Rust backend', () => {
     for (const [, attributes, name] of multiWord) {
       expect(attributes, name).toContain('rename_all = "snake_case"');
     }
+  });
+
+  it('reads the svn detection exactly as the backend serializes it', () => {
+    expect([...SVN_ORIGINS]).toEqual(contract.svn_origins);
+    expect(Object.keys(contract.svn_detection).sort()).toEqual([
+      'binary',
+      'error',
+      'warning',
+    ]);
+    expect(Object.keys(contract.svn_detection.binary ?? {}).sort()).toEqual([
+      'origin',
+      'path',
+      'version',
+    ]);
   });
 
   it('lists exactly the probe kinds and file payloads the backend serializes', () => {
@@ -312,6 +334,9 @@ describe('contract with the Rust backend', () => {
     expect(PROGRESS_EVENT).toBe(rustConst('PROGRESS_EVENT'));
     expect(DONE_EVENT).toBe(rustConst('DONE_EVENT'));
     expect(PROGRESS_EVENT).not.toBe(DONE_EVENT);
+    expect(archiveApi.ARCHIVE_PROGRESS_EVENT).toBe(
+      rustConst('ARCHIVE_PROGRESS_EVENT'),
+    );
   });
 
   it('listens for the close request on the event name the backend emits', () => {
@@ -331,7 +356,11 @@ describe('contract with the Rust backend', () => {
   });
 
   it('invokes every registered command, and only those, with the parameter names the backend declares', async () => {
-    const wrappers = Object.entries({ ...gateway, ...filesApi }).filter(
+    const wrappers = Object.entries({
+      ...gateway,
+      ...filesApi,
+      ...archiveApi,
+    }).filter(
       ([name, value]) => typeof value === 'function' && !HELPERS.includes(name),
     );
     for (const [, wrapper] of wrappers) {

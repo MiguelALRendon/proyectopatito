@@ -431,6 +431,77 @@ fn every_response_carries_the_hardening_headers() {
 }
 
 #[test]
+fn the_cross_origin_resource_policy_is_on_every_status_and_to_every_origin() {
+    let fx = fixture();
+    let big = File::create(fx.root.join("big.bin")).unwrap();
+    big.set_len(MAX_RESPONSE_BYTES + 1).unwrap();
+    let origins = [None, Some(APP_ORIGIN), Some(STRANGER_ORIGIN)];
+    let cases: [(Method, &str, Option<&str>, StatusCode); 12] = [
+        (Method::GET, "/digits.txt", None, StatusCode::OK),
+        (
+            Method::GET,
+            "/digits.txt",
+            Some("bytes=0-3"),
+            StatusCode::PARTIAL_CONTENT,
+        ),
+        (
+            Method::GET,
+            "/digits.txt",
+            Some("bytes=99-"),
+            StatusCode::RANGE_NOT_SATISFIABLE,
+        ),
+        (
+            Method::GET,
+            "/digits.txt",
+            Some("nonsense"),
+            StatusCode::BAD_REQUEST,
+        ),
+        (Method::GET, "/missing.txt", None, StatusCode::NOT_FOUND),
+        (Method::GET, "/.svn/wc.db", None, StatusCode::FORBIDDEN),
+        (Method::GET, "/big.bin", None, StatusCode::PAYLOAD_TOO_LARGE),
+        (Method::HEAD, "/digits.txt", None, StatusCode::OK),
+        (Method::OPTIONS, "/digits.txt", None, StatusCode::NO_CONTENT),
+        (
+            Method::POST,
+            "/digits.txt",
+            None,
+            StatusCode::METHOD_NOT_ALLOWED,
+        ),
+        (
+            Method::DELETE,
+            "/digits.txt",
+            None,
+            StatusCode::METHOD_NOT_ALLOWED,
+        ),
+        (Method::GET, "/%2e%2e", None, StatusCode::FORBIDDEN),
+    ];
+    for (method, path, range, status) in cases {
+        for origin in origins {
+            let mut headers = Vec::new();
+            headers.extend(range.map(|value| ("range", value)));
+            headers.extend(origin.map(|value| ("origin", value)));
+            let response = fx.send(method.clone(), path, &headers);
+            let label = format!("{method} {path} {range:?} {origin:?}");
+            assert_eq!(response.status(), status, "{label}");
+            assert_eq!(
+                header_of(&response, "cross-origin-resource-policy"),
+                Some("cross-origin"),
+                "{label}"
+            );
+        }
+    }
+}
+
+#[test]
+fn a_missing_workspace_still_carries_the_cross_origin_resource_policy() {
+    let response = handle(None, &request(Method::GET, "/digits.txt", &[]));
+    assert_eq!(
+        header_of(&response, "cross-origin-resource-policy"),
+        Some("cross-origin")
+    );
+}
+
+#[test]
 fn head_returns_the_headers_of_get_without_a_body() {
     let fx = fixture();
     let response = fx.send(Method::HEAD, "/digits.txt", &[]);

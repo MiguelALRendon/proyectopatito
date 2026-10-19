@@ -1,4 +1,8 @@
-import { invoke } from '@tauri-apps/api/core';
+import {
+  invoke,
+  type InvokeArgs,
+  type InvokeOptions,
+} from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
 
@@ -31,6 +35,13 @@ export const ERROR_KINDS = [
   'working_copy_busy',
   'cloud_only',
   'not_allowed',
+  'office_too_large',
+  'archive_corrupt',
+  'archive_encrypted',
+  'archive_limit',
+  'archive_unsupported',
+  'unsafe_entry',
+  'archive_needs_confirmation',
 ] as const;
 
 export type ErrorKind = (typeof ERROR_KINDS)[number];
@@ -42,14 +53,20 @@ export interface CommandError {
   detail: string | null;
 }
 
+export const SVN_ORIGINS = ['configured', 'bundled', 'system'] as const;
+
+export type SvnOrigin = (typeof SVN_ORIGINS)[number];
+
 export interface SvnBinary {
   path: string;
   version: string;
+  origin: SvnOrigin;
 }
 
 export interface SvnDetection {
   binary: SvnBinary | null;
   error: string | null;
+  warning: string | null;
 }
 
 export interface InfoEntry {
@@ -198,10 +215,13 @@ export function normalizeError(raw: unknown): CommandError {
 
 export async function call<T>(
   command: string,
-  args?: Record<string, unknown>,
+  args?: InvokeArgs,
+  options?: InvokeOptions,
 ): Promise<T> {
   try {
-    return await invoke<T>(command, args);
+    return await (options
+      ? invoke<T>(command, args, options)
+      : invoke<T>(command, args));
   } catch (raw) {
     throw normalizeError(raw);
   }
@@ -232,6 +252,11 @@ export const appFrontendReady = () => call<void>('app_frontend_ready');
 export const appHoldClose = () => call<void>('app_hold_close');
 export const appConfirmClose = () => call<void>('app_confirm_close');
 export const appCancelClose = () => call<void>('app_cancel_close');
+
+export const onEvent = <T>(
+  name: string,
+  handler: (payload: T) => void,
+): Promise<() => void> => listen<T>(name, ({ payload }) => handler(payload));
 
 export const onCloseRequested = (handler: () => void): Promise<() => void> =>
   listen(CLOSE_REQUESTED_EVENT, handler);
@@ -295,3 +320,10 @@ export async function runOperation(
     unlisteners.forEach((unlisten) => unlisten());
   }
 }
+
+export interface AppAbout {
+  version: string;
+  licenses: string;
+}
+
+export const appAbout = () => call<AppAbout>('app_about');

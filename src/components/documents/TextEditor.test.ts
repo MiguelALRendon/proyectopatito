@@ -59,6 +59,8 @@ const PROBE: FileProbe = {
   mime: 'text/plain',
   len: 40,
   extension: null,
+  has_macros: false,
+  version: null,
 };
 
 let wrapper: VueWrapper;

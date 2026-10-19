@@ -31,10 +31,10 @@ pub struct Slice {
 }
 
 impl Slice {
-    fn capped(start: u64, end: u64, total: u64) -> Self {
+    fn capped(start: u64, end: u64, total: u64, limit: u64) -> Self {
         Self {
             start,
-            len: (end - start + 1).min(MAX_RESPONSE_BYTES),
+            len: (end - start + 1).min(limit),
             total,
         }
     }
@@ -87,14 +87,18 @@ fn parse_position(text: &str) -> Result<Option<u64>, RangeError> {
 }
 
 pub fn plan(range: Option<Range>, total: u64) -> Outcome {
+    plan_within(range, total, MAX_RESPONSE_BYTES)
+}
+
+pub fn plan_within(range: Option<Range>, total: u64, limit: u64) -> Outcome {
     match range {
-        None => whole(total),
-        Some(range) => partial(range, total),
+        None => whole(total, limit),
+        Some(range) => partial(range, total, limit),
     }
 }
 
-fn whole(total: u64) -> Outcome {
-    if total > MAX_RESPONSE_BYTES {
+fn whole(total: u64, limit: u64) -> Outcome {
+    if total > limit {
         return Outcome::TooLarge;
     }
     Outcome::Full(Slice {
@@ -104,9 +108,9 @@ fn whole(total: u64) -> Outcome {
     })
 }
 
-fn partial(range: Range, total: u64) -> Outcome {
+fn partial(range: Range, total: u64, limit: u64) -> Outcome {
     match bounds(range, total) {
-        Some((start, end)) => Outcome::Partial(Slice::capped(start, end, total)),
+        Some((start, end)) => Outcome::Partial(Slice::capped(start, end, total, limit)),
         None => Outcome::Unsatisfiable,
     }
 }

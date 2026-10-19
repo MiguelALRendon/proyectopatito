@@ -4,10 +4,14 @@ use tauri::ipc::Invoke;
 fn registered_commands_handler<R: tauri::Runtime>()
 -> impl Fn(Invoke<R>) -> bool + Send + Sync + 'static {
     tauri::generate_handler![
+        commands::app_about,
+        commands::archive_list,
+        commands::archive_cancel,
         commands::fs_list,
         commands::fs_probe,
         commands::fs_read_text,
         commands::fs_write_text,
+        commands::fs_write_bytes,
         commands::fs_read_chunk,
         commands::fs_can_open_external,
         commands::fs_open_external,

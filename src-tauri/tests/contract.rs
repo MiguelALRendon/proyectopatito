@@ -10,7 +10,7 @@ use dakedaduck_svn_lib::app::files::{
 };
 use dakedaduck_svn_lib::app::operations::OperationId;
 use dakedaduck_svn_lib::app::sniff::ProbeKind;
-use dakedaduck_svn_lib::app::state::OperationResult;
+use dakedaduck_svn_lib::app::state::{OperationResult, SvnBinaryInfo, SvnDetection};
 use dakedaduck_svn_lib::app::ui_state::{Located, UiStateView};
 use dakedaduck_svn_lib::app::wc_status::WcStatusMap;
 use dakedaduck_svn_lib::commands::{DonePayload, ProgressPayload};
@@ -18,6 +18,7 @@ use dakedaduck_svn_lib::config::{
     Favorite, FolderView, SortDirection, SortKey, Tab, TabKind, UiState, ViewColumn, ViewMode,
 };
 use dakedaduck_svn_lib::svn::commands::Depth;
+use dakedaduck_svn_lib::svn::locator::SvnOrigin;
 use dakedaduck_svn_lib::svn::models::{StatusEntry, StatusItem, StatusLock};
 use dakedaduck_svn_lib::svn::progress::{ProgressAction, ProgressEvent};
 use serde_json::{Value, json};
@@ -55,10 +56,17 @@ fn kind_name(kind: CommandErrorKind) -> &'static str {
         CommandErrorKind::WorkingCopyBusy => "working_copy_busy",
         CommandErrorKind::CloudOnly => "cloud_only",
         CommandErrorKind::NotAllowed => "not_allowed",
+        CommandErrorKind::OfficeTooLarge => "office_too_large",
+        CommandErrorKind::ArchiveCorrupt => "archive_corrupt",
+        CommandErrorKind::ArchiveEncrypted => "archive_encrypted",
+        CommandErrorKind::ArchiveLimit => "archive_limit",
+        CommandErrorKind::ArchiveUnsupported => "archive_unsupported",
+        CommandErrorKind::UnsafeEntry => "unsafe_entry",
+        CommandErrorKind::ArchiveNeedsConfirmation => "archive_needs_confirmation",
     }
 }
 
-const ALL_KINDS: [CommandErrorKind; 24] = [
+const ALL_KINDS: [CommandErrorKind; 31] = [
     CommandErrorKind::NoWorkspace,
     CommandErrorKind::NoSvn,
     CommandErrorKind::OutsideWorkspace,
@@ -83,6 +91,13 @@ const ALL_KINDS: [CommandErrorKind; 24] = [
     CommandErrorKind::WorkingCopyBusy,
     CommandErrorKind::CloudOnly,
     CommandErrorKind::NotAllowed,
+    CommandErrorKind::OfficeTooLarge,
+    CommandErrorKind::ArchiveCorrupt,
+    CommandErrorKind::ArchiveEncrypted,
+    CommandErrorKind::ArchiveLimit,
+    CommandErrorKind::ArchiveUnsupported,
+    CommandErrorKind::UnsafeEntry,
+    CommandErrorKind::ArchiveNeedsConfirmation,
 ];
 
 fn progress(event: ProgressEvent) -> Value {
@@ -266,10 +281,14 @@ fn requests_the_ui_really_builds_deserialize_into_the_backend_args() {
     assert_eq!(status_map.password, None);
 }
 
-const ALL_PROBE_KINDS: [ProbeKind; 5] = [
+const ALL_PROBE_KINDS: [ProbeKind; 9] = [
     ProbeKind::Text,
     ProbeKind::Image,
     ProbeKind::Pdf,
+    ProbeKind::Office,
+    ProbeKind::Audio,
+    ProbeKind::Video,
+    ProbeKind::Archive,
     ProbeKind::Binary,
     ProbeKind::Cloud,
 ];
@@ -279,9 +298,35 @@ fn probe_kind_name(kind: ProbeKind) -> &'static str {
         ProbeKind::Text => "text",
         ProbeKind::Image => "image",
         ProbeKind::Pdf => "pdf",
+        ProbeKind::Office => "office",
+        ProbeKind::Audio => "audio",
+        ProbeKind::Video => "video",
+        ProbeKind::Archive => "archive",
         ProbeKind::Binary => "binary",
         ProbeKind::Cloud => "cloud",
     }
+}
+
+#[test]
+fn the_svn_detection_serializes_to_the_shape_the_frontend_reads() {
+    let detection = SvnDetection {
+        binary: Some(SvnBinaryInfo {
+            path: "C:/svn/svn.exe".to_owned(),
+            version: "1.14.5".to_owned(),
+            origin: SvnOrigin::Bundled,
+        }),
+        error: None,
+        warning: Some("aviso".to_owned()),
+    };
+    assert_eq!(
+        serde_json::to_value(detection).unwrap(),
+        fixture()["svn_detection"]
+    );
+    let origins = [SvnOrigin::Configured, SvnOrigin::Bundled, SvnOrigin::System];
+    assert_eq!(
+        serde_json::to_value(origins).unwrap(),
+        fixture()["svn_origins"]
+    );
 }
 
 #[test]
@@ -355,6 +400,8 @@ fn a_file_probe_serializes_to_the_shape_the_frontend_reads() {
         mime: "image/png",
         len: 68,
         extension: Some("png"),
+        has_macros: false,
+        version: None,
     };
     assert_eq!(
         serde_json::to_value(probe).unwrap(),

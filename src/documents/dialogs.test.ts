@@ -3,7 +3,9 @@ import { resolveChoice, useChoice } from '../composables/useChoice';
 import {
   askCloseAnyway,
   askConflict,
+  askLegacyFidelity,
   askLineEnding,
+  askSwitchOffice,
   askWindowClose,
   pluralTabs,
 } from './dialogs';
@@ -136,5 +138,57 @@ describe('pluralTabs', () => {
   it('concuerda el verbo con el número', () => {
     expect(pluralTabs(1)).toBe('1 pestaña tiene');
     expect(pluralTabs(3)).toBe('3 pestañas tienen');
+  });
+});
+
+describe('askLegacyFidelity', () => {
+  it('ofrece cancelar y guardar de todos modos, y nombra el archivo', async () => {
+    const answer = askLegacyFidelity('viejo.doc');
+    expect(labels()).toEqual(['Cancelar', 'Guardar de todos modos']);
+    expect(request.value?.message).toContain('viejo.doc');
+    expect(request.value?.message).toContain('formato');
+    resolveChoice('proceed');
+    expect(await answer).toBe(true);
+  });
+
+  it.each([
+    ['cancelar', 'cancel'],
+    ['cerrar sin elegir', null],
+  ])('al %s devuelve falso', async (_name, value) => {
+    const answer = askLegacyFidelity('viejo.doc');
+    resolveChoice(value);
+    expect(await answer).toBe(false);
+  });
+});
+
+describe('askSwitchOffice', () => {
+  it('explica que solo hay un documento a la vez y ofrece cancelar, descartar y guardar', async () => {
+    const answer = askSwitchOffice('informe.docx');
+    expect(labels()).toEqual([
+      'Cancelar',
+      'Descartar los cambios',
+      'Guardar y continuar',
+    ]);
+    expect(request.value?.message).toContain('informe.docx');
+    expect(request.value?.message).toContain(
+      'un documento de Office abierto a la vez',
+    );
+    resolveChoice('save');
+    expect(await answer).toBe('save');
+  });
+
+  it('descartar devuelve discard', async () => {
+    const answer = askSwitchOffice('a.docx');
+    resolveChoice('discard');
+    expect(await answer).toBe('discard');
+  });
+
+  it.each([
+    ['cancelar', 'cancel'],
+    ['cerrar sin elegir', null],
+  ])('al %s devuelve null', async (_name, value) => {
+    const answer = askSwitchOffice('a.docx');
+    resolveChoice(value);
+    expect(await answer).toBeNull();
   });
 });

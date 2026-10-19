@@ -1,4 +1,5 @@
 import { onScopeDispose, ref, type Ref } from 'vue';
+import { clamp } from '../utils/clamp';
 import { usePersistedPreference } from './usePersistedPreference';
 
 export const LAYOUT_STORAGE_PREFIX = 'dakedaduck-layout-';
@@ -22,11 +23,6 @@ export interface ResizablePanelHandle {
   startDrag: (event: PointerEvent) => void;
   nudge: (delta: number) => void;
   jumpTo: (value: number) => void;
-}
-
-function clampBetween(value: number, min: number, max?: number): number {
-  const lowered = Math.max(min, value);
-  return max === undefined ? lowered : Math.min(max, lowered);
 }
 
 function parseStoredSize(
@@ -91,15 +87,15 @@ export function useResizablePanel(
 ): ResizablePanelHandle {
   const { min, max } = config;
   const direction = config.direction ?? 1;
-  const clamp = (value: number) => clampBetween(value, min, max);
+  const clampSize = (value: number) => clamp(value, min, max);
   const size = usePersistedPreference<number>(
     `${LAYOUT_STORAGE_PREFIX}${key}`,
-    clamp(config.default),
-    (raw) => parseStoredSize(raw, clamp),
+    clampSize(config.default),
+    (raw) => parseStoredSize(raw, clampSize),
   );
 
   function setSize(value: number) {
-    if (Number.isFinite(value)) size.value = clamp(value);
+    if (Number.isFinite(value)) size.value = clampSize(value);
   }
 
   const { dragging, startDrag } = usePointerDrag(size, setSize, config);

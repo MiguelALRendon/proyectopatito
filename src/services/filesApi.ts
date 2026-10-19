@@ -4,7 +4,17 @@ export const WORKSPACE_FILE_ORIGIN = 'http://workspace-file.localhost';
 
 const PATH_SEPARATORS = /[\\/]/;
 
-export const PROBE_KINDS = ['text', 'image', 'pdf', 'binary', 'cloud'] as const;
+export const PROBE_KINDS = [
+  'text',
+  'image',
+  'pdf',
+  'office',
+  'audio',
+  'video',
+  'archive',
+  'binary',
+  'cloud',
+] as const;
 
 export type ProbeKind = (typeof PROBE_KINDS)[number];
 
@@ -47,6 +57,8 @@ export interface FileProbe {
   mime: string;
   len: number;
   extension: string | null;
+  has_macros: boolean;
+  version: string | null;
 }
 
 export interface TextDocument {
@@ -156,6 +168,20 @@ export const fsReadText = (path: string) =>
   call<TextDocument>('fs_read_text', { path });
 export const fsWriteText = (req: WriteTextRequest) =>
   call<TextWritten>('fs_write_text', { req });
+const OFFICE_PATH_HEADER = 'path';
+const OFFICE_VERSION_HEADER = 'expected-version';
+
+export const fsWriteBytes = (
+  path: string,
+  expectedVersion: string,
+  bytes: Uint8Array,
+) =>
+  call<TextWritten>('fs_write_bytes', bytes, {
+    headers: {
+      [OFFICE_PATH_HEADER]: encodeURIComponent(path),
+      [OFFICE_VERSION_HEADER]: expectedVersion,
+    },
+  });
 export const fsReadChunk = (path: string, offset: number, len: number) =>
   call<ArrayBuffer>('fs_read_chunk', { path, offset, len });
 export const fsCanOpenExternal = (path: string) =>

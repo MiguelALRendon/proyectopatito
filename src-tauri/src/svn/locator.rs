@@ -8,14 +8,22 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use serde::Serialize;
 use thiserror::Error;
 
+use crate::svn::bundled::{self, BundleProblem};
 use crate::svn::runner::CREATE_NO_WINDOW;
 
 pub const MIN_VERSION: SvnVersion = SvnVersion {
     major: 1,
     minor: 10,
     patch: 0,
+};
+
+pub const RECOMMENDED_VERSION: SvnVersion = SvnVersion {
+    major: 1,
+    minor: 14,
+    patch: 4,
 };
 
 pub const SVN_EXE: &str = "svn.exe";
@@ -40,16 +48,39 @@ impl fmt::Display for SvnVersion {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SvnOrigin {
+    Configured,
+    Bundled,
+    System,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SvnBinary {
     pub path: PathBuf,
     pub version: SvnVersion,
+    pub origin: SvnOrigin,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Bundle<'a> {
+    pub dir: &'a Path,
+    pub manifest: &'a str,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Located {
+    pub binary: SvnBinary,
+    pub skipped_bundle: Option<BundleProblem>,
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum LocatorError {
     #[error("no se encontró svn.exe (se requiere Subversion {MIN_VERSION} o superior)")]
     NotFound,
+    #[error("el svn.exe incluido con la aplicación no se puede usar ({0}) y no hay otro svn.exe")]
+    BundleDamaged(BundleProblem),
     #[error("la ruta indicada no es un svn.exe válido: {0}")]
     Invalid(PathBuf),
     #[error("svn {found} en {path} es anterior a la mínima requerida {required}")]
@@ -95,15 +126,59 @@ pub fn locate_in(
     search_dirs: &[PathBuf],
 ) -> Result<SvnBinary, LocatorError> {
     if let Some(path) = manual {
-        return probe(path).map_err(|failure| failure_to_error(path, failure));
+        return probe(path, SvnOrigin::Configured)
+            .map_err(|failure| failure_to_error(path, failure));
     }
+    search(search_dirs)
+}
+
+pub fn locate_full(
+    manual: Option<&Path>,
+    bundle: Option<Bundle<'_>>,
+    search_dirs: &[PathBuf],
+) -> Result<Located, LocatorError> {
+    if manual.is_some() {
+        let binary = locate_in(manual, search_dirs)?;
+        return Ok(Located {
+            binary,
+            skipped_bundle: None,
+        });
+    }
+    let skipped_bundle = match bundle.map(try_bundle) {
+        Some(Ok(binary)) => {
+            return Ok(Located {
+                binary,
+                skipped_bundle: None,
+            });
+        }
+        Some(Err(problem)) => Some(problem),
+        None => None,
+    };
+    match search(search_dirs) {
+        Ok(binary) => Ok(Located {
+            binary,
+            skipped_bundle,
+        }),
+        Err(LocatorError::NotFound) => {
+            Err(skipped_bundle.map_or(LocatorError::NotFound, LocatorError::BundleDamaged))
+        }
+        Err(other) => Err(other),
+    }
+}
+
+fn try_bundle(bundle: Bundle<'_>) -> Result<SvnBinary, BundleProblem> {
+    let path = bundled::verify(bundle.dir, bundle.manifest)?;
+    probe(&path, SvnOrigin::Bundled).map_err(|_| BundleProblem::Unusable)
+}
+
+fn search(search_dirs: &[PathBuf]) -> Result<SvnBinary, LocatorError> {
     let candidates = search_dirs
         .iter()
         .map(|dir| dir.join(SVN_EXE))
         .filter(|path| path.is_file());
     let mut too_old = None;
     for path in candidates {
-        match probe(&path) {
+        match probe(&path, SvnOrigin::System) {
             Ok(binary) => return Ok(binary),
             Err(ProbeFailure::TooOld(found)) => too_old = too_old.or(Some((path, found))),
             Err(ProbeFailure::Unusable) => {}
@@ -129,7 +204,7 @@ pub fn search_dirs(path: Option<&OsStr>, program_files: Option<&Path>) -> Vec<Pa
     path_dirs.chain(known).collect()
 }
 
-fn probe(path: &Path) -> Result<SvnBinary, ProbeFailure> {
+fn probe(path: &Path, origin: SvnOrigin) -> Result<SvnBinary, ProbeFailure> {
     let text = version_output(path).ok_or(ProbeFailure::Unusable)?;
     let version = parse_version(&text).ok_or(ProbeFailure::Unusable)?;
     if version < MIN_VERSION {
@@ -138,6 +213,7 @@ fn probe(path: &Path) -> Result<SvnBinary, ProbeFailure> {
     Ok(SvnBinary {
         path: path.to_path_buf(),
         version,
+        origin,
     })
 }
 

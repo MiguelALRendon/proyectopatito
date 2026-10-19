@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { MIDDLE_BUTTON } from '../../composables/useSelection';
 import { isSamePath } from '../../utils/folderPaths';
 import { CHANGES_BELOW_BADGE } from '../../utils/svnBadges';
+import { createTicketGate } from '../../utils/ticketGate';
 import AppIcon from '../icons/AppIcon.vue';
 import {
   flattenTree,
@@ -34,7 +35,7 @@ const nodes = ref<Record<string, TreeNodeState>>({});
 const expanded = ref<Set<string>>(new Set());
 const focusedPath = ref<string | null>(null);
 const elements = new Map<string, HTMLElement>();
-const tickets = new Map<string, number>();
+const tickets = createTicketGate();
 
 const rows = computed(() =>
   flattenTree({
@@ -62,17 +63,16 @@ function focusRow(path: string) {
 
 async function fetchChildren(path: string) {
   const key = nodeKey(path);
-  const ticket = (tickets.get(key) ?? 0) + 1;
-  tickets.set(key, ticket);
+  const ticket = tickets.next(key);
   const previous = nodes.value[key]?.children ?? null;
   nodes.value[key] = { children: previous, isLoading: true, hasFailed: false };
   try {
     const children = await props.load(path);
-    if (tickets.get(key) === ticket) {
+    if (tickets.isCurrent(key, ticket)) {
       nodes.value[key] = { children, isLoading: false, hasFailed: false };
     }
   } catch {
-    if (tickets.get(key) === ticket) {
+    if (tickets.isCurrent(key, ticket)) {
       nodes.value[key] = {
         children: previous,
         isLoading: false,

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
 import {
+  BYTE_DIGITS,
   ROW_HEIGHT_PX,
   buildRow,
   chunkIndexesOf,
   spacerHeightOf,
+  toHex,
   totalRowsOf,
   windowOf,
 } from '../../documents/hex';
@@ -13,7 +15,7 @@ import { useHexChunks } from '../../documents/useHexChunks';
 
 const DEFAULT_VIEWPORT_PX = 400;
 const COLUMN_NUMBERS = Array.from({ length: BYTES_PER_ROW }, (_, i) =>
-  i.toString(16).toUpperCase().padStart(2, '0'),
+  toHex(i, BYTE_DIGITS),
 );
 const EMPTY_TEXT = 'El archivo está vacío.';
 const ERROR_PREFIX = 'No se pudo leer el archivo';

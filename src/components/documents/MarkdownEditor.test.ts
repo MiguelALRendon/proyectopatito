@@ -27,6 +27,8 @@ const PROBE: FileProbe = {
   mime: 'text/markdown',
   len: 5,
   extension: null,
+  has_macros: false,
+  version: null,
 };
 
 type FakeSession = { phase: string; current: string } | null;

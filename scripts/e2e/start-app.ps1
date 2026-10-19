@@ -1,6 +1,8 @@
 param(
     [ValidateSet('debug', 'release', 'dev')][string]$Mode = 'debug',
     [string]$ConfigDir,
+    [string]$ExePath,
+    [string]$IsolatedRoot,
     [string]$UserDataDir,
     [string]$StateFile = (Join-Path ([IO.Path]::GetTempPath()) 'dakedaduck-app-state.json'),
     [int]$Port = 9333,
@@ -78,6 +80,16 @@ if ($CloseWindow) {
     return
 }
 
+if ($ExePath) { $exe = $ExePath }
+if ($IsolatedRoot) {
+    $env:USERPROFILE = Join-Path $IsolatedRoot 'profile'
+    $env:APPDATA = Join-Path $env:USERPROFILE 'AppData\Roaming'
+    $env:LOCALAPPDATA = Join-Path $env:USERPROFILE 'AppData\Local'
+    $env:ProgramFiles = Join-Path $IsolatedRoot 'programfiles'
+    $env:ProgramW6432 = $env:ProgramFiles
+    ${env:ProgramFiles(x86)} = Join-Path $IsolatedRoot 'programfiles-x86'
+    $env:PATH = Join-Path $env:SystemRoot 'System32'
+}
 if (Test-DebugPort $Port) { throw "el puerto de depuracion $Port ya responde: hay una instancia previa; detenla con -Stop" }
 if ($Mode -ne 'dev' -and ($Build -or -not (Test-Path $exe))) { $null = Invoke-TauriBuild }
 if (-not $UserDataDir) { $UserDataDir = Join-Path ([IO.Path]::GetTempPath()) 'dakedaduck-webview2-profile' }

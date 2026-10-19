@@ -1,9 +1,11 @@
 #![allow(dead_code)]
 
+pub mod containers;
+
 use std::path::Path;
 use std::process::Command;
 
-use dakedaduck_svn_lib::app::svn_locator::{SvnBinary, locate};
+use dakedaduck_svn_lib::svn::locator::{SvnBinary, locate};
 use percent_encoding::{AsciiSet, NON_ALPHANUMERIC, utf8_percent_encode};
 use tempfile::{Builder, TempDir};
 
@@ -66,6 +68,7 @@ pub struct FakeSvn {
     pub stdout: &'static str,
     pub stderr: &'static str,
     pub exit_code: i32,
+    pub delay_ms: u64,
 }
 
 impl FakeSvn {
@@ -75,16 +78,17 @@ impl FakeSvn {
             stdout: "",
             stderr: "",
             exit_code: 0,
+            delay_ms: 0,
         }
     }
 
     pub fn build(&self, dir: &Path) -> std::path::PathBuf {
         let source = dir.join(FAKE_SVN_SOURCE);
         let program = format!(
-            "fn main() {{ if std::env::args().any(|a| a == \"--version\") {{ println!(\"{{}}\", {:?}); return; }} \
+            "fn main() {{ std::thread::sleep(std::time::Duration::from_millis({})); if std::env::args().any(|a| a == \"--version\") {{ println!(\"{{}}\", {:?}); return; }} \
              let mut sink = String::new(); let _ = std::io::Read::read_to_string(&mut std::io::stdin(), &mut sink); \
              print!(\"{{}}\", {:?}); eprint!(\"{{}}\", {:?}); std::process::exit({}); }}",
-            self.version, self.stdout, self.stderr, self.exit_code
+            self.delay_ms, self.version, self.stdout, self.stderr, self.exit_code
         );
         std::fs::write(&source, program).unwrap();
         let output = dir.join(FAKE_SVN_EXE);

@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-14
 deciders: [usuario]
 ---
@@ -25,3 +25,7 @@ Elegida: **recurso del instalador** en `resources/svn/`, con el conjunto mínimo
 - Positiva: instalar, abrir y hacer un checkout sin instalar Subversion.
 - Negativa: el instalador crece (~13 MB) y hay que mantener actualizada la versión empaquetada; el `svn.exe` queda en una carpeta escribible por el usuario (mismo modelo de amenaza que cualquier `svn.exe` del usuario); la verificación de hash de todo el conjunto detecta corrupción o un conjunto incompleto, no defiende de otro proceso del mismo usuario.
 - Neutral: el `svn_path` del usuario sigue teniendo prioridad.
+
+## Actualización tras los spikes (2026-10-17)
+
+Medido en `plans/fase-2b-documentos/spikes.md` (S4): se midieron dos compilaciones de terceros del mismo código de Apache Subversion. **Elegida: SlikSVN 1.14.5** (7 701 022 bytes, SHA-256 `77d4fe02999dda3bdc3a20e86243ae6ede99aaf072b4c12b0cdedb54d88e954a`): línea estable 1.14, misma procedencia que el `svn` de desarrollo y de las pruebas de la Fase 1, corrige CVE-2024-45720; la clausura mínima son 23 archivos y 15 MB (con OpenSSL 3, que es Apache 2.0, y BerkeleyDB, con oferta de código fuente). Alternativa documentada: VisualSVN 1.15.0 (18 archivos, 11 MB, sin OpenSSL ni BerkeleyDB), descartada por ser una versión de 9 días y estrenar el formato de copia de trabajo 32. Con `PATH` y `ProgramFiles` vacíos las dos hicieron checkout, add, status, commit y un `ls` por https. La aplicación de Tauri compilada con `-C target-feature=+crt-static` deja de importar `VCRUNTIME140`. `vcruntime140.dll`, `vcruntime140_1.dll` y `msvcp140.dll` se copian de la edición de Visual Studio del equipo de compilación: la página de redistribución de Microsoft permite distribuir los archivos de `VC\redist` con el programa a usuarios de Visual Studio con licencia. Riesgo residual: el paquete es de un tercero (como cualquier binario de Subversion para Windows: Apache no publica binarios) y se verifica por SHA-256. La instalación local de SlikSVN 1.14.2 no sirve para empaquetar.

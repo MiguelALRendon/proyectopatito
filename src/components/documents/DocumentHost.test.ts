@@ -31,6 +31,8 @@ function probe(extra: Partial<FileProbe> = {}): FileProbe {
     mime: 'text/plain',
     len: 10,
     extension: null,
+    has_macros: false,
+    version: null,
     ...extra,
   };
 }

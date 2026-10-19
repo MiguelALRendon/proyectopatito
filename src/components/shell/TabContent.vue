@@ -1,10 +1,19 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useOfficeStore } from '../../stores/office';
 import { useTabsStore } from '../../stores/tabs';
 import DocumentHost from '../documents/DocumentHost.vue';
 import FolderExplorer from '../explorer/FolderExplorer.vue';
 import { TAB_PANEL_ID, tabDomId } from './tabIds';
 
 const tabs = useTabsStore();
+const office = useOfficeStore();
+
+const renderedTabs = computed(() =>
+  tabs.tabs.filter(
+    (tab) => tab.id === tabs.activeTab?.id || tab.id === office.liveTabId,
+  ),
+);
 </script>
 
 <template>
@@ -15,17 +24,15 @@ const tabs = useTabsStore();
     role="tabpanel"
     :aria-labelledby="tabDomId(tabs.activeTab.id)"
   >
-    <FolderExplorer
-      v-if="tabs.activeTab.kind === 'folder'"
-      :key="tabs.activeTab.id"
-      :tab-id="tabs.activeTab.id"
-    />
-    <DocumentHost
-      v-else
-      :key="tabs.activeTab.id"
-      :tab-id="tabs.activeTab.id"
-      :path="tabs.activeTab.path"
-    />
+    <div
+      v-for="tab in renderedTabs"
+      v-show="tab.id === tabs.activeTab.id"
+      :key="tab.id"
+      class="tab-content__pane"
+    >
+      <FolderExplorer v-if="tab.kind === 'folder'" :tab-id="tab.id" />
+      <DocumentHost v-else :tab-id="tab.id" :path="tab.path" />
+    </div>
   </div>
   <p v-else-if="tabs.isRestoring" role="status">Cargando…</p>
   <div v-else class="tab-content__empty">
@@ -38,6 +45,11 @@ const tabs = useTabsStore();
 
 <style scoped>
 .tab-content {
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.tab-content__pane {
   block-size: 100%;
   min-block-size: 0;
 }

@@ -8,6 +8,7 @@ use std::os::windows::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 
 use common::{FakeSvn, ScriptServer, TestRepo, TestServer};
@@ -15,17 +16,20 @@ use dakedaduck_svn_lib::app::args::{CheckoutArgs, CleanupArgs, CommitArgs, Updat
 use dakedaduck_svn_lib::app::error::{CommandError, CommandErrorKind};
 use dakedaduck_svn_lib::app::operations::{OperationError, OperationId};
 use dakedaduck_svn_lib::app::state::{AppState, OperationResult, Sinks};
-use dakedaduck_svn_lib::app::svn_locator::{LocatorError, SvnVersion};
 use dakedaduck_svn_lib::app::workspace::WorkspaceError;
 use dakedaduck_svn_lib::config::{AppConfig, CONFIG_FILE_NAME, ConfigStore};
 use dakedaduck_svn_lib::svn::commands::Depth;
 use dakedaduck_svn_lib::svn::error::{Captured, SvnError, SvnErrorKind};
+use dakedaduck_svn_lib::svn::locator::{LocatorError, SvnVersion};
 use dakedaduck_svn_lib::svn::runner::Password;
 use tempfile::TempDir;
 use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
 
 const DONE_TIMEOUT: Duration = Duration::from_secs(60);
 const MAX_DETAIL_CHARS: usize = 2000;
+const SLOW_DETECTION_MS: u64 = 600;
+const TICK: Duration = Duration::from_millis(20);
+const MIN_TICKS: u32 = 5;
 
 struct Sandbox {
     _dir: TempDir,
@@ -781,6 +785,34 @@ async fn malformed_svn_xml_is_reported_as_parse_failed() {
         kind_of(state.wc_info(".").await),
         CommandErrorKind::ParseFailed
     );
+}
+
+#[tokio::test]
+async fn warm_svn_detects_without_blocking_the_async_runtime() {
+    let sandbox = sandbox();
+    let dir = TempDir::new().unwrap();
+    let fake = FakeSvn {
+        delay_ms: SLOW_DETECTION_MS,
+        ..FakeSvn::with_version(CURRENT_VERSION)
+    };
+    let config = AppConfig {
+        svn_path: Some(fake.build(dir.path())),
+        ..AppConfig::default()
+    };
+    sandbox.store.save(&config).unwrap();
+    let state = AppState::new(sandbox.store.clone());
+    let ticks = Arc::new(AtomicU32::new(0));
+    let counter = ticks.clone();
+    let ticker = tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(TICK).await;
+            counter.fetch_add(1, Ordering::Relaxed);
+        }
+    });
+    state.warm_svn().await;
+    ticker.abort();
+    assert!(ticks.load(Ordering::Relaxed) >= MIN_TICKS);
+    assert!(state.svn_detect().binary.is_some());
 }
 
 #[test]

@@ -25,7 +25,11 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     next: SvnDetection,
   ): SvnDetection {
     if (next.binary || !previous?.binary) return next;
-    return { binary: previous.binary, error: next.error };
+    return {
+      binary: previous.binary,
+      error: next.error,
+      warning: previous.warning,
+    };
   }
 
   async function guarded(action: () => Promise<void>): Promise<boolean> {
