@@ -155,13 +155,14 @@ async fn an_update_in_progress_on_the_working_copy_blocks_the_write_until_it_end
     assert_eq!(fs::read(fx.root.join(&relative)).unwrap(), docx(&[]));
     drop(update);
     assert!(fx.write(&relative, &version, b"nuevo").is_ok());
+    assert_eq!(fs::read(fx.root.join(&relative)).unwrap(), b"nuevo");
 }
 
 #[test]
 fn writing_to_a_missing_target_creates_nothing() {
     let fx = fixture();
     let outcome = fx.write("no-existe.docx", "0-0-0", b"nuevo");
-    assert!(outcome.is_err());
+    assert!(matches!(outcome, Err(FileError::Io(_))), "{outcome:?}");
     assert!(fx.names_in("").is_empty());
 }
 
@@ -201,7 +202,14 @@ fn the_subversion_admin_folders_and_outside_paths_are_refused() {
         fx.write(r".svn\wc.docx", "0-0-0", b"x"),
         Err(FileError::ForbiddenPath)
     ));
-    assert!(fx.write(r"..\fuera.docx", "0-0-0", b"x").is_err());
+    let outside = fx.root.parent().unwrap().join("fuera.docx");
+    fs::write(&outside, b"original").unwrap();
+    let outcome = fx.write(r"..\fuera.docx", "0-0-0", b"x");
+    assert!(
+        matches!(outcome, Err(FileError::Workspace(_))),
+        "{outcome:?}"
+    );
+    assert_eq!(fs::read(&outside).unwrap(), b"original");
 }
 
 #[test]
@@ -285,10 +293,16 @@ fn a_write_does_not_hide_a_file_that_was_visible() {
 }
 
 #[test]
-fn a_failed_write_never_leaves_a_temporary_file_behind() {
+fn a_stale_version_creates_no_temporary_file_and_keeps_the_original() {
     let fx = fixture();
-    fx.put(REPORT, &docx(&[]));
-    let _ = fx.write(REPORT, "0-0-0", b"nuevo");
+    let original = docx(&[]);
+    let path = fx.put(REPORT, &original);
+    let outcome = fx.write(REPORT, "0-0-0", b"nuevo");
+    assert!(
+        matches!(outcome, Err(FileError::FileChanged)),
+        "{outcome:?}"
+    );
+    assert_eq!(fs::read(path).unwrap(), original);
     assert!(
         fx.names_in("")
             .iter()
@@ -357,9 +371,20 @@ fn a_successful_write_invalidates_the_status_cache_and_a_refused_one_does_not() 
 #[test]
 fn a_path_outside_the_workspace_is_refused_before_anything_is_written() {
     let fx = fixture();
-    let outcome = fx.write(r"..\fuera.docx", "0-0-0", b"x");
-    assert!(outcome.is_err());
-    assert!(!fx.root.parent().unwrap().join("fuera.docx").exists());
+    let outside = fx.root.parent().unwrap().join("fuera.docx");
+    let original = docx(&[]);
+    fs::write(&outside, &original).unwrap();
+    let version = {
+        let metadata = fs::symlink_metadata(&outside).unwrap();
+        assert!(metadata.is_file());
+        "0-0-0".to_owned()
+    };
+    let outcome = fx.write(r"..\fuera.docx", &version, b"x");
+    assert!(
+        matches!(outcome, Err(FileError::Workspace(_))),
+        "{outcome:?}"
+    );
+    assert_eq!(fs::read(&outside).unwrap(), original);
 }
 
 #[test]

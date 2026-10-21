@@ -146,6 +146,9 @@ mod tests {
         let cases = [
             ("", Unsafe::Empty),
             ("a//b", Unsafe::Empty),
+            (".", Unsafe::Empty),
+            ("./", Unsafe::Empty),
+            ("././", Unsafe::Empty),
             ("/etc/passwd", Unsafe::Absolute),
             (r"\\srv\share\x", Unsafe::Absolute),
             (r"\\?\C:\x", Unsafe::Absolute),

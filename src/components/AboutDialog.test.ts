@@ -167,5 +167,6 @@ describe('SvnVersionNotice', () => {
     mountNotice({ binary: null, error: 'no hay svn', warning: null });
     expect(wrapper.text()).toContain('Subversion no detectado');
     expect(wrapper.text()).toContain('no hay svn');
+    expect(wrapper.find('.banner--warning').exists()).toBe(false);
   });
 });

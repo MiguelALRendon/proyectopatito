@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   FRAME_TITLE,
@@ -116,6 +117,16 @@ describe('OfficeHost.mount', () => {
     await expect(mounting).rejects.toMatchObject({ code: 'boot-failed' });
   });
 
+  it('si el arranque falla, el iframe se quita y no queda sesión', async () => {
+    const { mounting } = await startMount();
+    frames[0].load();
+    await tick();
+    frames[0].say({ cmd: 'error', code: 'boot-failed', detail: 'wasm' });
+    await expect(mounting).rejects.toMatchObject({ code: 'boot-failed' });
+    expect(frames[0].remove).toHaveBeenCalledTimes(1);
+    expect(host.isMounted).toBe(false);
+  });
+
   it('falla por tiempo si el ready no llega en OFFICE_LOAD_TIMEOUT_MS', async () => {
     vi.useFakeTimers();
     const mounting = host.mount(document.body);
@@ -154,10 +165,19 @@ describe('OfficeHost.mount', () => {
     const { mounting } = await startMount();
     frames[0].load();
     await tick();
-    frames[0].say({ cmd: 'ready', extra: true, __proto__: null });
+    let isSettled = false;
+    mounting.then(
+      () => (isSettled = true),
+      () => (isSettled = true),
+    );
+    frames[0].say({ cmd: 'constructor' });
+    frames[0].say(null);
     frames[0].say('basura');
     frames[0].say({ cmd: 'opened', docId: 7, kind: 'writer' });
-    await mounting;
+    await tick();
+    expect(isSettled).toBe(false);
+    frames[0].say({ cmd: 'ready' });
+    await expect(mounting).resolves.toBe(1);
     expect(host.isMounted).toBe(true);
   });
 });
@@ -361,7 +381,9 @@ describe('OfficeHost.destroy', () => {
 });
 
 it('el mensaje de arranque lleva el tipo que reconoce host.js', () => {
+  const hostScript = readFileSync('src-tauri/assets/zeta/host.js', 'utf-8');
   expect(OFFICE_INIT_TYPE).toBe('dakedaduck-office-init');
+  expect(hostScript).toContain(`const INIT_TYPE = '${OFFICE_INIT_TYPE}';`);
 });
 
 describe('openOfficeFrame: el iframe real', () => {

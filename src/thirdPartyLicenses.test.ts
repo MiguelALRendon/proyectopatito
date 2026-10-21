@@ -39,7 +39,7 @@ const npmRows = rows(section(NPM_TITLE, CRATES_TITLE));
 const crateRows = rows(section(CRATES_TITLE));
 
 describe('THIRD_PARTY_LICENSES.md frente a las dependencias reales', () => {
-  it('lista cada dependencia de ejecución de npm con su versión instalada', () => {
+  it('lista cada dependencia de ejecución de npm', () => {
     const names = npmRows.map(([name]) => name.replace(/ \S+$/, ''));
     for (const dependency of Object.keys(PACKAGE.dependencies)) {
       expect(names, dependency).toContain(dependency);
@@ -51,6 +51,33 @@ describe('THIRD_PARTY_LICENSES.md frente a las dependencias reales', () => {
     for (const tool of ['vitest', '@vue/test-utils', 'happy-dom', 'prettier']) {
       expect(PACKAGE.devDependencies[tool], tool).toBeDefined();
       expect(names.has(tool), tool).toBe(false);
+    }
+  });
+
+  it('cada versión documentada existe en package-lock.json y en Cargo.lock', () => {
+    const lock = JSON.parse(readFileSync('package-lock.json', 'utf-8')) as {
+      packages: Record<string, { version?: string }>;
+    };
+    const installed = new Set(
+      Object.entries(lock.packages)
+        .filter(([path]) => path !== '')
+        .map(([path, info]) => {
+          const name = path.slice(path.lastIndexOf('node_modules/') + 13);
+          return `${name} ${info.version}`;
+        }),
+    );
+    for (const [name] of npmRows) {
+      expect(installed.has(name), name).toBe(true);
+    }
+    const cargoLock = readFileSync('src-tauri/Cargo.lock', 'utf-8');
+    const crates = new Set(
+      [...cargoLock.matchAll(/name = "([^"]+)"\r?\nversion = "([^"]+)"/g)].map(
+        (match) => `${match[1]} v${match[2]}`,
+      ),
+    );
+    expect(crates.size).toBeGreaterThan(100);
+    for (const [name] of crateRows) {
+      expect(crates.has(name), name).toBe(true);
     }
   });
 

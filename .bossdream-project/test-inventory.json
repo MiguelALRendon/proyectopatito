@@ -1716,7 +1716,7 @@
    "cubre": "Cada formato soportado extrae el mismo contenido en una carpeta nueva"
   },
   {
-   "id": "rust:archive_extract::real_rar_archives_extract",
+   "id": "rust:archive_extract::real_rar_archives_extract_their_exact_contents",
    "cubre": "Cada formato soportado extrae el mismo contenido en una carpeta nueva"
   },
   {
@@ -1784,7 +1784,7 @@
    "cubre": "Un 7z cuya posición de cabecera desborda u64 se rechaza"
   },
   {
-   "id": "rust:archive_list::a_seven_zip_with_a_valid_signature_and_a_hostile_header_is_an_error_not_a_crash",
+   "id": "rust:archive_list::a_seven_zip_with_a_valid_signature_and_a_hostile_header_is_corrupt_not_a_crash",
    "cubre": "Un 7z con firma válida y cabecera hostil termina en error tipado y no en caída"
   },
   {
@@ -1792,7 +1792,7 @@
    "cubre": "Una bomba 7z grabada se rechaza por límite antes de decodificar aunque el usuario confirme"
   },
   {
-   "id": "rust:archive_extract::recorded_bombs_are_stopped_before_writing_in_every_compressed_format",
+   "id": "rust:archive_extract::recorded_bombs_are_stopped_before_writing_by_the_defence_of_each_format",
    "cubre": "Las bombas grabadas 7z, tar.xz y tar.bz2 se detienen antes de escribir (confirmación o límite) sin dejar datos"
   },
   {
@@ -1860,15 +1860,15 @@
    "cubre": "Los límites de recursos de la librería rar son errores de límite"
   },
   {
-   "id": "rust:archive_list::damaged_and_truncated_archives_report_corruption",
+   "id": "rust:archive_list::damaged_and_truncated_archives_report_their_own_cause",
    "cubre": "Un comprimido dañado, truncado o ruidoso se informa como dañado o no compatible y nunca como listado"
   },
   {
-   "id": "rust:archive_extract::a_corrupt_archive_leaves_no_partial_folder",
+   "id": "rust:archive_extract::a_corrupt_archive_is_reported_as_corrupt_and_leaves_no_partial_folder",
    "cubre": "Un comprimido dañado, truncado o ruidoso se informa como dañado o no compatible y nunca como listado"
   },
   {
-   "id": "rust:archive_extract::rejected_rar_headers_fail_with_a_typed_error_and_leave_no_folder",
+   "id": "rust:archive_extract::a_rar_with_an_unknown_algorithm_version_is_unsupported_and_leaves_no_folder",
    "cubre": "Los encabezados rar rechazados por la librería fallan con error tipado y no dejan carpeta"
   },
   {
@@ -2084,11 +2084,11 @@
    "cubre": "Si otra operación tiene bloqueada la carpeta destino la extracción falla como ocupada sin escribir"
   },
   {
-   "id": "rust:archive_extract::a_corrupt_archive_leaves_no_partial_folder",
+   "id": "rust:archive_extract::a_corrupt_archive_is_reported_as_corrupt_and_leaves_no_partial_folder",
    "cubre": "La extracción es todo o nada: si falla o se cancela se borra la carpeta destino entera"
   },
   {
-   "id": "rust:archive_extract::a_cancelled_extraction_removes_what_it_created",
+   "id": "rust:archive_extract::a_listing_cancelled_before_it_starts_creates_nothing",
    "cubre": "La extracción es todo o nada: si falla o se cancela se borra la carpeta destino entera"
   },
   {
@@ -2216,7 +2216,7 @@
    "cubre": "Una escritura con la cancelación activada no escribe nada y se interrumpe como cancelada"
   },
   {
-   "id": "rust:archive_extract::a_cancelled_extraction_removes_what_it_created",
+   "id": "rust:archive_extract::a_listing_cancelled_before_it_starts_creates_nothing",
    "cubre": "Una escritura con la cancelación activada no escribe nada y se interrumpe como cancelada"
   },
   {
@@ -2528,7 +2528,7 @@
    "cubre": "Sondeado->Listado"
   },
   {
-   "id": "rust:archive_list::damaged_and_truncated_archives_report_corruption",
+   "id": "rust:archive_list::damaged_and_truncated_archives_report_their_own_cause",
    "cubre": "Sondeado->Corrupto"
   },
   {
@@ -2640,7 +2640,7 @@
    "cubre": "Extrayendo->Completa"
   },
   {
-   "id": "rust:archive_extract::a_cancelled_extraction_removes_what_it_created",
+   "id": "rust:archive_extract::a_listing_cancelled_before_it_starts_creates_nothing",
    "cubre": "Extrayendo->Cancelada"
   },
   {
@@ -2652,7 +2652,7 @@
    "cubre": "Extrayendo->Cancelada"
   },
   {
-   "id": "rust:archive_extract::a_corrupt_archive_leaves_no_partial_folder",
+   "id": "rust:archive_extract::a_corrupt_archive_is_reported_as_corrupt_and_leaves_no_partial_folder",
    "cubre": "Extrayendo->Fallida"
   },
   {
@@ -2668,7 +2668,7 @@
    "cubre": "Extrayendo->Fallida"
   },
   {
-   "id": "rust:archive_extract::a_cancelled_extraction_removes_what_it_created",
+   "id": "rust:archive_extract::a_listing_cancelled_before_it_starts_creates_nothing",
    "cubre": "Cancelada->DestinoBorrado"
   },
   {
@@ -2676,7 +2676,7 @@
    "cubre": "Cancelada->DestinoBorrado"
   },
   {
-   "id": "rust:archive_extract::a_corrupt_archive_leaves_no_partial_folder",
+   "id": "rust:archive_extract::a_corrupt_archive_is_reported_as_corrupt_and_leaves_no_partial_folder",
    "cubre": "Fallida->DestinoBorrado"
   },
   {
@@ -3100,7 +3100,7 @@
    "cubre": "Ninguna firma ni contenedor provoca pánico con archivos más cortos o truncados antes de su offset"
   },
   {
-   "id": "media_sniff.rs::bm_and_mz_stubs_are_binary_and_never_media",
+   "id": "media_sniff.rs::bm_and_mz_stubs_are_never_media",
    "cubre": "Los stubs BM y MZ nunca se clasifican como medio"
   },
   {
@@ -3822,7 +3822,7 @@
    "transicion_relacionada": "temporal_escrito->error_io"
   },
   {
-   "id": "text_files.rs::a_failed_write_never_leaves_a_temporary_file_behind",
+   "id": "text_files.rs::a_stale_version_creates_no_temporary_file_and_keeps_the_original",
    "cubre": "Si el relleno o el renombrado fallan, el temporal se elimina y el destino queda intacto"
   },
   {
@@ -6158,11 +6158,11 @@
    "cubre": "inicio->incluido-verificado"
   },
   {
-   "id": "e2e:installed.e2e.ts > la aplicación instalada, en un entorno vacío > hace checkout y commit con el svn del sistema configurado",
+   "id": "e2e:installed.e2e.ts > la aplicación instalada, en un entorno vacío > hace checkout y commit con el svn incluido",
    "cubre": "La aplicación instalada hace checkout y commit reales con el svn que detecta"
   },
   {
-   "id": "e2e:installed.e2e.ts > la aplicación instalada, en un entorno vacío > hace checkout y commit con el svn del sistema configurado",
+   "id": "e2e:installed.e2e.ts > la aplicación instalada, en un entorno vacío > hace checkout y commit con el svn incluido",
    "cubre": "primer-arranque-sin-subversion->checkout-y-commit"
   },
   {
@@ -7187,9 +7187,6 @@
    "razon": "FakeSvn y batch_file (svn_layer.rs / app_state.rs) son scripts .bat/.cmd que imprimen una versión sin interpretar los argumentos --version --quiet: no detectan que la sonda cambie de argumentos ni prueban un svn.exe real arrancando con sus DLL del paquete."
   },
   {
-   "razon": "El SAMPLE de svn_bundled.rs usa bytes ('programa') como svn.exe: verify() pasa, pero nunca se prueba try_bundle con un svn.exe íntegro que no arranca (rama Unusable)."
-  },
-  {
    "razon": "AboutDialog.test.ts y OnboardingView.test.ts mockean appAbout/svnDetect/svnSetPath: el aviso, el origen y el texto de licencias que reciben son literales inventados, no la salida real de app_about ni de SvnDetection::from."
   },
   {
@@ -7207,172 +7204,24 @@
  ],
  "assertions_debiles": [
   {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:339",
-   "razon": "rejected_rar_headers_fail_with_a_typed_error_and_leave_no_folder solo afirma si outcome.is_err(); si la extracción tiene éxito la prueba pasa sin verificar nada y no comprueba el tipo de error pese a su nombre"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:438",
-   "razon": "a_corrupt_archive_leaves_no_partial_folder acepta cualquier Err sin comprobar que sea Corrupt"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:560",
-   "razon": "recorded_bombs_are_stopped_before_writing acepta NeedsConfirmation o Limit indistintamente, no discrimina qué defensa actuó para cada formato"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:404",
-   "razon": "a_lying_header_never_leaves_more_than_a_refused_extraction acepta Limit o Corrupt"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:761",
-   "razon": "recorded_seven_zip_bomb_is_refused_before_decoding solo exige Limit: no distingue si lo causó el tope declarado o el bloque 7z sobredimensionado, así que no prueba la regla del bloque"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:307",
-   "razon": "real_rar_archives_extract solo comprueba files > 0 y carpeta no vacía, no el contenido extraído"
-  },
-  {
    "ubicacion": "src-tauri/tests/archive_extract.rs:716",
    "razon": "progress_is_throttled_but_always_ends_with_the_totals usa un umbral holgado (menos de 100 avisos para 300 archivos) que no detecta la pérdida del estrangulamiento exacto"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_list.rs:251",
-   "razon": "damaged_and_truncated_archives_report_corruption acepta Corrupt o Unsupported para todos los formatos sin distinguir causa"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_list.rs:431",
-   "razon": "a_seven_zip_with_a_valid_signature_and_a_hostile_header acepta tres tipos de error distintos"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_list.rs:155",
-   "razon": "real_rar_archives_list_in_both_generations solo comprueba que haya entradas, no nombres ni tamaños"
-  },
-  {
-   "ubicacion": "src-tauri/tests/archive_list.rs:79",
-   "razon": "hostile_names_are_listed_with_the_reason solo exige skip_reason presente, no que el motivo sea el correcto por entrada"
-  },
-  {
-   "ubicacion": "src-tauri/src/app/archive/reader_rar.rs:189",
-   "razon": "the_read_options_carry_the_project_limits busca números dentro del Debug de las opciones: frágil ante cambios de formato y no comprueba el total de bytes ni el máximo de cabeceras"
   },
   {
    "ubicacion": "src-tauri/src/app/archive/limits.rs:49",
    "razon": "the_published_limits_keep_their_values repite los literales de las constantes: no prueba ningún comportamiento (tautológica)"
   },
   {
-   "ubicacion": "src/documents/archive.test.ts:52",
-   "razon": "suspicionReasons solo comprueba que haya 3 textos distintos, no su contenido; no detecta que declared_size diga más de 1 GiB cuando el tope real del backend es 4 GiB"
-  },
-  {
-   "ubicacion": "src-tauri/tests/write_bytes.rs:288-297",
-   "razon": "a_failed_write_never_leaves_a_temporary_file_behind falla por versión vieja, que se rechaza antes de crear el temporal; la prueba pasaría aunque la limpieza del temporal no existiera (la limpieza real solo la prueba el caso de archivo abierto y text_files.rs)"
-  },
-  {
-   "ubicacion": "src-tauri/tests/write_bytes.rs:163-166",
-   "razon": "writing_to_a_missing_target solo comprueba outcome.is_err() sin verificar el tipo de error (text_files.rs sí exige Io)"
-  },
-  {
-   "ubicacion": "src-tauri/tests/write_bytes.rs:204",
-   "razon": "el rechazo de la ruta ..\\fuera.docx se comprueba con is_err() sin verificar ParentTraversal/OutsideWorkspace"
-  },
-  {
-   "ubicacion": "src-tauri/tests/write_bytes.rs:157",
-   "razon": "tras el reintento del guardado solo se comprueba is_ok(), no el contenido ni la versión resultante"
-  },
-  {
-   "ubicacion": "src-tauri/tests/media_sniff.rs:24-29",
-   "razon": "el helper rejected() acepta Binary o Text: las pruebas negativas de medios solo afirman que no es medio, no cuál es el tipo correcto (bm_and_mz_stubs_are_binary... acepta Text pese a su nombre)"
-  },
-  {
-   "ubicacion": "src-tauri/tests/media_sniff.rs:260-268",
-   "razon": "signatures_in_files_shorter_than_their_offset_never_panic descarta el resultado con let _ y solo prueba ausencia de pánico"
-  },
-  {
-   "ubicacion": "src-tauri/tests/office_sniff.rs:184-210",
-   "razon": "truncated_containers_never_panic y a_signature_alone... usan assert_ne!(kind, Office) en vez de fijar el tipo esperado (Binary), por lo que cualquier otro tipo pasa"
-  },
-  {
-   "ubicacion": "src-tauri/tests/office_sniff.rs:334",
-   "razon": "assert_ne!(kind_of(\"corto.zip\", PK\\x03\\x04), Archive) no fija el tipo resultante"
-  },
-  {
-   "ubicacion": "src-tauri/tests/files.rs:517",
-   "razon": "allowing_the_download... solo comprueba is_err() al leer una ruta inexistente; no distingue NotFound de otro error de E/S"
-  },
-  {
    "ubicacion": "tests/e2e/real-app/classify.e2e.ts:196-199",
    "razon": "EXPECTED usa toContain(\"Audio\")/toContain(\"Vídeo\") sobre todo el texto de la tarjeta; no fija que el tipo clasificado sea exactamente ese (una etiqueta que aparezca en otro texto de la tarjeta pasaría)"
-  },
-  {
-   "ubicacion": "src/documents/office/officeHost.test.ts:363",
-   "razon": "compara la constante OFFICE_INIT_TYPE con un literal; no lee host.js, así que no prueba que host.js reconozca ese tipo"
-  },
-  {
-   "ubicacion": "src/documents/office/officeHost.test.ts:153-162",
-   "razon": "ignora mensajes inválidos del iframe solo comprueba que host.isMounted sea true; no verifica que los mensajes inválidos no resolvieran ni rechazaran nada (el mount habría resuelto igual)"
-  },
-  {
-   "ubicacion": "src/stores/office.test.ts:488-496",
-   "razon": "cerrar la pestaña elimina la sesión llama a closeOthers con un id inexistente (no hace nada) y vacía el arreglo de pestañas con splice; no ejercita el cierre real de pestaña con diálogo"
   },
   {
    "ubicacion": "tests/e2e/real-app/office-open.e2e.ts:229-240",
    "razon": "macro.docx/macro.odt se abre sin ejecutar nada solo comprueba que aparece el aviso y que hay un iframe; no verifica que la macro no se ejecutó (MacroExecutionMode)"
   },
   {
-   "ubicacion": "tests/e2e/real-app/webview-boundary.e2e.ts:33-39",
-   "razon": "expectStillOnTheApp traga con catch(() => undefined) la espera de la rejilla; solo la comprobación del host de la URL falla de verdad"
-  },
-  {
-   "ubicacion": "src/stores/office.test.ts:122-127",
-   "razon": "markModified de un docId desconocido solo comprueba que la sesión conocida siga limpia; no prueba que no cree ni toque otra sesión"
-  },
-  {
-   "ubicacion": "src-tauri/tests/svn_bundled.rs:72",
-   "razon": "a_file_with_another_size_is_refused usa matches!(Err(Changed(_))) sin comprobar el nombre del archivo ni que la rama sea la de tamaño y no la de hash (con otro tamaño ambas dan Changed)."
-  },
-  {
-   "ubicacion": "src-tauri/tests/svn_bundled.rs:204",
-   "razon": "a_tampered_bundle_is_skipped... acepta cualquier Changed(_) y no verifica el texto del aviso resultante ni que el aviso del paquete conviva con el de la CVE."
-  },
-  {
-   "ubicacion": "src-tauri/tests/svn_bundled.rs:304",
-   "razon": "the_embedded_manifest... solo comprueba forma (64 hex, bytes>0, nombres requeridos); no compara con los archivos reales de resources/svn ni con svn.lock.json."
-  },
-  {
-   "ubicacion": "src-tauri/tests/app_state.rs:1194",
-   "razon": "svn_detect_falls_back_to_automatic_search_when_the_saved_client_is_broken solo afirma binary.is_some(): no comprueba el origen ni que sea el del sistema, y depende de que la máquina tenga Subversion."
-  },
-  {
-   "ubicacion": "src/components/AboutDialog.test.ts:136",
-   "razon": "'sin svn muestra el error y no el aviso' no afirma la ausencia del aviso: solo comprueba que aparezcan el título y el error."
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/installed.e2e.ts:244",
-   "razon": "el título dice «con el svn del sistema configurado» pero writeConfig() elimina svn_path del config, de modo que el checkout/commit usa el svn incluido; el svn del sistema solo se usa para verificar el log. El nombre induce a error sobre qué se probó."
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/installed.e2e.ts:312",
-   "razon": "el título afirma que «la aplicación no lo ejecuta» pero la prueba solo espera un banner con el nombre del archivo; no demuestra que svn.exe no se lanzó. Con PATH aislado a System32 el escenario BundleDamaged es el único posible, y el camino «dañado con svn del sistema» no se prueba instalado."
-  },
-  {
    "ubicacion": "tests/e2e/real-app/installed.e2e.ts:32",
    "razon": "toda la suite es describe.skipIf(!INSTALLER_PATH): en una ejecución normal de npm test no verifica nada; no hay evidencia de que se haya ejecutado contra el instalador actual salvo un registro manual."
-  },
-  {
-   "ubicacion": "src/components/documents/MediaPlayer.test.ts:213-220",
-   "razon": "El test de liberación comprueba pause y load pero no que se quite el atributo src; termina con un mountPlayer() suelto sin aserción"
-  },
-  {
-   "ubicacion": "src/components/documents/MediaPlayer.test.ts:278-284",
-   "razon": "El título dice que el botón y la barra espaciadora pausan pero solo prueba la barra espaciadora"
-  },
-  {
-   "ubicacion": "src/components/documents/MediaPlayer.test.ts:294-300",
-   "razon": "Con play() rechazado solo comprueba que no aparece la tarjeta; no verifica que el rechazo quede capturado ni que el estado siga en pausa"
-  },
-  {
-   "ubicacion": "src/components/documents/MediaPlayer.test.ts:446-456",
-   "razon": "Usa longitud mayor que 0 y toBeTruthy para el nombre accesible sin comparar el texto esperado de cada control"
   },
   {
    "ubicacion": "src-tauri/tests/protocol.rs:360-366",

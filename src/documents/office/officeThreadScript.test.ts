@@ -184,6 +184,57 @@ describe('office_thread.js: interceptor de comandos', () => {
     expect(harness.posted).toContainEqual({ cmd: 'blocked', command });
   });
 
+  function listed(name: string): string[] {
+    const body = new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`).exec(
+      SOURCE,
+    )?.[1];
+    return [...(body ?? '').matchAll(/'([^']+)'/g)].map((match) => match[1]);
+  }
+
+  it('bloquea cada comando de la lista BLOCKED, uno por uno', async () => {
+    const commands = listed('BLOCKED');
+    expect(commands.length).toBeGreaterThan(50);
+    const harness = await opened();
+    const query = queryAll(harness);
+    for (const command of commands) {
+      const dispatch = query(command) as Dispatch;
+      dispatch.dispatch();
+      expect(harness.posted, command).toContainEqual({
+        cmd: 'blocked',
+        command,
+      });
+    }
+  });
+
+  it('bloquea cualquier comando que empiece por un prefijo de BLOCKED_PREFIXES', async () => {
+    const prefixes = listed('BLOCKED_PREFIXES');
+    expect(prefixes).toEqual(
+      expect.arrayContaining([
+        'private:',
+        'macro:',
+        'mailto:',
+        '.uno:Export',
+        '.uno:SendMail',
+      ]),
+    );
+    const harness = await opened();
+    const query = queryAll(harness);
+    for (const prefix of prefixes) {
+      const command = `${prefix}inventado`;
+      (query(command) as Dispatch).dispatch();
+      expect(harness.posted, command).toContainEqual({
+        cmd: 'blocked',
+        command,
+      });
+    }
+  });
+
+  it('sin proveedor siguiente, un comando permitido devuelve null', async () => {
+    const harness = await opened();
+    const result = queryAll(harness)('.uno:Bold');
+    expect(result).toBeNull();
+  });
+
   it('desvía .uno:Save al flujo de guardado de la aplicación', async () => {
     const harness = await opened();
     const dispatch = queryAll(harness)('.uno:Save') as Dispatch;

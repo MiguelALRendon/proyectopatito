@@ -207,7 +207,7 @@ describe('OfficeViewer: caminos de fallo primero', () => {
     firstWrapper.unmount();
   });
 
-  it('si el visor se desmonta mientras el iframe aún monta, no envía el documento', async () => {
+  it('si el visor se desmonta mientras el iframe aún monta, no envía el documento y destruye el iframe', async () => {
     let finish: (owner: number) => void = () => undefined;
     host.mount.mockReturnValue(new Promise((resolve) => (finish = resolve)));
     await show();
@@ -215,6 +215,7 @@ describe('OfficeViewer: caminos de fallo primero', () => {
     finish(OWNER);
     await flushPromises();
     expect(host.open).not.toHaveBeenCalled();
+    expect(host.destroyOwned).toHaveBeenCalledWith(OWNER);
   });
 
   it('si se desmonta mientras abre, un fallo posterior no cambia nada ni destruye dos veces', async () => {
@@ -301,10 +302,15 @@ describe('OfficeViewer: guardar y estado', () => {
     const { office, tabId } = await show();
     emit({ cmd: 'modified', docId: office.sessionOf(tabId)?.docId as string });
     await flushPromises();
-    await wrapper
-      .get('.office-viewer__body')
-      .trigger('keydown', { key: 's', ctrlKey: true });
+    const shortcut = new KeyboardEvent('keydown', {
+      key: 's',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    wrapper.get('.office-viewer__body').element.dispatchEvent(shortcut);
     await flushPromises();
+    expect(shortcut.defaultPrevented).toBe(true);
     expect(fsWriteBytes).toHaveBeenCalledTimes(1);
   });
 

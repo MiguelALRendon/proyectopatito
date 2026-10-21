@@ -34,6 +34,7 @@ import { MAX_OFFICE_BYTES } from '../documents/limits';
 import { OfficeError } from '../documents/office/officeHost';
 import { fsProbe, fsWriteBytes, type FileProbe } from '../services/filesApi';
 import type { CommandError, ErrorKind } from '../services/tauri';
+import { confirm } from '../composables/useConfirm';
 import { useOfficeStore, type OfficeAttachment } from './office';
 import { useTabsStore } from './tabs';
 
@@ -124,6 +125,8 @@ describe('office: lo que no se puede guardar', () => {
     office.markModified('otro');
     expect(office.sessionOf(tabId)?.isDirty).toBe(false);
     expect(tabs.isDirty(tabId)).toBe(false);
+    expect(Object.keys(office.sessions)).toEqual([tabId]);
+    expect(office.dirtySessions()).toEqual([]);
   });
 
   it('el iframe que no entrega el documento deja un error recuperable y sigue sucio', async () => {
@@ -488,11 +491,47 @@ describe('office: sesiones, pestañas y cierre', () => {
   it('cerrar la pestaña elimina la sesión y deja de haber documento vivo', async () => {
     const { office, tabs, tabId } = setup();
     dirty(office);
-    await tabs.closeOthers('no-existe');
-    tabs.tabs.splice(0, tabs.tabs.length);
+    vi.mocked(confirm).mockResolvedValue(true);
+    expect(await tabs.close(tabId)).toBe(true);
     await nextTick();
     expect(office.sessionOf(tabId)).toBeNull();
     expect(office.hasLiveDocument).toBe(false);
+  });
+
+  it('cerrar la pestaña mientras se guarda espera al guardado y no pregunta si quedó limpia', async () => {
+    const { office, tabs, tabId } = setup();
+    dirty(office);
+    let finish!: () => void;
+    vi.mocked(fsWriteBytes).mockReturnValue(
+      new Promise((resolve) => {
+        finish = () => resolve(written());
+      }),
+    );
+    const saving = office.save(tabId);
+    await vi.waitFor(() => expect(fsWriteBytes).toHaveBeenCalled());
+    let isClosed = false;
+    const closing = tabs.close(tabId).then((closed) => (isClosed = closed));
+    await Promise.resolve();
+    expect(isClosed).toBe(false);
+    expect(confirm).not.toHaveBeenCalled();
+    finish();
+    await saving;
+    expect(await closing).toBe(true);
+    expect(confirm).not.toHaveBeenCalled();
+    expect(tabs.tabs.some((tab) => tab.id === tabId)).toBe(false);
+  });
+
+  it('si el guardado falla, cerrar pregunta si se descartan los cambios', async () => {
+    const { office, tabs, tabId } = setup();
+    dirty(office);
+    vi.mocked(fsWriteBytes).mockRejectedValue(failure('io'));
+    vi.mocked(confirm).mockResolvedValue(false);
+    const saving = office.save(tabId);
+    const closing = tabs.close(tabId);
+    await saving;
+    expect(await closing).toBe(false);
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(tabs.tabs.some((tab) => tab.id === tabId)).toBe(true);
   });
 
   it('recargar una pestaña desconocida no falla', () => {

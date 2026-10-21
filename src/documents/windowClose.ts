@@ -28,6 +28,7 @@ export async function saveAll(): Promise<boolean> {
 
 export async function confirmWindowClose(): Promise<boolean> {
   await useTabsStore().flush();
+  await useTabsStore().settleSaves();
   const dirtyCount = dirtyTabIds().length;
   if (dirtyCount === 0) return true;
   const choice = await askWindowClose(dirtyCount);

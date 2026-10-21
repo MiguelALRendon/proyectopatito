@@ -242,7 +242,7 @@ describe.skipIf(!INSTALLER)(
     );
 
     it(
-      'hace checkout y commit con el svn del sistema configurado',
+      'hace checkout y commit con el svn incluido',
       async () => {
         const { page } = app;
         await showFolder(page, WC);
@@ -310,7 +310,7 @@ describe.skipIf(!INSTALLER)(
     );
 
     it(
-      'un archivo alterado del svn incluido se ignora con un motivo y la aplicación no lo ejecuta',
+      'un archivo alterado del svn incluido se ignora y la ventana avisa con el nombre del archivo',
       async () => {
         const target = join(
           installRoot,

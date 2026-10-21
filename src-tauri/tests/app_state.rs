@@ -20,7 +20,7 @@ use dakedaduck_svn_lib::app::workspace::WorkspaceError;
 use dakedaduck_svn_lib::config::{AppConfig, CONFIG_FILE_NAME, ConfigStore};
 use dakedaduck_svn_lib::svn::commands::Depth;
 use dakedaduck_svn_lib::svn::error::{Captured, SvnError, SvnErrorKind};
-use dakedaduck_svn_lib::svn::locator::{LocatorError, SvnVersion};
+use dakedaduck_svn_lib::svn::locator::{LocatorError, SvnOrigin, SvnVersion};
 use dakedaduck_svn_lib::svn::runner::Password;
 use tempfile::TempDir;
 use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
@@ -1191,7 +1191,8 @@ fn svn_detect_falls_back_to_automatic_search_when_the_saved_client_is_broken() {
     config_with_svn_path(&sandbox, PathBuf::from(r"C:\no\existe\svn.exe"));
     let state = AppState::new(sandbox.store.clone());
     let detection = state.svn_detect();
-    assert!(detection.binary.is_some(), "{:?}", detection.error);
+    let binary = detection.binary.expect("debía encontrar otro svn");
+    assert_eq!(binary.origin, SvnOrigin::System, "{:?}", detection.error);
 }
 
 #[test]

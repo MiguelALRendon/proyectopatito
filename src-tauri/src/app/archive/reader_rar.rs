@@ -185,10 +185,18 @@ mod tests {
 
     #[test]
     fn the_read_options_carry_the_project_limits() {
-        let debug = format!("{:?}", options());
-        assert!(debug.contains(&MAX_RAR_MEMBER_BYTES.to_string()), "{debug}");
-        assert!(debug.contains(&MAX_RAR_HEADER_BYTES.to_string()), "{debug}");
-        assert!(debug.contains(&MAX_ARCHIVE_ENTRIES.to_string()), "{debug}");
+        let expected = ArchiveReadOptions::new()
+            .with_max_header_count(MAX_ARCHIVE_ENTRIES as u64)
+            .with_max_header_bytes(MAX_RAR_HEADER_BYTES)
+            .with_max_member_output_bytes(MAX_RAR_MEMBER_BYTES)
+            .with_max_total_output_bytes(MAX_EXTRACT_BYTES);
+        assert_eq!(format!("{:?}", options()), format!("{expected:?}"));
+        let swapped = ArchiveReadOptions::new()
+            .with_max_header_count(MAX_ARCHIVE_ENTRIES as u64)
+            .with_max_header_bytes(MAX_RAR_MEMBER_BYTES)
+            .with_max_member_output_bytes(MAX_RAR_HEADER_BYTES)
+            .with_max_total_output_bytes(MAX_EXTRACT_BYTES);
+        assert_ne!(format!("{:?}", options()), format!("{swapped:?}"));
     }
 
     #[test]

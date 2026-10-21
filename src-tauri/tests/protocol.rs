@@ -361,8 +361,8 @@ fn the_dev_origin_is_listed_only_with_debug_assertions() {
     let fx = fixture();
     let response = fx.send(Method::GET, "/digits.txt", &[("origin", DEV_ORIGIN)]);
     let reflected = header_of(&response, "access-control-allow-origin");
-    assert_eq!(reflected.is_some(), cfg!(debug_assertions));
-    assert!(reflected.is_none_or(|value| value == DEV_ORIGIN));
+    let expected = cfg!(debug_assertions).then_some(DEV_ORIGIN);
+    assert_eq!(reflected, expected);
 }
 
 #[test]

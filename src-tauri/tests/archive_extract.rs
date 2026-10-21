@@ -297,15 +297,34 @@ fn every_format_extracts_the_same_content() {
 }
 
 #[test]
-fn real_rar_archives_extract() {
+fn real_rar_archives_extract_their_exact_contents() {
     let bench = bench();
-    for name in ["rar4.rar", "rar5.rar", "solid.rar", "multifile.rar"] {
+    let hello = [b"Hello, RAR 5.0 fixture world.".as_slice(), &[10]].concat();
+    let tiny = [b"AAAAAAAA".as_slice(), &[10]].concat();
+    type Expected<'a> = Vec<(&'a str, Vec<u8>)>;
+    let cases: [(&str, Expected); 3] = [
+        ("rar4.rar", vec![("n", Vec::new())]),
+        ("rar5.rar", vec![("n", Vec::new())]),
+        (
+            "solid.rar",
+            vec![("hello.txt", hello.clone()), ("tiny.txt", tiny.clone())],
+        ),
+    ];
+    for (name, expected) in cases {
         let report = bench
             .extract(name, &fs::read(fixture(name)).unwrap())
             .unwrap();
-        assert!(report.files > 0, "{name}");
-        assert!(!bench.files_under(&report.destination).is_empty(), "{name}");
+        let stem = name.trim_end_matches(".rar");
+        assert_eq!(report.files as usize, expected.len(), "{name}");
+        for (file, content) in expected {
+            assert_eq!(bench.read(&format!("{stem}/{file}")), content, "{name}");
+        }
     }
+    let multi = fs::read(fixture("multifile.rar")).unwrap();
+    assert_eq!(bench.extract("multifile.rar", &multi).unwrap().files, 3);
+    assert_eq!(bench.read("multifile/hello.txt"), hello);
+    assert_eq!(bench.read("multifile/tiny.txt"), tiny);
+    assert_eq!(bench.read("multifile/random_4k.bin").len(), 4096);
 }
 
 #[test]
@@ -327,17 +346,29 @@ fn encrypted_archives_are_refused_before_anything_is_written() {
 }
 
 #[test]
-fn rejected_rar_headers_fail_with_a_typed_error_and_leave_no_folder() {
+fn a_rar_with_an_unknown_algorithm_version_is_unsupported_and_leaves_no_folder() {
     let bench = bench();
-    for name in [
-        "algorithm_version_2.rar",
-        "subdata_size_underflow.rar",
-        "zero_fill_out_of_window.rar",
-    ] {
-        let outcome = bench.extract(name, &fs::read(fixture(name)).unwrap());
+    let name = "algorithm_version_2.rar";
+    let outcome = bench.extract(name, &fs::read(fixture(name)).unwrap());
+    assert!(
+        matches!(outcome, Err(ArchiveError::Unsupported(_))),
+        "{outcome:?}"
+    );
+    assert!(!bench.exists("algorithm_version_2"));
+}
+
+#[test]
+fn rar_regression_fixtures_extract_one_file_inside_their_own_folder() {
+    let bench = bench();
+    for name in ["subdata_size_underflow.rar", "zero_fill_out_of_window.rar"] {
+        let report = bench
+            .extract(name, &fs::read(fixture(name)).unwrap())
+            .unwrap();
         let stem = name.trim_end_matches(".rar");
-        if outcome.is_err() {
-            assert!(!bench.exists(stem), "{name} dejó una carpeta a medias");
+        assert_eq!(report.files, 1, "{name}");
+        let inside = bench.dir.path().join(stem);
+        for file in bench.files_under(stem) {
+            assert!(file.starts_with(&inside), "{name}: {}", file.display());
         }
     }
 }
@@ -401,10 +432,7 @@ fn a_lying_header_never_leaves_more_than_a_refused_extraction() {
     let liar = zip_lying_about_size("liar.bin", 3 * MIB, 10);
     let outcome = bench.extract("liar.zip", &liar);
     assert!(
-        matches!(
-            outcome,
-            Err(ArchiveError::Limit(_) | ArchiveError::Corrupt(_))
-        ),
+        matches!(outcome, Err(ArchiveError::Corrupt(_))),
         "{outcome:?}"
     );
     assert!(!bench.exists("liar"), "la carpeta a medias debe borrarse");
@@ -431,16 +459,19 @@ fn the_total_limit_counts_every_entry() {
 }
 
 #[test]
-fn a_corrupt_archive_leaves_no_partial_folder() {
+fn a_corrupt_archive_is_reported_as_corrupt_and_leaves_no_partial_folder() {
     let bench = bench();
     let good = zip_stored(&[("a.txt", &[9u8; 4000])]);
     let outcome = bench.extract("cut.zip", &good[..good.len() - 30]);
-    assert!(outcome.is_err());
+    assert!(
+        matches!(outcome, Err(ArchiveError::Corrupt(_))),
+        "{outcome:?}"
+    );
     assert!(!bench.exists("cut"));
 }
 
 #[test]
-fn a_cancelled_extraction_removes_what_it_created() {
+fn a_listing_cancelled_before_it_starts_creates_nothing() {
     let bench = bench();
     put(
         bench.dir.path(),
@@ -552,16 +583,22 @@ fn the_archive_inside_a_subversion_admin_folder_is_refused() {
 }
 
 #[test]
-fn recorded_bombs_are_stopped_before_writing_in_every_compressed_format() {
+fn recorded_bombs_are_stopped_before_writing_by_the_defence_of_each_format() {
     let bench = bench();
     for name in ["bomba.7z", "bomba.tar.xz", "bomba.tar.bz2"] {
         put(bench.dir.path(), name, &fs::read(fixture(name)).unwrap());
         let outcome = bench.extract_existing(name, ExtractOptions::default(), &running());
-        let stopped = matches!(
-            outcome,
-            Err(ArchiveError::NeedsConfirmation(_) | ArchiveError::Limit(_))
-        );
-        assert!(stopped, "{name}: {outcome:?}");
+        if name == "bomba.7z" {
+            let is_block_limit =
+                matches!(&outcome, Err(ArchiveError::Limit(why)) if why.contains("bloque"));
+            assert!(is_block_limit, "{name}: {outcome:?}");
+        } else {
+            let is_ratio = matches!(
+                &outcome,
+                Err(ArchiveError::NeedsConfirmation(why)) if why == &[Suspicion::Ratio]
+            );
+            assert!(is_ratio, "{name}: {outcome:?}");
+        }
         assert!(
             !bench.exists(name.split('.').next().unwrap()),
             "{name} dejó datos"
@@ -713,7 +750,7 @@ fn progress_is_throttled_but_always_ends_with_the_totals() {
         )
         .unwrap();
     let seen = seen.lock().unwrap();
-    assert!(seen.len() < 100, "{} avisos de progreso", seen.len());
+    assert!(seen.len() < 30, "{} avisos de progreso", seen.len());
     let last = seen.last().unwrap();
     assert_eq!((last.files, last.bytes), (300, 600));
 }
@@ -759,7 +796,7 @@ fn recorded_seven_zip_bomb_is_refused_before_decoding() {
     };
     let outcome = bench.extract_existing("b.7z", options, &running());
     assert!(
-        matches!(outcome, Err(ArchiveError::Limit(_))),
+        matches!(&outcome, Err(ArchiveError::Limit(why)) if why.contains("bloque")),
         "{outcome:?}"
     );
     assert!(!bench.exists("b"));

@@ -22,10 +22,8 @@ fn kind_of(bytes: &[u8], extension: Option<&str>) -> ProbeKind {
 }
 
 fn rejected(bytes: &[u8], extension: Option<&str>) -> bool {
-    matches!(
-        kind_of(bytes, extension),
-        ProbeKind::Binary | ProbeKind::Text
-    )
+    let claimed = kind_of(bytes, extension);
+    matches!(claimed, ProbeKind::Binary | ProbeKind::Text) && claimed == kind_of(bytes, None)
 }
 
 fn padded(mut bytes: Vec<u8>) -> Vec<u8> {
@@ -263,12 +261,16 @@ fn signatures_in_files_shorter_than_their_offset_never_panic() {
         for (at, value) in b"ustar".iter().enumerate().take(length.saturating_sub(257)) {
             bytes[257 + at] = *value;
         }
-        let _ = sniff(&bytes, Some("tar"));
+        let found = kind_of(&bytes, Some("tar"));
+        assert!(
+            matches!(found, ProbeKind::Binary | ProbeKind::Text),
+            "{length}: {found:?}"
+        );
     }
 }
 
 #[test]
-fn bm_and_mz_stubs_are_binary_and_never_media() {
+fn bm_and_mz_stubs_are_never_media() {
     for bytes in [
         &b"BM"[..],
         b"MZ",

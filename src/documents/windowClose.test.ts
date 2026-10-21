@@ -79,6 +79,33 @@ describe('windowClose: cierre de la ventana', () => {
     expect(askWindowClose).not.toHaveBeenCalled();
   });
 
+  it('con un guardado en curso espera a que termine antes de contar lo pendiente', async () => {
+    const { tabs, tabId } = await openDocument();
+    tabs.setDirty(tabId, true);
+    let finish!: () => void;
+    tabs.trackSave(
+      tabId,
+      new Promise<void>((resolve) => {
+        finish = () => {
+          tabs.setDirty(tabId, false);
+          resolve();
+        };
+      }),
+    );
+    let isDecided = false;
+    const closing = confirmWindowClose().then((closed) => {
+      isDecided = true;
+      return closed;
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(isDecided).toBe(false);
+    expect(askWindowClose).not.toHaveBeenCalled();
+    finish();
+    expect(await closing).toBe(true);
+    expect(askWindowClose).not.toHaveBeenCalled();
+  });
+
   it('con cambios y cancelar no cierra ni pierde nada', async () => {
     const { tabs, documents, tabId } = await openDocument();
     documents.edit(tabId, EDITED);

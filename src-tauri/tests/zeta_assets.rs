@@ -30,11 +30,22 @@ fn pattern(len: u64) -> Vec<u8> {
     (0..len).map(|n| (n % PATTERN_PERIOD) as u8).collect()
 }
 
+fn salted(name: &str) -> Vec<u8> {
+    let salt = name.bytes().map(u64::from).sum::<u64>();
+    (0..100u64)
+        .map(|n| ((n + salt) % PATTERN_PERIOD) as u8)
+        .collect()
+}
+
 fn fixture() -> Fixture {
     let guard = tempfile::tempdir().unwrap();
     for name in DISK_NAMES {
-        let len = if name == "soffice.wasm" { BIG_LEN } else { 100 };
-        fs::write(guard.path().join(name), pattern(len)).unwrap();
+        let bytes = if name == "soffice.wasm" {
+            pattern(BIG_LEN)
+        } else {
+            salted(name)
+        };
+        fs::write(guard.path().join(name), bytes).unwrap();
     }
     let assets = ZetaAssets::new(guard.path().to_path_buf());
     Fixture {
@@ -243,7 +254,12 @@ fn small_files_are_served_whole_with_the_right_mime() {
             mime,
             "{path}"
         );
-        assert!(!response.body().is_empty(), "{path}");
+        let name = path.trim_start_matches('/');
+        if DISK_NAMES.contains(&name) {
+            assert_eq!(response.body(), &salted(name), "{path}");
+        } else {
+            assert!(!response.body().is_empty(), "{path}");
+        }
         assert_hardened(&response);
     }
     let wasm = get(&fx, "/soffice.wasm", Some("bytes=0-3"));

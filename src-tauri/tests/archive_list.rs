@@ -65,19 +65,20 @@ fn a_zip_lists_files_and_folders_with_their_sizes() {
 fn hostile_names_are_listed_with_the_reason_they_will_be_skipped() {
     let bench = bench();
     let hostile = [
-        "../evil.txt",
-        "C:/Windows/x.txt",
-        "/etc/x",
-        "con.txt",
-        ".svn/entries",
-        "a.txt:stream",
-        "dot.",
+        ("../evil.txt", "sube de carpeta"),
+        ("C:/Windows/x.txt", "letra de unidad"),
+        ("/etc/x", "ruta absoluta"),
+        ("con.txt", "nombre reservado"),
+        (".svn/entries", "carpeta administrativa de Subversion"),
+        ("a.txt:stream", "flujo alterno"),
+        ("dot.", "termina en punto"),
     ];
-    let entries: Vec<(&str, &[u8])> = hostile.iter().map(|name| (*name, &b"x"[..])).collect();
+    let entries: Vec<(&str, &[u8])> = hostile.iter().map(|(name, _)| (*name, &b"x"[..])).collect();
     let listing = list(&bench, "hostile.zip", &zip_stored(&entries)).unwrap();
     assert_eq!(listing.entries.len(), hostile.len());
-    for entry in &listing.entries {
-        assert!(entry.skip_reason.is_some(), "{} debía marcarse", entry.name);
+    for (entry, (name, reason)) in listing.entries.iter().zip(hostile) {
+        let given = entry.skip_reason.as_deref().unwrap_or("");
+        assert!(given.contains(reason), "{name}: {given:?}");
     }
 }
 
@@ -142,17 +143,26 @@ fn a_seven_zip_lists_its_files() {
 #[test]
 fn real_rar_archives_list_in_both_generations() {
     let bench = bench();
-    for name in [
-        "rar4.rar",
-        "rar5.rar",
-        "solid.rar",
-        "multifile.rar",
-        "with_comment.rar",
-    ] {
+    let expected: [(&str, Vec<(&str, u64)>); 5] = [
+        ("rar4.rar", vec![("n", 0)]),
+        ("rar5.rar", vec![("n", 0)]),
+        ("solid.rar", vec![("hello.txt", 30), ("tiny.txt", 9)]),
+        (
+            "multifile.rar",
+            vec![("hello.txt", 30), ("tiny.txt", 9), ("random_4k.bin", 4096)],
+        ),
+        ("with_comment.rar", vec![("hello.txt", 30)]),
+    ];
+    for (name, wanted) in expected {
         let bytes = std::fs::read(fixture(name)).unwrap();
         let listing = list(&bench, name, &bytes).unwrap();
         assert_eq!(listing.format, ArchiveFormat::Rar, "{name}");
-        assert!(!listing.entries.is_empty(), "{name} sin entradas");
+        let found: Vec<(&str, u64)> = listing
+            .entries
+            .iter()
+            .map(|entry| (entry.name.as_str(), entry.size))
+            .collect();
+        assert_eq!(found, wanted, "{name}");
     }
 }
 
@@ -236,26 +246,28 @@ fn more_entries_than_the_hard_limit_are_refused() {
 }
 
 #[test]
-fn damaged_and_truncated_archives_report_corruption() {
+fn damaged_and_truncated_archives_report_their_own_cause() {
     let bench = bench();
     let good = zip_stored(&[("a.txt", b"hola mundo")]);
-    for (name, bytes) in [
+    let corrupt = [
         ("cut.zip", good[..good.len() / 2].to_vec()),
         ("noise.zip", vec![0xA5; 400]),
         ("empty.zip", Vec::new()),
         ("noise.7z", vec![0x11; 300]),
         ("noise.tar.gz", vec![0x22; 300]),
-        ("noise.rar", vec![0x33; 300]),
-    ] {
+    ];
+    for (name, bytes) in corrupt {
         let outcome = list(&bench, name, &bytes);
         assert!(
-            matches!(
-                outcome,
-                Err(ArchiveError::Corrupt(_) | ArchiveError::Unsupported(_))
-            ),
+            matches!(outcome, Err(ArchiveError::Corrupt(_))),
             "{name}: {outcome:?}"
         );
     }
+    let unknown = list(&bench, "noise.rar", &[0x33; 300]);
+    assert!(
+        matches!(unknown, Err(ArchiveError::Unsupported(_))),
+        "{unknown:?}"
+    );
 }
 
 #[test]
@@ -423,18 +435,13 @@ fn sevenz_with_a_valid_signature_and_a_hostile_header(tail: u8) -> Vec<u8> {
 }
 
 #[test]
-fn a_seven_zip_with_a_valid_signature_and_a_hostile_header_is_an_error_not_a_crash() {
+fn a_seven_zip_with_a_valid_signature_and_a_hostile_header_is_corrupt_not_a_crash() {
     let bench = bench();
     for tail in [0x01, 0x00, 0xFF, 0x7F] {
         let bytes = sevenz_with_a_valid_signature_and_a_hostile_header(tail);
         let outcome = list(&bench, "hostile.7z", &bytes);
         assert!(
-            matches!(
-                outcome,
-                Err(ArchiveError::Corrupt(_)
-                    | ArchiveError::Unsupported(_)
-                    | ArchiveError::Limit(_))
-            ),
+            matches!(outcome, Err(ArchiveError::Corrupt(_))),
             "{tail:#x}: {outcome:?}"
         );
     }

@@ -101,6 +101,7 @@ export const useTabsStore = defineStore('tabs', () => {
   let hasUnsavedChanges = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let writing: Promise<void> = Promise.resolve();
+  const pendingSaves = new Map<string, Promise<unknown>>();
 
   const activeTab = computed(
     () => tabs.value.find((tab) => tab.id === activeId.value) ?? null,
@@ -281,6 +282,19 @@ export const useTabsStore = defineStore('tabs', () => {
     save();
   }
 
+  function trackSave(id: string, work: Promise<unknown>) {
+    const tracked = work
+      .catch(() => undefined)
+      .finally(() => {
+        if (pendingSaves.get(id) === tracked) pendingSaves.delete(id);
+      });
+    pendingSaves.set(id, tracked);
+  }
+
+  async function settleSaves(ids: string[] = [...pendingSaves.keys()]) {
+    await Promise.all(ids.map((id) => pendingSaves.get(id)));
+  }
+
   async function confirmDiscard(doomed: Tab[]): Promise<boolean> {
     const dirty = doomed.filter((tab) => isDirty(tab.id));
     if (dirty.length === 0) return true;
@@ -288,6 +302,7 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   async function closeIds(ids: string[], anchorId?: string): Promise<boolean> {
+    if (ids.some((id) => pendingSaves.has(id))) await settleSaves(ids);
     const doomed = tabs.value.filter((tab) => ids.includes(tab.id));
     if (doomed.length === 0 || !(await confirmDiscard(doomed))) return false;
     removeTabs(
@@ -360,6 +375,8 @@ export const useTabsStore = defineStore('tabs', () => {
     hasDirtyTabs,
     isDirty,
     setDirty,
+    trackSave,
+    settleSaves,
     open,
     activate,
     duplicate,

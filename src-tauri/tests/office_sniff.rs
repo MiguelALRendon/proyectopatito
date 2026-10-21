@@ -61,6 +61,15 @@ fn kind_of(name: &str, bytes: &[u8]) -> ProbeKind {
     probe_named(name, bytes).kind
 }
 
+fn assert_plain_without_the_extension(name: &str, bytes: &[u8], cut: usize) {
+    let claimed = kind_of(name, bytes);
+    assert!(
+        matches!(claimed, ProbeKind::Binary | ProbeKind::Text),
+        "corte {cut}: {claimed:?}"
+    );
+    assert_eq!(claimed, kind_of("a.bin", bytes), "corte {cut}");
+}
+
 fn office(name: &str, bytes: &[u8]) -> FileProbe {
     let probe = probe_named(name, bytes);
     assert_eq!(probe.kind, ProbeKind::Office, "{name}");
@@ -184,25 +193,17 @@ fn a_tar_extension_over_bytes_that_are_not_even_compressed_is_binary() {
 fn truncated_containers_never_panic_and_are_not_office() {
     let good = docx(&[]);
     for cut in [0, 3, 30, good.len() / 2, good.len() - 10, good.len() - 1] {
-        assert_ne!(
-            kind_of("a.docx", &good[..cut]),
-            ProbeKind::Office,
-            "corte {cut}"
-        );
+        assert_plain_without_the_extension("a.docx", &good[..cut], cut);
     }
     let good = ole2(&[WORD_STREAM]);
     for cut in [0, 8, 200, 512, 700, good.len() - 1] {
-        assert_ne!(
-            kind_of("a.doc", &good[..cut]),
-            ProbeKind::Office,
-            "corte {cut}"
-        );
+        assert_plain_without_the_extension("a.doc", &good[..cut], cut);
     }
 }
 
 #[test]
 fn a_signature_alone_without_a_directory_is_not_office() {
-    assert_ne!(kind_of("a.docx", b"PK\x03\x04"), ProbeKind::Office);
+    assert_plain_without_the_extension("a.docx", b"PK\x03\x04", 4);
     assert_eq!(
         kind_of("a.doc", &[0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]),
         ProbeKind::Binary
@@ -331,7 +332,7 @@ fn a_zip_signature_without_a_central_directory_is_binary() {
     let mut bytes = zip(&[("a.txt", b"hola")]);
     bytes.truncate(bytes.len() - 22);
     assert_eq!(kind_of("roto.zip", &bytes), ProbeKind::Binary);
-    assert_ne!(kind_of("corto.zip", b"PK\x03\x04"), ProbeKind::Archive);
+    assert_plain_without_the_extension("corto.zip", b"PK\x03\x04", 4);
 }
 
 #[test]

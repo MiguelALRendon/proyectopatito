@@ -26,15 +26,25 @@ function fakePort(sent: Msg[]): Port {
 interface BootOptions {
   rangeStatus?: number;
   rangeBytes?: number;
+  rangeTotal?: number;
+  hooks?: boolean;
   failScript?: string;
 }
 
-function rangeResponse(options: BootOptions) {
-  const length = options.rangeBytes ?? 10;
+const CHUNK = 8 * 1024 * 1024;
+
+function rangeResponse(options: BootOptions, range?: string) {
+  const start = Number(/bytes=(\d+)-/.exec(range ?? '')?.[1] ?? 0);
+  const total = options.rangeTotal ?? options.rangeBytes ?? 10;
+  const length = options.rangeTotal
+    ? Math.min(CHUNK, total - start)
+    : (options.rangeBytes ?? 10);
   return {
     status: options.rangeStatus ?? 206,
     ok: false,
-    headers: { get: () => `bytes 0-${length - 1}/${length}` },
+    headers: {
+      get: () => `bytes ${start}-${start + length - 1}/${total}`,
+    },
     arrayBuffer: async () => new ArrayBuffer(length),
   };
 }
@@ -80,8 +90,14 @@ function createHost(options: BootOptions = {}) {
       },
     },
   };
-  const fetchStub = vi.fn(async (_name: string, init?: { method?: string }) =>
-    init?.method === 'HEAD' ? { ok: false } : rangeResponse(options),
+  const fetchStub = vi.fn(
+    async (
+      _name: string,
+      init?: { method?: string; headers?: { Range?: string } },
+    ) =>
+      init?.method === 'HEAD'
+        ? { ok: options.hooks === true }
+        : rangeResponse(options, init?.headers?.Range),
   );
   new Function(
     'window',
@@ -114,7 +130,19 @@ function createHost(options: BootOptions = {}) {
       ports: [page],
       ...overrides,
     });
-  return { page, worker, toPage, toWorker, files, init, parent };
+  const emit = (type: string) => listeners[type]?.({});
+  return {
+    page,
+    worker,
+    toPage,
+    toWorker,
+    files,
+    init,
+    parent,
+    win,
+    fetchStub,
+    emit,
+  };
 }
 
 async function readyHost(options: BootOptions = {}) {
@@ -294,5 +322,119 @@ describe('host.js: ciclo de vida del documento', () => {
     expect(host.files.size).toBe(1);
     fromPage(host, { cmd: 'save', docId: 'a' });
     expect(host.toWorker.filter((m) => m.cmd === 'save')).toHaveLength(2);
+  });
+});
+
+describe('host.js: guardado y avisos del worker', () => {
+  async function openHost() {
+    const host = await readyHost();
+    open(host);
+    host.worker.onmessage?.({ data: { cmd: 'opened', kind: 'writer' } });
+    return host;
+  }
+
+  it('al guardar entrega una copia de los bytes del sistema de archivos, con requested y docId', async () => {
+    const host = await openHost();
+    fromPage(host, { cmd: 'save', docId: 'a' });
+    expect(host.toWorker).toContainEqual({ cmd: 'save' });
+    host.files.set(OFFICE_DIR + '/uuid-1.docx', new Uint8Array([9, 8, 7]));
+    host.worker.onmessage?.({ data: { cmd: 'stored', requested: true } });
+    const saved = host.toPage.find((m) => m.cmd === 'saved') as Msg;
+    expect(saved).toMatchObject({ docId: 'a', requested: true });
+    const bytes = saved.bytes as ArrayBuffer;
+    expect([...new Uint8Array(bytes)]).toEqual([9, 8, 7]);
+    host.files.get(OFFICE_DIR + '/uuid-1.docx')?.fill(0);
+    expect([...new Uint8Array(bytes)]).toEqual([9, 8, 7]);
+  });
+
+  it('un guardado no solicitado conserva requested en falso', async () => {
+    const host = await openHost();
+    host.worker.onmessage?.({ data: { cmd: 'stored', requested: false } });
+    const saved = host.toPage.find((m) => m.cmd === 'saved') as Msg;
+    expect(saved.requested).toBe(false);
+  });
+
+  it('reenvía modified, blocked y save-requested a la página', async () => {
+    const host = await openHost();
+    host.worker.onmessage?.({ data: { cmd: 'modified' } });
+    host.worker.onmessage?.({
+      data: { cmd: 'blocked', command: '.uno:Print' },
+    });
+    host.worker.onmessage?.({ data: { cmd: 'save-requested' } });
+    expect(host.toPage).toEqual(
+      expect.arrayContaining([
+        { cmd: 'modified', docId: 'a' },
+        { cmd: 'blocked', command: '.uno:Print' },
+        { cmd: 'save-requested', docId: 'a' },
+      ]),
+    );
+  });
+
+  it('ajusta la ventana al abrir y, con retardo, al redimensionar', async () => {
+    vi.useFakeTimers();
+    try {
+      const host = await openHost();
+      const fits = () => host.toWorker.filter((m) => m.cmd === 'fit');
+      expect(fits()).toEqual([{ cmd: 'fit', w: 798, h: 600 }]);
+      host.emit('resize');
+      host.emit('resize');
+      expect(fits()).toHaveLength(1);
+      vi.advanceTimersByTime(150);
+      expect(fits()).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('un evento del worker sin documento abierto se ignora', async () => {
+    const host = await readyHost();
+    host.worker.onmessage?.({ data: { cmd: 'modified' } });
+    host.worker.onmessage?.({ data: { cmd: 'constructor' } });
+    expect(host.toPage.filter((m) => m.cmd === 'modified')).toEqual([]);
+  });
+
+  it('descarga los archivos grandes por tramos de 8 MiB hasta completarlos', async () => {
+    const host = createHost({ rangeTotal: CHUNK + 10 });
+    host.init();
+    await vi.waitFor(() =>
+      expect(host.toPage).toContainEqual({ cmd: 'ready' }),
+    );
+    const starts = host.fetchStub.mock.calls
+      .map(([name, init]) => [name, init?.headers?.Range])
+      .filter(([, range]) => range !== undefined);
+    expect(starts).toEqual(
+      expect.arrayContaining([
+        ['soffice.wasm', `bytes=${CHUNK}-${2 * CHUNK - 1}`],
+        ['soffice.data', `bytes=${CHUNK}-${2 * CHUNK - 1}`],
+      ]),
+    );
+    const progress = host.toPage.filter((m) => m.cmd === 'progress');
+    expect(progress[progress.length - 1]).toMatchObject({
+      loaded: 2 * (CHUNK + 10),
+      total: 2 * (CHUNK + 10),
+    });
+  });
+
+  it('con los ganchos de prueba disponibles también carga sus scripts', async () => {
+    const host = createHost({ hooks: true });
+    host.init();
+    await vi.waitFor(() =>
+      expect(host.toPage).toContainEqual({ cmd: 'ready' }),
+    );
+    const module = host.win.Module as { uno_scripts: string[] };
+    expect(module.uno_scripts.map((url) => url.split('/').pop())).toEqual([
+      'zeta.js',
+      'office_thread.js',
+      'office_test_thread.js',
+    ]);
+  });
+
+  it('sin ganchos de prueba solo carga zeta.js y office_thread.js', async () => {
+    const host = await readyHost();
+    const module = host.win.Module as { uno_scripts: string[] };
+    expect(module.uno_scripts.map((url) => url.split('/').pop())).toEqual([
+      'zeta.js',
+      'office_thread.js',
+    ]);
   });
 });

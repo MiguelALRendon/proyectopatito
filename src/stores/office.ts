@@ -176,11 +176,11 @@ export const useOfficeStore = defineStore('office', () => {
       error: null,
       hasEditsWhileSaving: false,
     });
-    try {
-      return await writeToDisk(session);
-    } catch (error) {
-      return failSave(session, error);
-    }
+    const attempt = writeToDisk(session).catch((error: unknown) =>
+      failSave(session, error),
+    );
+    tabs.trackSave(tabId, attempt);
+    return attempt;
   }
 
   async function persistUnrequestedSave(
@@ -192,17 +192,19 @@ export const useOfficeStore = defineStore('office', () => {
     );
     if (!session || session.isSaving) return 'unavailable';
     session.isSaving = true;
-    try {
-      const written = await fsWriteBytes(
-        session.path,
-        session.version,
-        new Uint8Array(bytes),
-      );
-      return markSaved(session, written.version);
-    } catch (error) {
-      setDirty(session, true);
-      return failSave(session, error);
-    }
+    const attempt = fsWriteBytes(
+      session.path,
+      session.version,
+      new Uint8Array(bytes),
+    ).then(
+      (written) => markSaved(session, written.version),
+      (error: unknown) => {
+        setDirty(session, true);
+        return failSave(session, error);
+      },
+    );
+    tabs.trackSave(session.tabId, attempt);
+    return attempt;
   }
 
   function reload(tabId: string) {

@@ -514,7 +514,8 @@ fn allowing_the_download_makes_the_probe_read_the_cloud_only_file() {
         len: 4096,
         attributes: FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS,
     };
-    assert!(probe_facts(Path::new(r"Z:\no\existe\nube.docx"), facts, true).is_err());
+    let missing = probe_facts(Path::new(r"Z:\no\existe\nube.docx"), facts, true);
+    assert!(matches!(missing, Err(ref why) if why.kind() == std::io::ErrorKind::NotFound));
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("hidratado.txt");
     fs::write(&file, "hola").unwrap();

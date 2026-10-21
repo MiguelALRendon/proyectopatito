@@ -125,6 +125,10 @@ async function openDocument(
     officeHost.mount(container),
   ]);
   frameOwner = owner;
+  if (isUnmounted) {
+    void officeHost.destroyOwned(owner);
+    return;
+  }
   if (isStale(ticket)) return;
   const docId = crypto.randomUUID();
   const opened = await officeHost.open(docId, ext, bytes);

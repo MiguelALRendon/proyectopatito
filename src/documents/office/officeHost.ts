@@ -107,7 +107,12 @@ export class OfficeHost {
     void frame.loaded.then(() => {
       if (this.session === session) frame.deliver(channel.port2);
     });
-    await ready;
+    try {
+      await ready;
+    } catch (error) {
+      if (this.session === session) await this.destroy();
+      throw error;
+    }
     return owner;
   }
 

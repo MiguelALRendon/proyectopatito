@@ -73,10 +73,10 @@ fn a_changed_file_is_refused_even_with_the_same_size() {
 fn a_file_with_another_size_is_refused() {
     let dir = write_bundle(&SAMPLE);
     fs::write(dir.path().join("libuno.dll"), b"uno y mas").unwrap();
-    assert!(matches!(
+    assert_eq!(
         verify(dir.path(), &manifest_of(&SAMPLE)),
-        Err(BundleProblem::Changed(_))
-    ));
+        Err(BundleProblem::Changed("libuno.dll".to_owned()))
+    );
 }
 
 #[test]
@@ -200,15 +200,18 @@ fn a_tampered_bundle_is_skipped_with_its_reason_and_the_system_svn_is_used() {
         .flatten()
         .find(|item| item.file_name().to_string_lossy().ends_with(".dll"))
         .unwrap();
+    let victim_name = victim.file_name().to_string_lossy().into_owned();
     let mut bytes = fs::read(victim.path()).unwrap();
     bytes[0] ^= 0xFF;
     fs::write(victim.path(), bytes).unwrap();
     let located = locate_full(None, Some(bundle_of(&real)), &[real.system_dir.clone()]).unwrap();
     assert_eq!(located.binary.origin, SvnOrigin::System);
-    assert!(matches!(
+    assert_eq!(
         located.skipped_bundle,
-        Some(BundleProblem::Changed(_))
-    ));
+        Some(BundleProblem::Changed(victim_name.clone()))
+    );
+    let warning = SvnDetection::from(Ok(located)).warning.unwrap();
+    assert!(warning.contains(&victim_name) && warning.contains("se ignoró"));
 }
 
 #[test]
@@ -421,7 +424,11 @@ fn the_shipped_folder_verifies_against_the_embedded_manifest_when_it_exists() {
     let shipped = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/svn"));
     // resources/svn is gitignored: it only exists after scripts/bundle-svn.ps1 ran
     if !shipped.join("svn.exe").is_file() {
+        assert!(
+            std::env::var_os("ALLOW_MISSING_SHIPPED_SVN").is_some(),
+            "falta src-tauri/resources/svn: corre scripts/bundle-svn.ps1 o define ALLOW_MISSING_SHIPPED_SVN"
+        );
         return;
     }
-    assert!(verify(shipped, MANIFEST_JSON).is_ok());
+    assert_eq!(verify(shipped, MANIFEST_JSON), Ok(shipped.join("svn.exe")));
 }

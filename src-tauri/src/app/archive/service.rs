@@ -1,4 +1,5 @@
 use std::fs;
+use std::io;
 use std::os::windows::fs::MetadataExt;
 use std::path::Path;
 use std::sync::Arc;
@@ -79,10 +80,7 @@ impl ArchiveService {
         };
         match extract::run(&self.workspace, &job, cancel, on_progress) {
             Ok(report) => Ok(self.finished(report, &destination, &relative)),
-            Err(error) => {
-                self.discard(&destination);
-                Err(error)
-            }
+            Err(error) => Err(self.rolled_back(error, &destination, &relative)),
         }
     }
 
@@ -94,10 +92,20 @@ impl ArchiveService {
         }
     }
 
-    fn discard(&self, dir: &ScopedPath) {
-        if self.workspace.revalidate(dir).is_ok() {
-            fs::remove_dir_all(dir.as_path()).ok();
+    fn rolled_back(&self, error: ArchiveError, dir: &ScopedPath, relative: &Path) -> ArchiveError {
+        self.statuses.invalidate(dir.as_path());
+        match self.discard(dir) {
+            Ok(()) => error,
+            Err(left) => ArchiveError::Io(io::Error::other(format!(
+                "{error}; además no se pudo borrar lo extraído en «{}»: {left}",
+                relative.display()
+            ))),
         }
+    }
+
+    fn discard(&self, dir: &ScopedPath) -> io::Result<()> {
+        self.workspace.revalidate(dir).map_err(io::Error::other)?;
+        fs::remove_dir_all(dir.as_path())
     }
 
     fn open_source(&self, path: &Path) -> Result<Source, ArchiveError> {
@@ -176,6 +184,7 @@ fn preflight(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::windows::fs::OpenOptionsExt;
     use std::process::Command;
 
     #[test]
@@ -195,8 +204,43 @@ mod tests {
             .status()
             .unwrap();
         assert!(link.success());
-        service.discard(&target);
+        assert!(service.discard(&target).is_err());
         assert!(outside.join("a.txt").exists());
+    }
+
+    #[test]
+    fn a_rollback_that_cannot_delete_everything_says_what_is_left() {
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = Workspace::new(dir.path()).unwrap();
+        let service = ArchiveService::new(workspace.clone(), Arc::default());
+        let target = workspace.resolve(Path::new("d"), false).unwrap();
+        fs::create_dir(target.as_path()).unwrap();
+        let held = target.as_path().join("abierto.bin");
+        let _lock = fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .share_mode(0)
+            .open(&held)
+            .unwrap();
+        let outcome = service.rolled_back(ArchiveError::Cancelled, &target, Path::new("d"));
+        let ArchiveError::Io(why) = outcome else {
+            panic!("debía avisar de lo que quedó: {outcome:?}");
+        };
+        assert!(why.to_string().contains("operación cancelada"));
+        assert!(why.to_string().contains("«d»"));
+        assert!(held.exists());
+    }
+
+    #[test]
+    fn a_clean_rollback_keeps_the_original_error() {
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = Workspace::new(dir.path()).unwrap();
+        let service = ArchiveService::new(workspace.clone(), Arc::default());
+        let target = workspace.resolve(Path::new("d"), false).unwrap();
+        fs::create_dir(target.as_path()).unwrap();
+        let outcome = service.rolled_back(ArchiveError::Cancelled, &target, Path::new("d"));
+        assert!(matches!(outcome, ArchiveError::Cancelled));
     }
 
     #[test]
@@ -207,7 +251,7 @@ mod tests {
         let target = workspace.resolve(Path::new("d"), false).unwrap();
         fs::create_dir(target.as_path()).unwrap();
         fs::write(target.as_path().join("a.txt"), b"x").unwrap();
-        service.discard(&target);
+        assert!(service.discard(&target).is_ok());
         assert!(!target.as_path().exists());
     }
 }

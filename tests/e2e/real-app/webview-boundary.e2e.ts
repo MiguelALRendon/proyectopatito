@@ -32,10 +32,7 @@ async function attempt(script: string): Promise<void> {
 
 async function expectStillOnTheApp(): Promise<void> {
   expect(new URL(app.page.url()).host).toBe(APP_HOST);
-  await app.page
-    .getByRole('grid')
-    .waitFor({ timeout: 3_000 })
-    .catch(() => undefined);
+  await app.page.getByRole('grid').waitFor({ timeout: 3_000 });
 }
 
 beforeAll(async () => {

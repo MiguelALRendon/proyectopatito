@@ -94,7 +94,7 @@ function toggle() {
 
 function seekBy(delta: number) {
   const element = media.value;
-  if (!element) return;
+  if (!element || !canSeek.value) return;
   element.currentTime = seekTarget(
     element.currentTime,
     delta,
@@ -166,6 +166,7 @@ function release() {
 watch(
   () => props.path,
   () => {
+    release();
     runtimeFailure.value = null;
     duration.value = Number.NaN;
     currentTime.value = 0;

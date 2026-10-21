@@ -192,9 +192,10 @@ describe('MediaPlayer: lo que no se puede reproducir, primero', () => {
     expect(press('constructor').defaultPrevented).toBe(false);
   });
 
-  it('buscar no pasa de la duración ni baja de cero', () => {
+  it('buscar no pasa de la duración ni baja de cero', async () => {
     mountPlayer();
     const state = control({ duration: 8, currentTime: 6 });
+    await fire('loadedmetadata');
     press('ArrowRight');
     expect(state.currentTime).toBe(8);
     state.currentTime = 2;
@@ -202,9 +203,10 @@ describe('MediaPlayer: lo que no se puede reproducir, primero', () => {
     expect(state.currentTime).toBe(0);
   });
 
-  it('con duración desconocida el control de posición está desactivado', () => {
+  it('con duración infinita (una transmisión) el control de posición está desactivado', async () => {
     mountPlayer();
     control({ duration: Number.POSITIVE_INFINITY });
+    await fire('loadedmetadata');
     expect(
       wrapper.get('input[aria-label="Posición"]').attributes('disabled'),
     ).toBeDefined();
@@ -213,8 +215,10 @@ describe('MediaPlayer: lo que no se puede reproducir, primero', () => {
   it('al desmontar libera el archivo: pausa, quita el origen y recarga', () => {
     mountPlayer();
     control();
+    const removeSource = vi.spyOn(element(), 'removeAttribute');
     wrapper.unmount();
     expect(pause).toHaveBeenCalled();
+    expect(removeSource).toHaveBeenCalledWith('src');
     expect(load).toHaveBeenCalled();
     mountPlayer();
   });
@@ -278,8 +282,11 @@ describe('MediaPlayer: reproducir, pausar y buscar', () => {
   it('con el medio sonando el botón y la barra espaciadora pausan', async () => {
     mountPlayer();
     control({ paused: false });
+    await fire('play');
     press(' ');
     expect(pause).toHaveBeenCalledTimes(1);
+    await wrapper.get('button[aria-label="Pausar"]').trigger('click');
+    expect(pause).toHaveBeenCalledTimes(2);
     expect(play).not.toHaveBeenCalled();
   });
 
@@ -296,7 +303,10 @@ describe('MediaPlayer: reproducir, pausar y buscar', () => {
     control();
     play.mockRejectedValue(new Error('NotAllowedError'));
     await wrapper.get('button[aria-label="Reproducir"]').trigger('click');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(play).toHaveBeenCalledTimes(1);
     expect(wrapper.find('article').exists()).toBe(false);
+    expect(wrapper.find('button[aria-label="Reproducir"]').exists()).toBe(true);
   });
 
   it('las flechas buscan cinco segundos y el tiempo avanza con timeupdate', async () => {
@@ -464,9 +474,30 @@ describe('MediaPlayer: estados de la reproducción', () => {
     mountPlayer();
   });
 
+  it('con la duración desconocida las flechas no buscan', async () => {
+    mountPlayer();
+    const state = control({ duration: Number.NaN, currentTime: 10 });
+    await fire('loadedmetadata');
+    press('ArrowRight');
+    press('ArrowLeft');
+    await wrapper.vm.$nextTick();
+    expect(state.currentTime).toBe(10);
+  });
+
+  it('al cambiar de archivo libera el anterior: pausa, quita el origen y recarga', async () => {
+    mountPlayer(probeOf(), 'wc/uno.mp3');
+    const previous = element();
+    const removeSource = vi.spyOn(previous, 'removeAttribute');
+    await wrapper.setProps({ path: 'wc/dos.mp3' });
+    expect(pause).toHaveBeenCalled();
+    expect(removeSource).toHaveBeenCalledWith('src');
+    expect(load).toHaveBeenCalled();
+  });
+
   it('buscar mientras suena no la detiene', async () => {
     mountPlayer();
     const state = control({ paused: false, duration: 100, currentTime: 10 });
+    await fire('loadedmetadata');
     await fire('play');
     press('ArrowRight');
     expect(state.currentTime).toBe(15);
@@ -477,6 +508,7 @@ describe('MediaPlayer: estados de la reproducción', () => {
   it('buscar en pausa no la reanuda', async () => {
     mountPlayer();
     const state = control({ paused: true, duration: 100, currentTime: 10 });
+    await fire('loadedmetadata');
     press('ArrowRight');
     await wrapper.vm.$nextTick();
     expect(state.currentTime).toBe(15);
@@ -527,14 +559,14 @@ describe('MediaPlayer: accesibilidad', () => {
 
   it('todos los controles tienen nombre accesible', () => {
     mountPlayer(VIDEO, 'wc\\clip.mp4');
-    for (const button of wrapper.findAll('button')) {
-      expect(
-        (button.attributes('aria-label') ?? button.text()).length,
-      ).toBeGreaterThan(0);
-    }
-    for (const input of wrapper.findAll('input')) {
-      expect(input.attributes('aria-label')).toBeTruthy();
-    }
+    const names = wrapper
+      .findAll('button')
+      .map((button) => button.attributes('aria-label') ?? button.text());
+    expect(names).toEqual(['Pantalla completa', 'Reproducir', 'Silenciar']);
+    const sliders = wrapper
+      .findAll('input')
+      .map((input) => input.attributes('aria-label'));
+    expect(sliders).toEqual(['Posición', 'Volumen']);
   });
 
   it('la región del visor se llama según el tipo', () => {
