@@ -30,10 +30,17 @@
    "escape_hatch": null
   }
  },
- "qa_manager_veredicto": null,
+ "qa_manager_veredicto": {
+  "status": "REJECTED",
+  "razones": [
+   "Missing flow transition: instalado->maquina-limpia-verificada (CA-14; la prueba en Windows 11 limpio no está hecha)",
+   "Evidence insufficient: mocks_riesgosos[] del inventario tiene 27 entradas sin cerrar ni exentar",
+   "Evidence insufficient: assertions_debiles[] del inventario tiene 45 entradas sin cerrar ni reconciliar"
+  ]
+ },
  "remediacion_aplicada": true,
  "bloqueado": true,
- "motivo_bloqueo": "PIPELINE FAIL en etapa flow_correctness tras qa-run: Missing validation coverage: La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria; Missing validation coverage: write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado; Missing validation coverage: El temporal se sincroniza a disco (sync_all) antes del renombrado; Missing flow transition: instalado->maquina-limpia-verificada",
+ "motivo_bloqueo": "QA VERDICT: REJECTED: máquina limpia (CA-14) pendiente; mocks_riesgosos y assertions_debiles sin reconciliar; flow-breaker blocked",
  "inventario": {
   "reglas": 616,
   "flujos": 22,
@@ -75,5 +82,24 @@
   "agente": "bossdream-evidence-auditor",
   "veredicto": "pass",
   "nota": "Las 4 afirmaciones tienen evidencia real; la evidencia no desbloquea el gate flow_correctness."
- }
+ },
+ "flow_breaker": {
+  "veredicto": "blocked",
+  "hallazgos": [
+   "guardando->cerrado: cerrar y descartar durante un guardado no es determinista (T-38)",
+   "running->cancelled/failed: discard ignora un borrado parcial y la interfaz afirma que no quedó nada (T-39)",
+   "cargando->sin-visor: cerrar durante la carga deja el host sin destruir (T-40)",
+   "cargando->buscando: las flechas buscan sin duración conocida; release() no se llama al cambiar de ruta (T-41)"
+  ],
+  "descartado": "413 en host.js: los scripts pesan menos de 1 MB y los archivos grandes ya usan Range"
+ },
+ "auditor_de_pruebas": {
+  "veredicto": "pass",
+  "hallazgos": 20,
+  "detalle": ".bossdream-project/agent-outputs/test-auditor-2b.md",
+  "deuda": "T-42"
+ },
+ "exentas_aceptadas_por_el_usuario": [
+  "reglas 24, 25 y 27 (2026-10-20)"
+ ]
 }

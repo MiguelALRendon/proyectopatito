@@ -162,7 +162,7 @@ Casos obligatorios: los 103 que reportó `test-inventory-check.ps1` sobre el inv
 
 ### Casos sin prueba automática
 
-- **24** (tarball: 4 MiB de entrada y 64 MiB de memoria xz), **25** (segunda comprobación de escritura tras el candado) y **27** (`sync_all` antes del renombrado): no son observables desde fuera. Una entrada de tar siempre se identifica con sus primeros 512 bytes, el candado se toma antes de la segunda comprobación sin posibilidad de intercalar otro proceso en una prueba determinista, y `sync_all` solo cambia la durabilidad ante un corte de energía. Se tratan como equivalentes.
+- **24** (tarball: 4 MiB de entrada y 64 MiB de memoria xz), **25** (segunda comprobación de escritura tras el candado) y **27** (`sync_all` antes del renombrado): no son observables desde fuera. Una entrada de tar siempre se identifica con sus primeros 512 bytes, el candado se toma antes de la segunda comprobación sin posibilidad de intercalar otro proceso en una prueba determinista, y `sync_all` solo cambia la durabilidad ante un corte de energía. Se tratan como equivalentes. **Decisión del usuario (2026-10-20): quedan exentas.** Se retiraron de `rules[]` del inventario y constan, con su razón, en la clave `exentas` de `test-inventory.json`.
 - **97** (`instalado->maquina-limpia-verificada`): requiere la máquina limpia del usuario (CA-14). El instalador, `installed.e2e.ts` (9 de 9 en un perfil aislado) y la lista `scripts/e2e/clean-machine-checklist.md` están listos.
 
 ### Cobertura parcial que conviene saber

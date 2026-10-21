@@ -258,7 +258,6 @@
   "Un tarball comprimido se reporta con el MIME y la extensión compuesta de su compresión (tar.gz, tar.bz2, tar.xz)",
   "Una cabecera gzip con un campo extra largo (20000 bytes) se lee igualmente",
   "Un primer bloque que se comprime a mucho más de 8 KiB se juzga igual por su contenido descomprimido",
-  "La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria",
   "Un archivo con atributo OFFLINE, RECALL_ON_OPEN o RECALL_ON_DATA_ACCESS se clasifica como nube con su tamaño sin leer un solo byte",
   "Con allow_download la sonda sí lee el contenido de un archivo solo en la nube",
   "Solo los atributos OFFLINE, RECALL_ON_OPEN y RECALL_ON_DATA_ACCESS marcan un archivo como solo en la nube",
@@ -280,7 +279,6 @@
   "write_bytes devuelve FileChanged, no TooLarge, si el archivo creció por encima de 32 MiB desde que se abrió",
   "write_bytes devuelve Busy mientras hay una operación SVN en curso sobre la copia de trabajo y funciona de nuevo al terminar",
   "El candado de escritura se toma sobre la raíz de la copia de trabajo o, fuera de una copia, sobre el propio archivo",
-  "write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado",
   "write_bytes no escribe un destino que se cambió por una junction después de resolver la ruta",
   "write_bytes sobre una carpeta falla con NotAFile y sobre un destino inexistente falla sin crear nada",
   "write_bytes rechaza con CloudOnly un archivo solo en la nube",
@@ -289,7 +287,6 @@
   "Un segundo guardado con la versión anterior es un conflicto y conserva el primer guardado",
   "Tras escribir, write_bytes invalida la caché de estado SVN del archivo",
   "El contenido se escribe en un temporal hermano con sufijo .dd-tmp y se publica con un renombrado atómico",
-  "El temporal se sincroniza a disco (sync_all) antes del renombrado",
   "Si el relleno o el renombrado fallan, el temporal se elimina y el destino queda intacto",
   "Un nombre de temporal ocupado se salta, la búsqueda se acota a 8 intentos y en una carpeta inexistente falla con NotFound",
   "Un renombrado con ACCESS_DENIED (5) o LOCK_VIOLATION (33) se traduce a FileLocked y cualquier otro código a Io",
@@ -7388,6 +7385,26 @@
   {
    "ubicacion": "tests/e2e/real-app/media.e2e.ts:198-219",
    "razon": "Comprueba que se emitió alguna petición con Range y que el tiempo supera la mitad, pero no que la respuesta fuera 206 ni el valor del Range pedido"
+  }
+ ],
+ "exentas": [
+  {
+   "regla": "La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria",
+   "razon": "No observable: una entrada de tar se reconoce con sus primeros 512 bytes, de modo que el tope de entrada y el de memoria de xz no cambian ningún resultado que una prueba pueda ver.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-20"
+  },
+  {
+   "regla": "write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado",
+   "razon": "No observable de forma determinista: habría que intercalar otro proceso entre la primera y la segunda comprobación de solo lectura.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-20"
+  },
+  {
+   "regla": "El temporal se sincroniza a disco (sync_all) antes del renombrado",
+   "razon": "No observable: sync_all solo cambia la durabilidad ante un corte de energía.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-20"
   }
  ]
 }

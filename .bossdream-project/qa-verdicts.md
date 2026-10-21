@@ -70,3 +70,13 @@ El Test Checks determinista (`scripts/test-checks.ps1`) no deja pasar `flow_corr
 Detalle de lo que sí se cerró (99 de 103 casos, 139 pruebas nuevas y tres defectos corregidos) en `.bossdream-project/qa-costly-findings.md`.
 
 **Auditoría de la evidencia (`bossdream-evidence-auditor`):** `VERDICT: pass`. Las cuatro razones citan archivos reales que las respaldan; la auditoría no desbloquea el gate.
+
+## Segunda ronda de la Fase 2B (2026-10-20, tras `qa-run` y las exenciones del usuario)
+
+| Agente | Veredicto | Razón literal (resumen) |
+|---|---|---|
+| QA Manager (`bossdream-qa-planner`) | **REJECTED** | `Missing flow transition: instalado->maquina-limpia-verificada`; `Evidence insufficient` por `mocks_riesgosos[]` (27) y `assertions_debiles[]` (45) sin cerrar |
+| Auditor de pruebas (`bossdream-qa-auditor`) | pass | 20 hallazgos (5 medios), ver `agent-outputs/test-auditor-2b.md` y T-42 |
+| Flow-breaker (`bossdream-flow-breaker`) | blocked | `guardando->cerrado` no determinista (T-38); rollback de extracción que ignora borrados parciales (T-39); cierre durante la carga de Office (T-40); búsqueda sin duración y `release()` al cambiar de ruta (T-41). Descartado: 413 en `host.js` (los scripts pesan menos de 1 MB) |
+
+El QA Manager responde expresamente que, aun resueltas las listas, el veredicto no puede ser ACCEPTED sin la prueba en máquina limpia.
