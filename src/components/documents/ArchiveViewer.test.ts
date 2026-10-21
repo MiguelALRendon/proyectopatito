@@ -172,6 +172,25 @@ describe('ArchiveViewer: listado', () => {
     expect(extractButton()?.attributes('disabled')).toBeDefined();
   });
 
+  it('muestra un guion en el tamaño de los directorios y de los valores nulos', async () => {
+    api.archiveList.mockResolvedValue(
+      listing({
+        entries: [
+          entry('carpeta/', { kind: 'directory', size: 99, packed: 99 }),
+          entry('sin-dato.bin', { size: 7, packed: null }),
+        ],
+      }),
+    );
+    await mountViewer();
+    const rows = wrapper.findAll('[role="row"]').slice(1);
+    const cells = rows.map((row) =>
+      row.findAll('[role="cell"]').map((cell) => cell.text()),
+    );
+    expect(cells[0].slice(1, 3)).toEqual(['-', '-']);
+    expect(cells[1][1]).not.toBe('-');
+    expect(cells[1][2]).toBe('-');
+  });
+
   it('avisa cuando el listado está truncado', async () => {
     api.archiveList.mockResolvedValue(
       listing({ truncated: true, entry_count: 60000 }),
@@ -189,6 +208,21 @@ describe('ArchiveViewer: listado', () => {
     expect(wrapper.get('article').text()).toContain('el archivo está dañado');
     expect(wrapper.text()).toContain('Mostrar hexadecimal');
     expect(extractButton()).toBeUndefined();
+  });
+
+  it('tras un fallo, abrir otro archivo vuelve a cargar y muestra su listado', async () => {
+    api.archiveList.mockRejectedValueOnce(
+      failure('archive_corrupt', 'el archivo está dañado'),
+    );
+    await mountViewer();
+    expect(wrapper.get('article').text()).toContain('el archivo está dañado');
+    api.archiveList.mockResolvedValueOnce(
+      listing({ entries: [entry('otro.txt')] }),
+    );
+    await wrapper.setProps({ path: 'C:\wc\otro.zip' });
+    await flushPromises();
+    expect(api.archiveList).toHaveBeenLastCalledWith('C:\wc\otro.zip', 2);
+    expect(wrapper.text()).toContain('otro.txt');
   });
 
   it('al cambiar de ruta cancela el listado anterior y descarta su respuesta tardía', async () => {
@@ -312,6 +346,19 @@ describe('ArchiveViewer: extracción', () => {
     expect(dialog()?.textContent).toContain('2 archivos');
   });
 
+  it('tras un fallo, Cerrar descarta el diálogo sin reintentar', async () => {
+    api.archiveExtract.mockRejectedValueOnce(
+      failure('archive_limit', 'supera el tope de 4 GiB'),
+    );
+    await openDialog();
+    dialogButton('Extraer').click();
+    await flushPromises();
+    dialogButton('Cerrar').click();
+    await flushPromises();
+    expect(dialog()).toBeNull();
+    expect(api.archiveExtract).toHaveBeenCalledTimes(1);
+  });
+
   it('cancelar a mitad lo dice y no deja el diálogo atascado', async () => {
     let reject!: (error: CommandError) => void;
     api.archiveExtract.mockReturnValue(
@@ -327,6 +374,25 @@ describe('ArchiveViewer: extracción', () => {
     await flushPromises();
     expect(dialog()?.textContent).toContain('No quedó nada en el disco');
     expect(store.reloadAfterChange).not.toHaveBeenCalled();
+  });
+
+  it('indica cuántas entradas omitidas quedaron fuera de la lista', async () => {
+    api.archiveExtract.mockResolvedValue({ ...REPORT, skipped_more: 3 });
+    await openDialog();
+    dialogButton('Extraer').click();
+    await flushPromises();
+    expect(dialog()?.textContent).toContain('y 3 más');
+  });
+
+  it('mientras extrae, el clic en el fondo no cierra el diálogo', async () => {
+    api.archiveExtract.mockReturnValue(new Promise(() => undefined));
+    await openDialog();
+    dialogButton('Extraer').click();
+    await flushPromises();
+    const overlay = document.body.querySelector('.base-modal__overlay');
+    overlay?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await flushPromises();
+    expect(dialog()).not.toBeNull();
   });
 
   it('mientras extrae, Escape no cierra el diálogo', async () => {

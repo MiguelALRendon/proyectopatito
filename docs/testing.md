@@ -74,6 +74,22 @@ El fuzz de comprimidos no es una prueba permanente: se hizo con un test temporal
 
 Increment 10 (2B), sobre `svn/locator.rs` y `svn/bundled.rs`: 38 mutantes, 27 muertos, 10 inviables y 1 vivo (`Display` de `SvnVersion`, cerrado con `version_is_displayed_as_dotted_numbers`; segunda pasada sobre `SvnVersion`: 2 muertos, 1 inviable). Corre con `--in-place` (no admite `-j`), prioridad baja y `CARGO_BUILD_JOBS=2`: sin eso la PC se traba.
 
+QA Increment (2B, 2026-10-20), mutación sobre lo que añadió la fase:
+
+| Módulo | Mutantes | Resultado |
+|---|---|---|
+| `app/archive/*.rs` | 295 | 3 vivos documentados |
+| `container.rs`, `compressed_tar.rs`, `inspect.rs`, `media.rs`, `office.rs` y `sniff.rs` hasta la línea 266 | 421 de 505 probados | vivos restantes: todos equivalentes |
+| `files/edit.rs` y `zeta_assets.rs` | 74 | 1 vivo equivalente |
+| Frontend (Stryker, umbral 85) | n/a | 90,60 % |
+
+- **`qa-run` (modo costoso, 2026-10-20):** de los 103 casos obligatorios del inventario, 99 tienen prueba (Rust, Vitest o Pester) y 4 no: `La lectura de un tarball se limita…` y `write_bytes vuelve a comprobar… después de tomar el candado` y `El temporal se sincroniza (sync_all)…` (no observables desde fuera: equivalentes) y `instalado->maquina-limpia-verificada` (acción del usuario, CA-14). Se escribieron 139 pruebas nuevas (52 de Rust, 75 de Vitest y 12 de Pester) y la ejecución halló tres defectos reales, ya corregidos: el límite de memoria de xz salía como error de E/S y no como límite, la etiqueta de tamaño declarado decía 1 GiB frente a los 4 GiB / 2 GiB reales, y el aviso de la CVE se perdía cuando se ignoraba el paquete incluido. Quedan registradas T-35 a T-37.
+- **Pruebas Pester** de los scripts de release (`scripts/tests/*.Tests.ps1`: `bundle-svn.ps1`, `build-release.ps1` y `verify-installer.ps1`, con un `msiexec`, un `npx` y un `ProgramFiles` falsos, sin red salvo un servidor local en loopback): `Invoke-Pester -Path scripts/tests` (Pester 5 o superior).
+- **Sin probar:** los 84 mutantes de `sniff.rs` posteriores a la línea 266, porque la PC se reinició a mitad de una corrida de 9 horas (Kernel-Power 41 a la 01:03). Desde entonces las corridas se hacen en tandas de menos de 15 minutos con `--iterate`, `--shard` y prioridad baja.
+- **Equivalentes:** `Limited::flush` (`File::flush` no hace nada); `container.rs` 101:42, 135:13, 181 y 240:15 (los tamaños de archivo reales no llegan a los valores donde difieren); `sniff.rs:212` (la BOM decodificada es un carácter válido y no nulo); `compressed_tar.rs` `INPUT_LIMIT_BYTES` (ver arriba); `edit.rs:26` (`|` y `^` coinciden con bits disjuntos).
+- **No alcanzables:** `make_directory:153` (guarda de `create_dir_all`; en Windows todo nombre inválido se rechaza antes, en `resolve`) y `check_limits:137` (un bloque 7z de exactamente 256 MiB exigiría fabricar ese archivo).
+- **Trampa:** `cargo mutants -- --test x` no corre las pruebas unitarias de `src`; hay que añadir `--lib`, o marca como vivos mutantes que sí se detectan. Un reinicio en mitad de una corrida deja PDB corruptos (`LNK1285`): borrar el `.pdb` y el `.exe` indicados.
+
 Instalador (Increment 9): `scripts/build-release.ps1` genera el instalador en `src-tauri/target-release`; `INSTALLER_PATH=<instalador> npx vitest run --config vitest.e2e.config.ts tests/e2e/real-app/installed.e2e.ts` lo instala con `scripts/e2e/verify-installer.ps1` en un perfil aislado (`USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `ProgramFiles` y `PATH` vacíos), lanza la aplicación instalada con `start-app.ps1 -ExePath -IsolatedRoot` y la desinstala. La suite completa sobre el release se corre con `E2E_APP_MODE=release` tras `npx tauri build --no-bundle --features e2e-config-dir` con `CARGO_TARGET_DIR=src-tauri/target-e2e`.
 
 ### Puertas del pipeline

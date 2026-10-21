@@ -386,3 +386,10 @@ fn unknown_binary_with_no_signature_keeps_the_generic_mime() {
     assert_eq!(probe.kind, ProbeKind::Binary);
     assert_eq!(probe.mime, MIME_BINARY);
 }
+
+#[test]
+fn the_tbz_suffix_is_a_bzip2_tarball() {
+    let probe = probe_named("a.tbz", &bzip2(&tar_archive("a.txt", b"hola")));
+    assert_eq!(probe.kind, ProbeKind::Archive);
+    assert_eq!(probe.extension, Some("tar.bz2"));
+}

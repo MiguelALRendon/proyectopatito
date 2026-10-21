@@ -187,3 +187,71 @@ pub fn zip_with_unix_mode(name: &str, mode: u32) -> Vec<u8> {
     bytes[at..at + 4].copy_from_slice(&(mode << 16).to_le_bytes());
     bytes
 }
+
+pub fn sevenz_with_anti_item(anti: &str, kept: (&str, &[u8])) -> Vec<u8> {
+    let mut writer = ArchiveWriter::new(Cursor::new(Vec::new())).unwrap();
+    let mut entry = ArchiveEntry::new_file(anti);
+    // sevenz-rust2 writes the anti bit inverted: a plain empty entry is read back as anti
+    entry.has_stream = false;
+    writer.push_archive_entry::<&[u8]>(entry, None).unwrap();
+    let (name, data) = kept;
+    writer
+        .push_archive_entry(ArchiveEntry::new_file(name), Some(data))
+        .unwrap();
+    writer.finish().unwrap().into_inner()
+}
+
+pub fn crc32(bytes: &[u8]) -> u32 {
+    let mut crc = !0u32;
+    for byte in bytes {
+        crc ^= u32::from(*byte);
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 {
+                (crc >> 1) ^ 0xEDB8_8320
+            } else {
+                crc >> 1
+            };
+        }
+    }
+    !crc
+}
+
+pub fn xz_asking_for_dictionary(dictionary_property: u8) -> Vec<u8> {
+    let mut stream = vec![0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00, 0x00, 0x00];
+    stream.extend(crc32(&[0x00, 0x00]).to_le_bytes());
+    let block = [
+        0x02,
+        0x00,
+        0x21,
+        0x01,
+        dictionary_property,
+        0x00,
+        0x00,
+        0x00,
+    ];
+    stream.extend(block);
+    stream.extend(crc32(&block).to_le_bytes());
+    stream
+}
+
+pub fn rar_with_symlink(link: &str, target: &str) -> Vec<u8> {
+    let mut builder = rars::Builder::new(rars::ArchiveVersion::Rar50).store(true);
+    builder
+        .add_unix_symlink(
+            link.as_bytes().to_vec(),
+            target.as_bytes().to_vec(),
+            false,
+            None,
+            None,
+        )
+        .unwrap();
+    builder.to_bytes().unwrap()
+}
+
+pub fn rar_with_file(name: &str, data: &[u8]) -> Vec<u8> {
+    let mut builder = rars::Builder::new(rars::ArchiveVersion::Rar50).store(true);
+    builder
+        .add_bytes(name.as_bytes().to_vec(), data.to_vec(), None, None)
+        .unwrap();
+    builder.to_bytes().unwrap()
+}

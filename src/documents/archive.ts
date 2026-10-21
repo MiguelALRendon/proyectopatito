@@ -16,7 +16,7 @@ export const FORMAT_LABELS: Record<ArchiveFormat, string> = {
 
 export const SUSPICION_LABELS: Record<Suspicion, string> = {
   declared_size:
-    'declara un tamaño total muy grande al descomprimirse (más de 1 GiB)',
+    'declara más datos de los permitidos al descomprimirse (más de 4 GiB en total o 2 GiB en un archivo)',
   ratio: 'se comprime de forma desproporcionada (más de 200 veces)',
   depth: 'tiene carpetas anidadas a una profundidad inusual',
 };

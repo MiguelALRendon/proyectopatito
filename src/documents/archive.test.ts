@@ -1,5 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  SUSPICION_LABELS,
   countLabel,
   displayName,
   hasHiddenCharacters,
@@ -79,5 +81,23 @@ describe('countLabel', () => {
     expect(countLabel(1, 'archivo', 'archivos')).toBe('1 archivo');
     expect(countLabel(0, 'archivo', 'archivos')).toBe('0 archivos');
     expect(countLabel(2, 'archivo', 'archivos')).toBe('2 archivos');
+  });
+});
+
+describe('SUSPICION_LABELS frente a los límites de Rust', () => {
+  const limits = readFileSync('src-tauri/src/app/archive/limits.rs', 'utf-8');
+  const gibOf = (name: string) =>
+    Number(
+      new RegExp(`${name}: u64 = (\\d+) \\* GIB`).exec(limits)?.[1] ?? NaN,
+    );
+
+  it('el motivo de tamaño declarado muestra el mismo umbral que aplica el backend', () => {
+    const total = gibOf('MAX_EXTRACT_BYTES');
+    const single = gibOf('MAX_ENTRY_BYTES');
+    expect([total, single]).toEqual([4, 2]);
+    expect(SUSPICION_LABELS.declared_size).toContain(`${total} GiB en total`);
+    expect(SUSPICION_LABELS.declared_size).toContain(
+      `${single} GiB en un archivo`,
+    );
   });
 });

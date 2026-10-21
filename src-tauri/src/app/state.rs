@@ -96,7 +96,7 @@ impl From<Result<Located, LocatorError>> for SvnDetection {
         match result {
             Ok(located) => {
                 let mut detection = Self::found(&located.binary);
-                detection.warning = bundle_warning(&located).or(detection.warning);
+                detection.warning = joined(bundle_warning(&located), detection.warning);
                 detection
             }
             Err(error) => Self::failed(error),
@@ -132,6 +132,13 @@ fn outdated_warning(version: SvnVersion) -> Option<String> {
             "svn {version} es anterior a {RECOMMENDED_VERSION}: tiene una vulnerabilidad conocida de inyección de argumentos en Windows (CVE-2024-45720). Se puede usar, pero conviene actualizarlo o usar el svn incluido con la aplicación."
         )
     })
+}
+
+fn joined(first: Option<String>, second: Option<String>) -> Option<String> {
+    match (first, second) {
+        (Some(first), Some(second)) => Some(format!("{first} {second}")),
+        (first, second) => first.or(second),
+    }
 }
 
 fn bundle_warning(located: &Located) -> Option<String> {
@@ -493,16 +500,24 @@ fn detect_svn(
     slot: &Mutex<Option<SvnBinary>>,
     bundle_dir: Option<&Path>,
 ) -> Result<Located, LocatorError> {
-    let manual = config.read(|config| config.svn_path.clone());
     let bundle = bundle_dir.map(|dir| Bundle {
         dir,
         manifest: MANIFEST_JSON,
     });
-    let dirs = default_search_dirs();
+    detect_svn_in(config, slot, bundle, &default_search_dirs())
+}
+
+fn detect_svn_in(
+    config: &ConfigHandle,
+    slot: &Mutex<Option<SvnBinary>>,
+    bundle: Option<Bundle<'_>>,
+    dirs: &[PathBuf],
+) -> Result<Located, LocatorError> {
+    let manual = config.read(|config| config.svn_path.clone());
     let located = match manual.as_deref() {
-        Some(path) => locate_full(Some(path), bundle, &dirs)
-            .or_else(|error| locate_full(None, bundle, &dirs).map_err(|_| error)),
-        None => locate_full(None, bundle, &dirs),
+        Some(path) => locate_full(Some(path), bundle, dirs)
+            .or_else(|error| locate_full(None, bundle, dirs).map_err(|_| error)),
+        None => locate_full(None, bundle, dirs),
     };
     *locked(slot) = located.as_ref().ok().map(|found| found.binary.clone());
     located
@@ -566,4 +581,122 @@ where
         done(id, result.into());
     });
     id
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::CONFIG_FILE_NAME;
+    use serde_json::json;
+    use sha2::{Digest, Sha256};
+    use std::process::Command;
+    use tempfile::TempDir;
+
+    const MISSING: &str = "C:/no/existe/svn.exe";
+    const OLD: SvnVersion = SvnVersion {
+        major: 1,
+        minor: 14,
+        patch: 2,
+    };
+
+    fn compiled_fake_svn(version: &str) -> Vec<u8> {
+        let scratch = TempDir::new().unwrap();
+        let source = scratch.path().join("fake.rs");
+        std::fs::write(&source, format!("fn main() {{ println!({version:?}); }}")).unwrap();
+        let exe = scratch.path().join("fake.exe");
+        let built = Command::new("rustc")
+            .arg(&source)
+            .arg("-o")
+            .arg(&exe)
+            .status();
+        assert!(built.unwrap().success());
+        std::fs::read(exe).unwrap()
+    }
+
+    fn bundle_of(bytes: &[u8]) -> (TempDir, String) {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(SVN_EXE), bytes).unwrap();
+        let entry = json!({
+            "name": SVN_EXE,
+            "bytes": bytes.len(),
+            "sha256": format!("{:x}", Sha256::digest(bytes)),
+        });
+        (dir, json!({ "files": [entry] }).to_string())
+    }
+
+    fn config_saving(path: Option<&str>) -> (TempDir, ConfigHandle) {
+        let dir = TempDir::new().unwrap();
+        let store = ConfigStore {
+            path: dir.path().join("cfg").join(CONFIG_FILE_NAME),
+        };
+        let config = ConfigHandle::new(store);
+        if let Some(path) = path {
+            config
+                .update(|c| c.svn_path = Some(PathBuf::from(path)))
+                .unwrap();
+        }
+        (dir, config)
+    }
+
+    #[test]
+    fn a_broken_saved_client_falls_back_to_the_verified_bundled_svn() {
+        let (_cfg, config) = config_saving(Some(MISSING));
+        let (dir, manifest) = bundle_of(&compiled_fake_svn("1.14.5"));
+        let bundle = Bundle {
+            dir: dir.path(),
+            manifest: &manifest,
+        };
+        let found = detect_svn_in(&config, &Mutex::default(), Some(bundle), &[]).unwrap();
+        assert_eq!(found.binary.origin, SvnOrigin::Bundled);
+    }
+
+    #[test]
+    fn a_broken_saved_client_with_nothing_else_reports_the_saved_clients_error() {
+        let (_cfg, config) = config_saving(Some(MISSING));
+        let outcome = detect_svn_in(&config, &Mutex::default(), None, &[]);
+        assert_eq!(outcome, Err(LocatorError::Invalid(PathBuf::from(MISSING))));
+    }
+
+    #[test]
+    fn a_cached_svn_is_not_detected_again_by_warm_svn() {
+        let (_cfg, config) = config_saving(None);
+        let state = AppState::new(config.store.clone());
+        let cached = SvnBinary {
+            path: PathBuf::from("C:/cache/svn.exe"),
+            version: SvnVersion {
+                major: 1,
+                minor: 14,
+                patch: 5,
+            },
+            origin: SvnOrigin::Configured,
+        };
+        *locked(&state.svn) = Some(cached.clone());
+        tauri::async_runtime::block_on(state.warm_svn());
+        assert_eq!(locked(&state.svn).clone(), Some(cached));
+    }
+
+    #[test]
+    fn the_bundle_lives_in_the_svn_subfolder_of_the_resource_directory() {
+        let (_cfg, config) = config_saving(None);
+        let state = AppState::new(config.store).with_bundled_svn(Path::new("C:/recursos"));
+        assert_eq!(
+            state.bundle_dir,
+            Some(PathBuf::from("C:/recursos").join(BUNDLE_DIR))
+        );
+    }
+
+    #[test]
+    fn the_cve_warning_is_not_lost_when_the_bundle_was_ignored() {
+        let old = SvnBinary {
+            path: PathBuf::from("C:/svn/svn.exe"),
+            version: OLD,
+            origin: SvnOrigin::System,
+        };
+        let located = Located {
+            binary: old,
+            skipped_bundle: Some(crate::svn::bundled::BundleProblem::Unusable),
+        };
+        let warning = SvnDetection::from(Ok(located)).warning.unwrap();
+        assert!(warning.contains("se ignoró") && warning.contains("CVE-2024-45720"));
+    }
 }

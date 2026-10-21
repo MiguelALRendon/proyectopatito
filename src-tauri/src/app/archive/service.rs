@@ -172,3 +172,42 @@ fn preflight(
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::process::Command;
+
+    #[test]
+    fn a_destination_that_left_the_workspace_is_not_deleted() {
+        let dir = tempfile::tempdir().unwrap();
+        let (root, outside) = (dir.path().join("raiz"), dir.path().join("fuera"));
+        fs::create_dir(&root).unwrap();
+        fs::create_dir(&outside).unwrap();
+        fs::write(outside.join("a.txt"), b"x").unwrap();
+        let workspace = Workspace::new(&root).unwrap();
+        let service = ArchiveService::new(workspace.clone(), Arc::default());
+        let target = workspace.resolve(Path::new("d"), false).unwrap();
+        let link = Command::new("cmd")
+            .args(["/C", "mklink", "/J"])
+            .arg(target.as_path())
+            .arg(&outside)
+            .status()
+            .unwrap();
+        assert!(link.success());
+        service.discard(&target);
+        assert!(outside.join("a.txt").exists());
+    }
+
+    #[test]
+    fn a_destination_inside_the_workspace_is_deleted() {
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = Workspace::new(dir.path()).unwrap();
+        let service = ArchiveService::new(workspace.clone(), Arc::default());
+        let target = workspace.resolve(Path::new("d"), false).unwrap();
+        fs::create_dir(target.as_path()).unwrap();
+        fs::write(target.as_path().join("a.txt"), b"x").unwrap();
+        service.discard(&target);
+        assert!(!target.as_path().exists());
+    }
+}

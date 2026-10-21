@@ -325,3 +325,73 @@ fn the_test_hooks_exist_only_in_debug_and_e2e_builds() {
         }
     }
 }
+
+#[test]
+fn the_chunk_size_is_the_one_the_host_script_asks_for() {
+    let host = fs::read_to_string("assets/zeta/host.js").unwrap();
+    let megabytes = CHUNK_BYTES / (1024 * 1024);
+    assert!(host.contains(&format!("const CHUNK_BYTES = {megabytes} * 1024 * 1024;")));
+}
+
+#[test]
+fn an_io_error_other_than_missing_answers_500() {
+    let fx = fixture();
+    let path = fx._guard.path().join("soffice.js");
+    fs::remove_file(&path).unwrap();
+    fs::create_dir(&path).unwrap();
+    let response = get(&fx, "/soffice.js", None);
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    assert_hardened(&response);
+}
+
+#[test]
+fn every_response_says_it_accepts_ranges() {
+    let fx = fixture();
+    let responses = [
+        get(&fx, "/soffice.js", None),
+        get(&fx, "/soffice.wasm", Some("bytes=0-9")),
+        get(&fx, "/nada.js", None),
+        handle(
+            Some(&fx.assets),
+            &request(Method::POST, "/soffice.js", None),
+        ),
+    ];
+    for response in responses {
+        assert_eq!(text(response.headers(), header::ACCEPT_RANGES), "bytes");
+    }
+}
+
+#[test]
+fn the_document_policy_closes_plugins_and_the_base_url() {
+    let fx = fixture();
+    let policy = text(
+        get(&fx, "/host.html", None).headers(),
+        header::CONTENT_SECURITY_POLICY,
+    );
+    let directives: Vec<&str> = policy.split(';').map(str::trim).collect();
+    for expected in ["default-src 'self'", "object-src 'none'", "base-uri 'none'"] {
+        assert!(directives.contains(&expected), "{expected}: {policy}");
+    }
+}
+
+#[test]
+fn an_invalid_range_is_refused_before_looking_for_the_file() {
+    let fx = fixture();
+    let response = get(&fx, "/no-existe.js", Some("bytes=a-b"));
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+}
+
+#[test]
+fn the_page_scripts_come_only_from_the_app_itself() {
+    let config: serde_json::Value = serde_json::from_str(PAGE_CONFIG).unwrap();
+    let security = &config["app"]["security"];
+    for key in ["csp", "devCsp"] {
+        let policy = security[key].as_str().unwrap();
+        let scripts: Vec<&str> = policy
+            .split(';')
+            .map(str::trim)
+            .filter(|directive| directive.starts_with("script-src"))
+            .collect();
+        assert_eq!(scripts, ["script-src 'self'"], "{key}");
+    }
+}

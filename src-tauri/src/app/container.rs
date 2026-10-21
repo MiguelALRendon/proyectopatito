@@ -307,3 +307,390 @@ fn u16_le(bytes: &[u8], at: usize) -> u16 {
 fn u32_le(bytes: &[u8], at: usize) -> u32 {
     u32::from_le_bytes([bytes[at], bytes[at + 1], bytes[at + 2], bytes[at + 3]])
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    const FREE: u32 = 0xFFFF_FFFF;
+    const END: u32 = 0xFFFF_FFFE;
+    const SECTOR: usize = 512;
+    const LOCAL_EXTRA: usize = 4;
+    const CENTRAL_EXTRA: usize = 3;
+    const CENTRAL_COMMENT: usize = 2;
+
+    fn zip_with(parts: &[(&str, &[u8])], comment: &[u8]) -> Vec<u8> {
+        let mut file = Vec::new();
+        let mut central = Vec::new();
+        for (name, data) in parts {
+            let offset = file.len() as u32;
+            let mut local = vec![0u8; ZIP_LOCAL_FIXED_LEN];
+            local[..4].copy_from_slice(&ZIP_LOCAL_SIGNATURE);
+            local[18..22].copy_from_slice(&(data.len() as u32).to_le_bytes());
+            local[26..28].copy_from_slice(&(name.len() as u16).to_le_bytes());
+            local[28..30].copy_from_slice(&(LOCAL_EXTRA as u16).to_le_bytes());
+            file.extend(local);
+            file.extend(name.bytes());
+            file.extend([9u8; LOCAL_EXTRA]);
+            file.extend(*data);
+            let mut header = vec![0u8; ZIP_CENTRAL_FIXED_LEN];
+            header[..4].copy_from_slice(&ZIP_CENTRAL_SIGNATURE);
+            header[20..24].copy_from_slice(&(data.len() as u32).to_le_bytes());
+            header[28..30].copy_from_slice(&(name.len() as u16).to_le_bytes());
+            header[30..32].copy_from_slice(&(CENTRAL_EXTRA as u16).to_le_bytes());
+            header[32..34].copy_from_slice(&(CENTRAL_COMMENT as u16).to_le_bytes());
+            header[42..46].copy_from_slice(&offset.to_le_bytes());
+            central.extend(header);
+            central.extend(name.bytes());
+            central.extend([7u8; CENTRAL_EXTRA + CENTRAL_COMMENT]);
+        }
+        let directory_offset = file.len() as u32;
+        file.extend(&central);
+        let mut end = vec![0u8; ZIP_EOCD_LEN];
+        end[..4].copy_from_slice(&ZIP_EOCD_SIGNATURE);
+        end[10..12].copy_from_slice(&(parts.len() as u16).to_le_bytes());
+        end[12..16].copy_from_slice(&(central.len() as u32).to_le_bytes());
+        end[16..20].copy_from_slice(&directory_offset.to_le_bytes());
+        end[20..22].copy_from_slice(&(comment.len() as u16).to_le_bytes());
+        file.extend(end);
+        file.extend(comment);
+        file
+    }
+
+    fn read_directory(bytes: &[u8]) -> Option<Vec<ZipEntry>> {
+        let len = bytes.len() as u64;
+        read_zip_directory(&mut Cursor::new(bytes), len).unwrap()
+    }
+
+    fn two_files() -> Vec<u8> {
+        zip_with(&[("a.txt", b"hello"), ("dir/b.bin", b"world!!")], b"hi")
+    }
+
+    #[test]
+    fn signatures_are_recognised_only_at_the_start() {
+        assert!(has_zip_local_signature(&ZIP_LOCAL_SIGNATURE));
+        assert!(!has_zip_local_signature(b"not a zip"));
+        assert!(has_ole2_signature(&OLE2_SIGNATURE));
+        assert!(!has_ole2_signature(b"not ole2 at all"));
+    }
+
+    #[test]
+    fn a_stored_zip_lists_names_sizes_and_offsets() {
+        let entries = read_directory(&two_files()).unwrap();
+        let names: Vec<&str> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(names, ["a.txt", "dir/b.bin"]);
+        assert_eq!(entries[0].compressed_size, 5);
+        assert_eq!(entries[1].compressed_size, 7);
+        assert_eq!(entries[0].local_offset, 0);
+        let second = ZIP_LOCAL_FIXED_LEN + 5 + LOCAL_EXTRA + 5;
+        assert_eq!(entries[1].local_offset as usize, second);
+    }
+
+    #[test]
+    fn a_zip_with_no_entries_is_only_its_end_record() {
+        let empty = zip_with(&[], b"");
+        assert_eq!(empty.len(), ZIP_EOCD_LEN);
+        assert_eq!(read_directory(&empty), Some(vec![]));
+    }
+
+    #[test]
+    fn the_end_record_whose_comment_fits_exactly_wins() {
+        let mut fake = ZIP_EOCD_SIGNATURE.to_vec();
+        fake.extend([0u8; 30]);
+        let bytes = zip_with(&[("a.txt", b"hello")], &fake);
+        assert_eq!(read_directory(&bytes).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn a_file_shorter_than_an_end_record_is_not_a_zip() {
+        assert_eq!(read_directory(&[0u8; ZIP_EOCD_LEN - 1]), None);
+    }
+
+    fn end_with(entries: u16, size: u32, offset: u32, position: u64) -> ZipEnd {
+        ZipEnd {
+            position,
+            entries,
+            directory_size: size,
+            directory_offset: offset,
+        }
+    }
+
+    #[test]
+    fn the_directory_must_end_before_the_end_record() {
+        assert_eq!(end_with(1, 46, 0, 46).directory_bytes(), Some(46));
+        assert_eq!(end_with(1, 46, 0, 45).directory_bytes(), None);
+    }
+
+    #[test]
+    fn the_directory_must_hold_a_header_for_every_entry() {
+        assert_eq!(end_with(2, 92, 0, 1000).directory_bytes(), Some(92));
+        assert_eq!(end_with(2, 91, 0, 1000).directory_bytes(), None);
+        assert_eq!(end_with(2, 60, 0, 1000).directory_bytes(), None);
+    }
+
+    #[test]
+    fn the_directory_size_is_capped_at_four_mebibytes() {
+        let cap = 4 * 1024 * 1024;
+        let huge = 1u64 << 40;
+        assert_eq!(
+            end_with(1, 2 * 1024 * 1024, 0, huge).directory_bytes(),
+            Some(2 * 1024 * 1024)
+        );
+        assert_eq!(
+            end_with(1, cap, 0, huge).directory_bytes(),
+            Some(cap as usize)
+        );
+        assert_eq!(end_with(1, cap + 1, 0, huge).directory_bytes(), None);
+    }
+
+    #[test]
+    fn a_zip_directory_cannot_declare_more_than_20000_entries() {
+        let huge = 1u64 << 40;
+        let size = |entries: u32| entries * ZIP_CENTRAL_FIXED_LEN as u32;
+        assert!(
+            end_with(20_000, size(20_000), 0, huge)
+                .directory_bytes()
+                .is_some()
+        );
+        assert_eq!(
+            end_with(20_001, size(20_001), 0, huge).directory_bytes(),
+            None
+        );
+    }
+
+    #[test]
+    fn zip64_markers_are_refused_each_on_its_own() {
+        let huge = 1u64 << 40;
+        assert_eq!(end_with(1, 46, ZIP64_FIELD, huge).directory_bytes(), None);
+        assert_eq!(end_with(1, ZIP64_FIELD, 0, huge).directory_bytes(), None);
+        assert_eq!(end_with(ZIP64_ENTRIES, 46, 0, huge).directory_bytes(), None);
+    }
+
+    #[test]
+    fn a_central_header_that_is_not_one_ends_the_listing() {
+        let mut bytes = two_files();
+        let directory = bytes.len()
+            - ZIP_EOCD_LEN
+            - 2
+            - (2 * (ZIP_CENTRAL_FIXED_LEN + CENTRAL_EXTRA + CENTRAL_COMMENT) + 5 + 9);
+        bytes[directory] = b'X';
+        assert_eq!(read_directory(&bytes), None);
+    }
+
+    fn entry_of(bytes: &[u8], index: usize) -> ZipEntry {
+        read_directory(bytes).unwrap().remove(index)
+    }
+
+    fn stored(bytes: &[u8], entry: &ZipEntry, max_len: usize) -> Option<Vec<u8>> {
+        read_stored_entry(&mut Cursor::new(bytes), entry, max_len).unwrap()
+    }
+
+    #[test]
+    fn a_stored_entry_is_read_past_its_name_and_extra_field() {
+        let bytes = two_files();
+        assert_eq!(
+            stored(&bytes, &entry_of(&bytes, 0), 100),
+            Some(b"hello".to_vec())
+        );
+        assert_eq!(
+            stored(&bytes, &entry_of(&bytes, 1), 100),
+            Some(b"world!!".to_vec())
+        );
+    }
+
+    #[test]
+    fn the_stored_entry_size_limit_is_inclusive() {
+        let bytes = two_files();
+        let entry = entry_of(&bytes, 0);
+        assert!(stored(&bytes, &entry, 5).is_some());
+        assert!(stored(&bytes, &entry, 4).is_none());
+    }
+
+    #[test]
+    fn a_compressed_entry_is_not_read() {
+        let bytes = two_files();
+        let mut entry = entry_of(&bytes, 0);
+        entry.method = 8;
+        assert!(stored(&bytes, &entry, 100).is_none());
+    }
+
+    #[test]
+    fn an_offset_that_is_not_a_local_header_is_refused() {
+        let bytes = two_files();
+        let mut entry = entry_of(&bytes, 0);
+        entry.local_offset = 1;
+        assert!(stored(&bytes, &entry, 100).is_none());
+    }
+
+    #[test]
+    fn a_local_header_with_a_damaged_signature_is_refused() {
+        let mut bytes = two_files();
+        let entry = entry_of(&bytes, 0);
+        bytes[0] = b'X';
+        assert!(stored(&bytes, &entry, 100).is_none());
+    }
+
+    #[test]
+    fn a_truncated_entry_is_refused_without_an_error() {
+        let bytes = two_files();
+        let entry = entry_of(&bytes, 0);
+        let cut = ZIP_LOCAL_FIXED_LEN + 5 + LOCAL_EXTRA + 2;
+        assert!(stored(&bytes[..cut], &entry, 100).is_none());
+    }
+
+    struct Broken;
+
+    impl Read for Broken {
+        fn read(&mut self, _: &mut [u8]) -> io::Result<usize> {
+            Err(io::Error::other("disco roto"))
+        }
+    }
+
+    #[test]
+    fn only_a_short_read_is_swallowed_and_other_errors_propagate() {
+        let mut buffer = [0u8; 4];
+        assert!(read_or_none(&mut Broken, &mut buffer).is_err());
+        assert!(!read_or_none(&mut &[1u8, 2][..], &mut buffer).unwrap());
+        assert!(read_or_none(&mut &[1u8, 2, 3, 4][..], &mut buffer).unwrap());
+    }
+
+    fn ole2_header(first_directory: u32, fat: &[u32], difat: (u32, u32)) -> [u8; OLE2_HEADER_LEN] {
+        let mut header = [0u8; OLE2_HEADER_LEN];
+        header[..8].copy_from_slice(&OLE2_SIGNATURE);
+        header[0x1A..0x1C].copy_from_slice(&3u16.to_le_bytes());
+        header[0x1C..0x1E].copy_from_slice(&OLE2_BYTE_ORDER);
+        header[0x1E..0x20].copy_from_slice(&9u16.to_le_bytes());
+        header[0x30..0x34].copy_from_slice(&first_directory.to_le_bytes());
+        header[0x44..0x48].copy_from_slice(&difat.0.to_le_bytes());
+        header[0x48..0x4C].copy_from_slice(&difat.1.to_le_bytes());
+        for slot in 0..OLE2_HEADER_FAT_SLOTS {
+            let value = fat.get(slot).copied().unwrap_or(FREE);
+            let at = 0x4C + slot * U32_BYTES;
+            header[at..at + U32_BYTES].copy_from_slice(&value.to_le_bytes());
+        }
+        header
+    }
+
+    fn sector_of(ids: &[u32], next: u32) -> Vec<u8> {
+        let slots = SECTOR / U32_BYTES - 1;
+        let mut sector = Vec::new();
+        for slot in 0..slots {
+            sector.extend(ids.get(slot).copied().unwrap_or(FREE).to_le_bytes());
+        }
+        sector.extend(next.to_le_bytes());
+        sector
+    }
+
+    fn ole2() -> Ole2 {
+        Ole2 {
+            sector_len: SECTOR as u64,
+            first_directory: 0,
+            fat_sectors: vec![],
+        }
+    }
+
+    #[test]
+    fn the_header_lists_its_fat_sectors_in_order() {
+        let parsed = parse_ole2_header(&ole2_header(7, &[5, 6], (END, 0))).unwrap();
+        assert_eq!(parsed.fat_sectors, [5, 6]);
+        assert_eq!(parsed.first_directory, 7);
+        assert_eq!(parsed.sector_len, SECTOR as u64);
+    }
+
+    #[test]
+    fn extra_fat_sectors_are_followed_through_the_difat_chain() {
+        let full: Vec<u32> = (100..100 + 127).collect();
+        let mut file = ole2_header(0, &[], (0, 2)).to_vec();
+        file.extend(sector_of(&full, 1));
+        file.extend(sector_of(&[300], END));
+        let mut parsed = ole2();
+        let header = ole2_header(0, &[], (0, 2));
+        let len = file.len() as u64;
+        assert!(
+            collect_extra_fat_sectors(&mut Cursor::new(&file), &header, &mut parsed, len).unwrap()
+        );
+        let mut expected = full.clone();
+        expected.push(300);
+        assert_eq!(parsed.fat_sectors, expected);
+    }
+
+    fn difat_chain(sectors: usize) -> Vec<u8> {
+        let mut file = vec![0u8; SECTOR];
+        for index in 0..sectors {
+            file.extend(sector_of(&[], index as u32 + 1));
+        }
+        file
+    }
+
+    fn follows_difat(declared: u32, sectors: usize) -> bool {
+        let file = difat_chain(sectors);
+        let header = ole2_header(0, &[], (0, declared));
+        let mut parsed = ole2();
+        let len = file.len() as u64;
+        collect_extra_fat_sectors(&mut Cursor::new(&file), &header, &mut parsed, len).unwrap()
+    }
+
+    #[test]
+    fn the_difat_chain_is_capped_at_1024_sectors() {
+        assert!(follows_difat(1024, 1025));
+        assert!(!follows_difat(1025, 1025));
+    }
+
+    #[test]
+    fn a_sector_must_end_inside_the_file() {
+        let mut file = vec![0u8; SECTOR];
+        file.extend(sector_of(&[], END));
+        let parsed = ole2();
+        let sector = |len: u64| read_sector(&mut Cursor::new(&file), &parsed, 0, len).unwrap();
+        assert!(sector(file.len() as u64).is_some());
+        assert!(sector(file.len() as u64 - 1).is_none());
+    }
+
+    #[test]
+    fn the_next_sector_is_found_in_the_right_fat_sector() {
+        let mut file = vec![0u8; SECTOR];
+        file.extend(sector_of(&[], END));
+        let mut second = vec![FREE; SECTOR / U32_BYTES];
+        second[2] = 77;
+        file.extend(second.iter().flat_map(|id| id.to_le_bytes()));
+        let parsed = Ole2 {
+            fat_sectors: vec![0, 1],
+            ..ole2()
+        };
+        let len = file.len() as u64;
+        let next = next_sector(&mut Cursor::new(&file), &parsed, 130, len).unwrap();
+        assert_eq!(next, Some(77));
+    }
+
+    fn named_entry(name: &str, kind: u8, name_len: Option<u16>) -> Vec<u8> {
+        let mut entry = vec![0u8; OLE2_ENTRY_LEN];
+        let units: Vec<u8> = name
+            .encode_utf16()
+            .chain([0])
+            .flat_map(u16::to_le_bytes)
+            .collect();
+        entry[..units.len()].copy_from_slice(&units);
+        let declared = name_len.unwrap_or(units.len() as u16);
+        entry[OLE2_NAME_FIELD_LEN..OLE2_NAME_FIELD_LEN + 2]
+            .copy_from_slice(&declared.to_le_bytes());
+        entry[OLE2_NAME_FIELD_LEN + 2] = kind;
+        entry
+    }
+
+    #[test]
+    fn a_directory_entry_needs_a_known_type_and_a_sane_name_length() {
+        assert_eq!(
+            ole2_entry_name(&named_entry("WordDocument", 2, None)).as_deref(),
+            Some("WordDocument")
+        );
+        assert_eq!(
+            ole2_entry_name(&named_entry("Root Entry", 5, None)).as_deref(),
+            Some("Root Entry")
+        );
+        assert_eq!(ole2_entry_name(&named_entry("Libre", 0, None)), None);
+        assert_eq!(ole2_entry_name(&named_entry("Impar", 2, Some(11))), None);
+        assert_eq!(ole2_entry_name(&named_entry("Corto", 2, Some(0))), None);
+        assert_eq!(ole2_entry_name(&named_entry("Largo", 2, Some(66))), None);
+    }
+}

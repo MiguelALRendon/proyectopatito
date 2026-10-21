@@ -166,6 +166,11 @@ impl From<io::Error> for ArchiveError {
         if let Some(kind) = interrupt_of(&error) {
             return kind.into();
         }
+        if is_xz_memory_limit(&error) {
+            return Self::Limit(
+                "el archivo exige más memoria de la permitida para descomprimirlo".to_owned(),
+            );
+        }
         if error.raw_os_error() == Some(ERROR_DISK_FULL) {
             return Self::Limit("no hay espacio libre en el disco".to_owned());
         }
@@ -176,6 +181,13 @@ impl From<io::Error> for ArchiveError {
             _ => Self::Io(error),
         }
     }
+}
+
+fn is_xz_memory_limit(error: &io::Error) -> bool {
+    let inner = error
+        .get_ref()
+        .and_then(|inner| inner.downcast_ref::<liblzma::stream::Error>());
+    matches!(inner, Some(liblzma::stream::Error::MemLimit))
 }
 
 pub(crate) fn ensure_running(cancel: &Cancel) -> Result<(), ArchiveError> {

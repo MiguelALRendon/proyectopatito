@@ -464,4 +464,85 @@ mod tests {
             io::ErrorKind::PermissionDenied
         ))));
     }
+
+    #[test]
+    fn a_pulse_reports_exactly_at_its_interval() {
+        let seen = Arc::default();
+        let interval = Duration::from_millis(PROGRESS_INTERVAL_MS as u64);
+        let mut pulse = pulse_into(&seen, interval);
+        pulse.beat(1);
+        assert_eq!(seen.lock().unwrap().len(), 1);
+    }
+
+    fn extractor_in(root: &Path) -> Extractor {
+        Extractor {
+            workspace: Workspace::new(root).unwrap(),
+            destination: root.to_path_buf(),
+            cancel: Arc::default(),
+            limits: Limits::default(),
+            total: Arc::default(),
+            total_bytes: 0,
+            report: ExtractReport::default(),
+            is_writing: false,
+            last_emit: Instant::now(),
+            on_progress: Arc::new(|_| {}),
+        }
+    }
+
+    fn entry_named(name: &str, kind: EntryKind) -> Entry {
+        Entry {
+            name: name.to_owned(),
+            kind,
+            size: 0,
+            packed: None,
+            is_encrypted: false,
+        }
+    }
+
+    #[test]
+    fn a_workspace_refusal_is_an_error_and_not_an_occupied_name() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut extractor = extractor_in(dir.path());
+        let escape = vec!["..".to_owned(), "x".to_owned()];
+        let folder = entry_named("x", EntryKind::Directory);
+        assert!(extractor.make_directory(&folder, &escape).is_err());
+        let file = entry_named("x", EntryKind::File);
+        assert!(extractor.open_file(&file, &escape).is_err());
+        assert!(extractor.report.skipped.is_empty());
+    }
+
+    #[test]
+    fn a_folder_that_cannot_be_created_for_another_reason_is_an_error() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut extractor = extractor_in(dir.path());
+        let invalid = vec!["bad?name".to_owned()];
+        let folder = entry_named("d", EntryKind::Directory);
+        assert!(extractor.make_directory(&folder, &invalid).is_err());
+        assert!(extractor.report.skipped.is_empty());
+    }
+
+    #[test]
+    fn a_file_name_taken_999_times_ends_in_a_limit_error() {
+        let dir = tempfile::tempdir().unwrap();
+        let extractor = extractor_in(dir.path());
+        let parts = vec!["f.txt".to_owned()];
+        for attempt in 1..=MAX_SUFFIX_ATTEMPTS {
+            fs::write(dir.path().join(&suffixed(&parts, attempt)[0]), b"x").unwrap();
+        }
+        assert!(matches!(
+            extractor.unique_file(&parts),
+            Err(ArchiveError::Limit(_))
+        ));
+    }
+
+    #[test]
+    fn a_file_in_the_way_of_a_folder_is_skipped_with_a_reason() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join("taken"), b"x").unwrap();
+        let mut extractor = extractor_in(dir.path());
+        let folder = entry_named("taken", EntryKind::Directory);
+        let decision = extractor.make_directory(&folder, &["taken".to_owned()]);
+        assert!(matches!(decision, Ok(Decision::Skip)));
+        assert_eq!(extractor.report.skipped.len(), 1);
+    }
 }

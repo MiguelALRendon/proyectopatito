@@ -165,3 +165,55 @@ pub(super) fn visit(
     }
     outcome.map_err(map_error)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn archive_declaring(
+        next_offset: u64,
+        next_size: u64,
+        length: u64,
+    ) -> (tempfile::TempDir, std::path::PathBuf) {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("a.7z");
+        let mut header = [0u8; SIGNATURE_HEADER_BYTES as usize];
+        let offset_at = NEXT_HEADER_OFFSET_AT..NEXT_HEADER_OFFSET_AT + U64_BYTES;
+        header[offset_at].copy_from_slice(&next_offset.to_le_bytes());
+        let size_at = NEXT_HEADER_SIZE_AT..NEXT_HEADER_SIZE_AT + U64_BYTES;
+        header[size_at].copy_from_slice(&next_size.to_le_bytes());
+        let mut file = File::create(&path).unwrap();
+        file.write_all(&header).unwrap();
+        file.set_len(length).unwrap();
+        (dir, path)
+    }
+
+    fn start_header_is_valid(next_offset: u64, next_size: u64, length: u64) -> bool {
+        let (_dir, path) = archive_declaring(next_offset, next_size, length);
+        check_start_header(&path).is_ok()
+    }
+
+    #[test]
+    fn the_next_header_must_end_inside_the_file() {
+        assert!(start_header_is_valid(4, 10, 46));
+        assert!(start_header_is_valid(4, 10, 47));
+        assert!(!start_header_is_valid(4, 10, 45));
+    }
+
+    #[test]
+    fn a_small_next_header_beyond_the_file_is_refused() {
+        assert!(!start_header_is_valid(1000, 1, 64));
+    }
+
+    #[test]
+    fn the_next_header_size_is_capped_even_when_it_fits_the_file() {
+        let fits = |size| start_header_is_valid(0, size, SIGNATURE_HEADER_BYTES + size);
+        assert!(fits(MAX_7Z_HEADER_BYTES));
+        assert!(!fits(MAX_7Z_HEADER_BYTES + 1));
+    }
+
+    #[test]
+    fn an_overflowing_next_header_position_is_refused() {
+        assert!(!start_header_is_valid(u64::MAX, 1, 64));
+    }
+}

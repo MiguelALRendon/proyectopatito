@@ -1,143 +1,79 @@
 {
-  "ejecutado_en": "2026-10-16/2026-10-17",
-  "test_pipeline_result": {
-    "archivo": ".bossdream-project/test-checks-2a-b.json",
-    "code_correctness": "passed",
-    "contract_correctness": "passed",
-    "flow_correctness": "passed",
-    "regression_safety": "skipped (sin herramienta integrada para Rust)",
-    "quality_approval": "requires-agent"
+ "ejecutado_en": "2026-10-20T13:02:21-06:00",
+ "fase": "2B",
+ "test_pipeline_result": {
+  "code_correctness": {
+   "status": "passed"
   },
-  "qa_manager_veredicto": {
-    "status": "ACCEPTED",
-    "razones": [],
-    "nota": "tercera pasada; el informe esta archivado en evidence-2a/informes-de-agentes.md. El script test-checks.ps1 dejo quality_approval en 'requires-agent' por diseno: el juicio semantico lo emite ese agente"
+  "contract_correctness": {
+   "status": "passed"
   },
-  "remediacion_aplicada": true,
-  "bloqueado": false,
-  "motivo_bloqueo": null,
-  "evidencia_posterior_al_veredicto": {
-    "vitest": "88 archivos, 1637 pruebas (.bossdream-project/evidence-2a/vitest.log)",
-    "e2e_ventana_real": "Final: 142/142 sin errores, 11 archivos (evidence-2a/e2e-final.log), cuyo log es posterior a la edicion de scripts/e2e/start-app.ps1 segun las fechas de modificacion de evidence-2a/orden-temporal.txt (scripts/e2e/start-app.ps1 linea 86 trae los flags: --disable-features=CalculateNativeWinOcclusion --disable-backgrounding-occluded-windows --disable-renderer-backgrounding). Tres corridas previas de la suite completa con logs anteriores a la edicion de scripts/e2e/start-app.ps1 (orden-temporal.txt) fallaron solo en pruebas del visor PDF (distintas en cada corrida): e2e-final-1-tras-compilar-4-fallos-pdf.log (138/142), e2e-final-2-4-fallos-pdf.log (138/142), e2e-final-3-2-fallos-pdf.log (140/142); viewers.e2e.ts aislado 29/29 (e2e-viewers-rerun.log). Otras corridas conservadas: e2e.log (142 pasan y un error de worker de vitest 'Timeout calling onTaskUpdate') y e2e-rerun.log (141/142, fallo en tabs.e2e.ts 'reordena con Ctrl+Mayus+flechas', corregido esperando el foco en esa prueba). Causa de los fallos PDF: HIPOTESIS no verificada (ventana ocluida o pantalla apagada frena el pintado de WebView2); hay un solo log de exito posterior a la edicion del script, que no es prueba concluyente. Deuda T-26 en docs/TECH_DEBT.md.",
-    "stryker": "90,74 % (umbral 85) .bossdream-project/stryker-summary.json",
-    "mutantes_vivos_rust": [
-      "files/mod.rs:38:60 | -> ^ (equivalente: bits disjuntos, mod.rs:33-38)",
-      "sniff.rs:202:17 (equivalente solo por razonamiento; la prueba exhaustiva temporal no tiene archivo)",
-      "commands/protocol.rs:48:5 on_request -> () (no construible fuera de Tauri; cubierto por protocol.e2e.ts)"
-    ],
-    "flow_breaker": "Informe archivado en evidence-2a/informes-de-agentes.md (seccion Flow-breaker) con las pruebas y el cambio que lo tratan",
-    "qa_auditor": "17 hallazgos archivados y mapeados a la prueba que los trata en evidence-2a/informes-de-agentes.md",
-    "mutacion_rust": {
-      "files_range_closing_ui_state_wc_status": "378 mutantes encontrados en la corrida 1; los vivos de cada corrida se repitieron tras pruebas nuevas; ultima repeticion: los 17 nombrados en .bossdream-project/mutants-rust-2a/mutants.out/caught.txt; salvo files/mod.rs:38:60 (equivalente, excluido)",
-      "sniff_y_protocol": "205 mutantes en la corrida completa (mutants-rust-2a-sniff-protocol-2.log: 131 atrapados, 67 inviables, 3 timeouts, 4 vivos); la primera corrida encontro 229 y se interrumpio sin resumen"
-    },
-    "symlink_8dot3": ".bossdream-project/evidence-2a/files-symlink-8dot3-nocapture.log: ambas ejecutan su rama real (sin aviso de omision)",
-    "build": "npm run build, registro con comando y exit en evidence-2a/build.log",
-    "cargo_test": "528 pasan, 0 fallan (evidence-2a/cargo-test.log)",
-    "justificaciones_mutantes": ".bossdream-project/evidence-2a/mutantes-justificados.md",
-    "clippy_fmt": "evidence-2a/clippy.log y evidence-2a/fmt.log (comando y exit=0 incluidos)",
-    "corridas_interrumpidas": "Las corridas mutants-rust-2a.log, mutants-rust-2a-parte2.log y mutants-rust-2a-sniff-protocol.log estan interrumpidas (sin linea de resumen): sus cifras de vivos son parciales (solo los observados antes del corte). La corrida 3 uso --iterate: su log dice 'Iteration excludes 312 previously caught or unviable mutants' y 'Found 189 mutants to test'. Esa aritmetica no cuadra con los 378 porque las listas de atrapados parecen fusionadas a mano (traen duplicados); por eso no se afirma que la cobertura del universo completo este demostrada por un archivo, solo que no quedaron vivos nombrados tras las repeticiones."
+  "flow_correctness": {
+   "status": "failed",
+   "severidad": "hard",
+   "condicion_de_bloqueo": "Missing validation coverage: La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria; Missing validation coverage: write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado; Missing validation coverage: El temporal se sincroniza a disco (sync_all) antes del renombrado; Missing flow transition: instalado->maquina-limpia-verificada",
+   "escape_hatch": null,
+   "transiciones_no_cubiertas": [
+    "instalado->maquina-limpia-verificada"
+   ],
+   "metodos_incompletos": []
   },
-  "afirmaciones": [
-    {
-      "texto": "cargo test 528 pasan, 0 fallan",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/cargo-test.log"
-    },
-    {
-      "texto": "vitest 88 archivos, 1637 pruebas pasan",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/vitest.log"
-    },
-    {
-      "texto": "E2E sobre ventana real 142/142 en la corrida final",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/e2e-final.log"
-    },
-    {
-      "texto": "Stryker 90,74 % con umbral 85",
-      "evidencia_adjunta": ".bossdream-project/stryker-summary.json"
-    },
-    {
-      "texto": "symlink y 8.3 ejecutaron su rama real en esta maquina",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/files-symlink-8dot3-nocapture.log"
-    },
-    {
-      "texto": "Corrida E2E fallida 1: 138/142, 4 fallos en pruebas del visor PDF, causa no verificada",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/e2e-final-1-tras-compilar-4-fallos-pdf.log"
-    },
-    {
-      "texto": "Corrida E2E fallida 2: 138/142, 4 fallos en pruebas del visor PDF, causa no verificada",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/e2e-final-2-4-fallos-pdf.log"
-    },
-    {
-      "texto": "Corrida E2E fallida 3: 140/142, 2 fallos en pruebas del visor PDF, causa no verificada",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/e2e-final-3-2-fallos-pdf.log"
-    },
-    {
-      "texto": "viewers.e2e.ts aislado: 29/29",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/e2e-viewers-rerun.log"
-    },
-    {
-      "texto": "Mutacion, corrida 1 (interrumpida, sin resumen): 378 mutantes encontrados y 4 vivos observados antes del corte (files/mod.rs:38:60, files/mod.rs:268:25, range.rs:3:33, range.rs:4:40); el total real de vivos de esa corrida no se conoce",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a.log"
-    },
-    {
-      "texto": "Mutacion, corrida 2 (interrumpida, sin resumen): 253 mutantes encontrados y 5 vivos observados antes del corte (range.rs:117:64, ui_state.rs:147:52, :152:9, :173:47 dos veces); el total real de vivos no se conoce",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-parte2.log"
-    },
-    {
-      "texto": "Mutacion, corrida 3: 189 mutantes probados, 153 atrapados, 19 inviables, 17 vivos (wc_status, edit, external, text, version)",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-parte3.log"
-    },
-    {
-      "texto": "Mutacion, corrida 4: 17 mutantes probados, 17 atrapados",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-parte4.log"
-    },
-    {
-      "texto": "Mutacion de sniff.rs y protocol.rs: 205 mutantes, 131 atrapados, 67 inviables, 3 timeouts y 4 vivos (sniff.rs:4:34, :202:17, :346:55, protocol.rs:48:5)",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-sniff-protocol-2.log"
-    },
-    {
-      "texto": "Mutacion de repeticion: 6 mutantes, 2 atrapados, 3 timeouts (skip_prolog_item) y 1 vivo (sniff.rs:202:17)",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-sniff-protocol-3.log"
-    },
-    {
-      "texto": "Atrapados nominalmente tras las pruebas nuevas: files/mod.rs:268:25, range.rs:3:33 y range.rs:4:40 figuran como previamente atrapados",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-parte3/previously_caught.txt"
-    },
-    {
-      "texto": "Atrapados nominalmente en la corrida 3: range.rs:117:64, ui_state.rs:147:52, ui_state.rs:152:9 y ui_state.rs:173:47 (x2)",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-parte3/caught.txt"
-    },
-    {
-      "texto": "El directorio de resultados de la repeticion de sniff/protocol tiene outcomes.json con total_mutants 6, caught 2, missed 1, timeout 3 (igual que sniff-protocol-3.log) y su caught.txt nombra sniff.rs:4:34 y sniff.rs:346:55",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a-sniff-protocol/mutants.out/outcomes.json"
-    },
-    {
-      "texto": "files/mod.rs:38:60 es equivalente (bits disjuntos): constantes 0x1000, 0x4_0000 y 0x40_0000 en mod.rs:33-38",
-      "evidencia_adjunta": "src-tauri/src/app/files/mod.rs"
-    },
-    {
-      "texto": "protocol.rs:48:5 on_request es un envoltorio sobre handle() registrado en lib.rs:19 y no construible fuera de Tauri (UriSchemeContext/UriSchemeResponder con campos pub(crate)); el documento marca como razonamiento sin archivo la equivalencia de sniff.rs:202:17 y los 3 timeouts de skip_prolog_item",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/mutantes-justificados.md"
-    },
-    {
-      "texto": "cargo clippy --all-targets sin avisos ni errores",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/clippy.log"
-    },
-    {
-      "texto": "cargo fmt --check sin diferencias",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/fmt.log"
-    },
-    {
-      "texto": "Los 17 mutantes de wc_status, edit, external, text y version vivos en la corrida 3 figuran nominalmente como atrapados en la ultima repeticion",
-      "evidencia_adjunta": ".bossdream-project/mutants-rust-2a/mutants.out/caught.txt"
-    },
-    {
-      "texto": "Veredicto ACCEPTED del QA Manager (tercera pasada), veredictos previos REJECTED, informe del flow-breaker y los 17 hallazgos del auditor de pruebas con la prueba que trata cada uno",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/informes-de-agentes.md"
-    },
-    {
-      "texto": "Orden temporal: los 3 logs E2E fallidos son anteriores a la ultima edicion de scripts/e2e/start-app.ps1 y e2e-final.log (142/142) es posterior",
-      "evidencia_adjunta": ".bossdream-project/evidence-2a/orden-temporal.txt"
-    }
-  ]
+  "regression_safety": {
+   "status": "skipped",
+   "nota": "no se encontro herramienta de mutation testing para el stack de 'src-tauri/tests' (ver src-tauri/tests/README.md)",
+   "consumidores_externos_detectados": []
+  },
+  "quality_approval": {
+   "status": "failed",
+   "severidad": "hard",
+   "condicion_de_bloqueo": "una o mas etapas previas fallaron",
+   "escape_hatch": null
+  }
+ },
+ "qa_manager_veredicto": null,
+ "remediacion_aplicada": true,
+ "bloqueado": true,
+ "motivo_bloqueo": "PIPELINE FAIL en etapa flow_correctness tras qa-run: Missing validation coverage: La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria; Missing validation coverage: write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado; Missing validation coverage: El temporal se sincroniza a disco (sync_all) antes del renombrado; Missing flow transition: instalado->maquina-limpia-verificada",
+ "inventario": {
+  "reglas": 616,
+  "flujos": 22,
+  "casos_obligatorios_iniciales": 103,
+  "casos_cerrados_con_prueba": 99,
+  "casos_abiertos": 4
+ },
+ "pruebas_nuevas": {
+  "rust": 52,
+  "vitest": 75,
+  "pester": 12
+ },
+ "puertas": {
+  "cargo_test": 823,
+  "vitest": 2115,
+  "pester": 12,
+  "stryker_frontend": "90,60 % (umbral 85)",
+  "cargo_mutants": "ver docs/testing.md"
+ },
+ "afirmaciones": [
+  {
+   "texto": "Missing validation coverage: La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria",
+   "evidencia_adjunta": ".bossdream-project/qa-costly-findings.md"
+  },
+  {
+   "texto": "Missing validation coverage: write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado",
+   "evidencia_adjunta": ".bossdream-project/qa-costly-findings.md"
+  },
+  {
+   "texto": "Missing validation coverage: El temporal se sincroniza a disco (sync_all) antes del renombrado",
+   "evidencia_adjunta": ".bossdream-project/qa-costly-findings.md"
+  },
+  {
+   "texto": "Missing flow transition: instalado->maquina-limpia-verificada",
+   "evidencia_adjunta": "scripts/e2e/clean-machine-checklist.md"
+  }
+ ],
+ "auditoria_de_evidencia": {
+  "agente": "bossdream-evidence-auditor",
+  "veredicto": "pass",
+  "nota": "Las 4 afirmaciones tienen evidencia real; la evidencia no desbloquea el gate flow_correctness."
+ }
 }

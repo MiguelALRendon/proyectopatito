@@ -88,6 +88,25 @@ describe('OnboardingView with the bundled svn', () => {
   });
 });
 
+describe('OnboardingView with a svn that is not the bundled one', () => {
+  it.each(['system', 'configured'] as const)(
+    'con un svn %s el campo de la ruta está siempre visible, sin plegar',
+    async (origin) => {
+      vi.mocked(service.svnDetect).mockResolvedValue({
+        binary: { path: 'C:/x/svn.exe', version: '1.14.2', origin },
+        error: null,
+        warning: null,
+      });
+      await button('Detectar de nuevo')?.trigger('click');
+      await flushPromises();
+      expect(wrapper.find('details').exists()).toBe(false);
+      expect(wrapper.find('div.onboarding__path #svn-path').exists()).toBe(
+        true,
+      );
+    },
+  );
+});
+
 describe('OnboardingView manual svn path', () => {
   it('ignores an empty path and saves the typed one trimmed', async () => {
     vi.mocked(service.svnSetPath).mockResolvedValue({

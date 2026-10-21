@@ -53,3 +53,20 @@ Resumen del orquestador. Las salidas crudas de las rondas finales (QA Manager y 
 - Mutacion Rust: sin vivos nombrados salvo `files/mod.rs:38:60` y `sniff.rs:202:17` (equivalentes) y `protocol.rs:48:5` (solo E2E). Stryker 90,74 %.
 - Cifras: cargo 528, vitest 1637, E2E 142/142 en la corrida final (3 corridas previas con fallos PDF de causa no verificada, T-26).
 - Auditor de evidencia: 9 pasadas; las 9 bloquearon por afirmaciones sin respaldo en archivo que se fueron corrigiendo; la ultima pidio solo cambios de redaccion, aplicados sin una decima auditoria.
+
+# Veredictos del QA Increment/Testing (Fase 2B)
+
+## Estado: BLOQUEADO (2026-10-20)
+
+El Test Checks determinista (`scripts/test-checks.ps1`) no deja pasar `flow_correctness` y por eso no se invocó al QA Manager (`bossdream-qa-planner`), como indica el skill. `code_correctness` y `contract_correctness` pasan; `regression_safety` queda `skipped` porque el script solo detecta Stryker (frontend) y la mutación de Rust se corrió aparte (ver `docs/testing.md`).
+
+| Caso abierto | Por qué sigue sin prueba | Qué lo cierra |
+|---|---|---|
+| La lectura de un tarball se limita a 4 MiB de entrada y el decodificador xz a 64 MiB | No es observable: una entrada de tar se reconoce con sus primeros 512 bytes | Decisión del usuario: tratarla como regla exenta |
+| `write_bytes` vuelve a comprobar que el destino es escribible tras tomar el candado | Haría falta intercalar otro proceso entre las dos comprobaciones | Decisión del usuario: regla exenta |
+| El temporal se sincroniza a disco (`sync_all`) antes del renombrado | Solo cambia la durabilidad ante un corte de energía | Decisión del usuario: regla exenta |
+| Transición `instalado->maquina-limpia-verificada` | Requiere la máquina o VM limpia con Windows 11 (CA-14) | Evidencia real del usuario según `scripts/e2e/clean-machine-checklist.md` |
+
+Detalle de lo que sí se cerró (99 de 103 casos, 139 pruebas nuevas y tres defectos corregidos) en `.bossdream-project/qa-costly-findings.md`.
+
+**Auditoría de la evidencia (`bossdream-evidence-auditor`):** `VERDICT: pass`. Las cuatro razones citan archivos reales que las respaldan; la auditoría no desbloquea el gate.

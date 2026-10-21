@@ -382,3 +382,20 @@ fn text_that_merely_starts_like_a_signature_stays_text() {
         );
     }
 }
+
+fn ebml_with_doc_type_ending_at(end: usize) -> Vec<u8> {
+    let mut bytes = vec![0x1A, 0x45, 0xDF, 0xA3, 0x9F];
+    let needle = [0x42, 0x82, 0x84, b'w', b'e', b'b', b'm'];
+    bytes.resize(end - needle.len(), 0);
+    bytes.extend(needle);
+    padded(bytes)
+}
+
+#[test]
+fn the_ebml_doc_type_must_end_inside_the_first_64_bytes() {
+    assert_eq!(
+        kind_of(&ebml_with_doc_type_ending_at(64), Some("webm")),
+        ProbeKind::Video
+    );
+    assert!(rejected(&ebml_with_doc_type_ending_at(65), Some("webm")));
+}

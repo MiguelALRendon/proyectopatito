@@ -7,6 +7,7 @@ describe('failureOf', () => {
     ['timeout', 'timeout'],
     ['boot-failed', 'boot'],
     ['open-failed', 'damaged'],
+    ['save-failed', 'damaged'],
     ['invalid-message', 'damaged'],
     ['busy', 'damaged'],
     ['destroyed', 'boot'],

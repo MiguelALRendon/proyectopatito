@@ -12,6 +12,7 @@ import { appAbout } from '../services/tauri';
 import { useWorkspaceStore } from '../stores/workspace';
 import AboutDialog from './AboutDialog.vue';
 import SvnVersionNotice from './SvnVersionNotice.vue';
+import SvnWarning from './SvnWarning.vue';
 
 const LICENSES = '# Licencias de terceros\nSlikSVN 1.14.5';
 
@@ -98,6 +99,21 @@ describe('AboutDialog', () => {
     expect(document.body.querySelector('pre')?.textContent).toContain('<img');
   });
 
+  it('mientras app_about no responde, la versión de la aplicación es «…»', async () => {
+    vi.mocked(appAbout).mockReturnValue(new Promise(() => undefined));
+    await mountDialog(detection());
+    expect(dialogText()).toContain('Versión de la aplicación…');
+  });
+
+  it('el texto de licencias se alcanza con el teclado y tiene etiqueta accesible', async () => {
+    await mountDialog(detection());
+    const licenses = document.body.querySelector('.about__licenses');
+    expect(licenses?.getAttribute('tabindex')).toBe('0');
+    expect(licenses?.getAttribute('aria-label')).toBe(
+      'Texto de las licencias de terceros',
+    );
+  });
+
   it('Cerrar emite close', async () => {
     await mountDialog(detection());
     const button = [...document.body.querySelectorAll('button')].find((item) =>
@@ -131,6 +147,20 @@ describe('SvnVersionNotice', () => {
   it('muestra el aviso persistente de la versión junto al estado', () => {
     mountNotice(detection({ warning: 'svn 1.14.2 es anterior (CVE)' }));
     expect(wrapper.text()).toContain('CVE');
+  });
+
+  it('sin svn y sin error pide indicar la ruta de svn.exe', () => {
+    mountNotice({ binary: null, error: null, warning: null });
+    expect(wrapper.text()).toContain(
+      'Indica la ruta de svn.exe para continuar.',
+    );
+  });
+
+  it('SvnWarning no pinta nada cuando no hay aviso', () => {
+    useWorkspaceStore().svn = detection({ warning: null });
+    wrapper = mount(SvnWarning);
+    expect(wrapper.find('.banner').exists()).toBe(false);
+    expect(wrapper.text()).toBe('');
   });
 
   it('sin svn muestra el error y no el aviso', () => {

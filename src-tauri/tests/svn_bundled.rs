@@ -1,10 +1,14 @@
 #![cfg(windows)]
 
+mod common;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use dakedaduck_svn_lib::app::state::SvnDetection;
-use dakedaduck_svn_lib::svn::bundled::{BundleProblem, verify};
+use common::FakeSvn;
+use dakedaduck_svn_lib::app::state::{AppState, SvnDetection};
+use dakedaduck_svn_lib::config::{CONFIG_FILE_NAME, ConfigStore};
+use dakedaduck_svn_lib::svn::bundled::{BundleProblem, MANIFEST_JSON, verify};
 use dakedaduck_svn_lib::svn::locator::{
     Bundle, Located, LocatorError, SvnBinary, SvnOrigin, SvnVersion, locate, locate_full,
 };
@@ -305,4 +309,119 @@ fn the_embedded_manifest_lists_svn_exe_the_runtime_and_well_formed_hashes() {
         assert!(file["bytes"].as_u64().unwrap() > 0);
     }
     assert_eq!(manifest["version"], "1.14.5");
+}
+
+fn fake_svn_bytes(version: &'static str) -> Vec<u8> {
+    let scratch = TempDir::new().unwrap();
+    let exe = FakeSvn::with_version(version).build(scratch.path());
+    fs::read(exe).unwrap()
+}
+
+fn locate_bundle_only(files: &[(&str, &[u8])]) -> Result<Located, LocatorError> {
+    let dir = write_bundle(files);
+    let manifest = manifest_of(files);
+    let bundle = Bundle {
+        dir: dir.path(),
+        manifest: &manifest,
+    };
+    locate_full(None, Some(bundle), &[])
+}
+
+#[test]
+fn an_intact_bundle_whose_svn_does_not_start_is_unusable() {
+    let unusable = || LocatorError::BundleDamaged(BundleProblem::Unusable);
+    assert_eq!(
+        locate_bundle_only(&[("svn.exe", b"no es un ejecutable")]),
+        Err(unusable())
+    );
+    let silent = fake_svn_bytes("sin version");
+    assert_eq!(locate_bundle_only(&[("svn.exe", &silent)]), Err(unusable()));
+}
+
+#[test]
+fn an_intact_bundle_with_a_svn_older_than_the_minimum_is_unusable() {
+    let old = fake_svn_bytes("1.9.9");
+    assert_eq!(
+        locate_bundle_only(&[("svn.exe", &old)]),
+        Err(LocatorError::BundleDamaged(BundleProblem::Unusable))
+    );
+}
+
+#[test]
+fn a_damaged_bundle_with_only_an_outdated_system_svn_reports_too_old() {
+    let system = TempDir::new().unwrap();
+    FakeSvn::with_version("1.9.9").build(system.path());
+    let empty = TempDir::new().unwrap();
+    let manifest = manifest_of(&SAMPLE);
+    let bundle = Bundle {
+        dir: empty.path(),
+        manifest: &manifest,
+    };
+    let outcome = locate_full(None, Some(bundle), &[system.path().to_path_buf()]);
+    assert!(
+        matches!(outcome, Err(LocatorError::TooOld { .. })),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn svn_set_path_accepts_the_executable_name_in_any_case() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("SVN.EXE"), fake_svn_bytes("1.14.5")).unwrap();
+    let store = ConfigStore {
+        path: dir.path().join("cfg").join(CONFIG_FILE_NAME),
+    };
+    let detection = AppState::new(store).svn_set_path(&dir.path().join("SVN.EXE"));
+    assert!(detection.binary.is_some(), "{detection:?}");
+}
+
+#[test]
+fn the_embedded_manifest_matches_the_lock_and_the_shipped_folder() {
+    let lock: serde_json::Value = serde_json::from_str(
+        &fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../third_party/svn.lock.json"
+        ))
+        .unwrap(),
+    )
+    .unwrap();
+    let manifest: serde_json::Value = serde_json::from_str(MANIFEST_JSON).unwrap();
+    assert_eq!(manifest["version"], lock["version"]);
+    let mut wanted: Vec<String> = lock["files"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|name| name.as_str().unwrap().to_ascii_lowercase())
+        .collect();
+    for runtime in lock["runtime"].as_array().unwrap() {
+        wanted.push(runtime["name"].as_str().unwrap().to_ascii_lowercase());
+    }
+    let mut listed: Vec<String> = manifest["files"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|file| file["name"].as_str().unwrap().to_ascii_lowercase())
+        .collect();
+    wanted.sort();
+    listed.sort();
+    assert_eq!(listed, wanted);
+    for runtime in lock["runtime"].as_array().unwrap() {
+        let entry = manifest["files"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|file| file["name"] == runtime["name"])
+            .unwrap();
+        assert_eq!(entry["sha256"], runtime["sha256"]);
+    }
+}
+
+#[test]
+fn the_shipped_folder_verifies_against_the_embedded_manifest_when_it_exists() {
+    let shipped = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/svn"));
+    // resources/svn is gitignored: it only exists after scripts/bundle-svn.ps1 ran
+    if !shipped.join("svn.exe").is_file() {
+        return;
+    }
+    assert!(verify(shipped, MANIFEST_JSON).is_ok());
 }

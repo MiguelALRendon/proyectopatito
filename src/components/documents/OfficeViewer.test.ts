@@ -283,6 +283,20 @@ describe('OfficeViewer: guardar y estado', () => {
     expect(wrapper.get('.office-viewer__chip').text()).toBe('Guardado');
   });
 
+  it('mientras guarda, el chip dice «Guardando…» y el botón queda desactivado y ocupado', async () => {
+    const { office, tabId } = await show();
+    const docId = office.sessionOf(tabId)?.docId as string;
+    emit({ cmd: 'modified', docId });
+    await flushPromises();
+    vi.mocked(fsWriteBytes).mockReturnValueOnce(new Promise(() => undefined));
+    await wrapper.get('button.btn').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('.office-viewer__chip').text()).toBe('Guardando…');
+    const button = wrapper.get('button.btn');
+    expect(button.attributes('disabled')).toBeDefined();
+    expect(button.attributes('aria-busy')).toBe('true');
+  });
+
   it('Ctrl+S sobre el visor guarda y no deja pasar el atajo', async () => {
     const { office, tabId } = await show();
     emit({ cmd: 'modified', docId: office.sessionOf(tabId)?.docId as string });

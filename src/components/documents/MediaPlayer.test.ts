@@ -425,6 +425,88 @@ describe('MediaPlayer: reproducir, pausar y buscar', () => {
   });
 });
 
+describe('MediaPlayer: estados de la reproducción', () => {
+  it('al cambiar de archivo se reinician duración, posición, dimensiones y estado', async () => {
+    mountPlayer(VIDEO, 'wc\a.mp4');
+    control({
+      duration: 100,
+      currentTime: 30,
+      videoWidth: 640,
+      videoHeight: 480,
+      paused: false,
+    });
+    await fire('loadedmetadata');
+    await fire('timeupdate');
+    await fire('play');
+    expect(wrapper.get('.media-player__time').text()).toBe('0:30 de 1:40');
+    await wrapper.setProps({ path: 'wc\b.mp4' });
+    expect(wrapper.get('.media-player__time').text()).toBe('0:00 de --:--');
+    expect(wrapper.get('.media-player__facts').text()).not.toContain('640');
+    expect(wrapper.find('button[aria-label="Reproducir"]').exists()).toBe(true);
+  });
+
+  it('con el sonido silenciado el control de volumen muestra cero', async () => {
+    mountPlayer();
+    control({ muted: true, volume: 0.8 });
+    await fire('volumechange');
+    const slider = wrapper.get('input[aria-label="Volumen"]');
+    expect((slider.element as HTMLInputElement).value).toBe('0');
+  });
+
+  it('al desmontar se retira el listener de fullscreenchange', () => {
+    mountPlayer();
+    const remove = vi.spyOn(document, 'removeEventListener');
+    wrapper.unmount();
+    expect(remove).toHaveBeenCalledWith(
+      'fullscreenchange',
+      expect.any(Function),
+    );
+    mountPlayer();
+  });
+
+  it('buscar mientras suena no la detiene', async () => {
+    mountPlayer();
+    const state = control({ paused: false, duration: 100, currentTime: 10 });
+    await fire('play');
+    press('ArrowRight');
+    expect(state.currentTime).toBe(15);
+    expect(pause).not.toHaveBeenCalled();
+    expect(wrapper.find('button[aria-label="Pausar"]').exists()).toBe(true);
+  });
+
+  it('buscar en pausa no la reanuda', async () => {
+    mountPlayer();
+    const state = control({ paused: true, duration: 100, currentTime: 10 });
+    press('ArrowRight');
+    await wrapper.vm.$nextTick();
+    expect(state.currentTime).toBe(15);
+    expect(play).not.toHaveBeenCalled();
+    expect(wrapper.find('button[aria-label="Reproducir"]').exists()).toBe(true);
+  });
+
+  it('al terminar vuelve a ofrecer reproducir, y reproducir de nuevo arranca otra vez', async () => {
+    mountPlayer();
+    const state = control({ paused: false, duration: 100, currentTime: 100 });
+    await fire('play');
+    state.paused = true;
+    await fire('ended');
+    expect(wrapper.find('button[aria-label="Reproducir"]').exists()).toBe(true);
+    await wrapper.get('button[aria-label="Reproducir"]').trigger('click');
+    expect(play).toHaveBeenCalledTimes(1);
+    await fire('play');
+    expect(wrapper.find('button[aria-label="Pausar"]').exists()).toBe(true);
+  });
+
+  it('un error mientras suena cae a la tarjeta y quita el elemento de medio', async () => {
+    mountPlayer();
+    control({ paused: false, error: { code: 3 } });
+    await fire('play');
+    await fire('error');
+    expect(wrapper.find('article').exists()).toBe(true);
+    expect(wrapper.find('audio, video').exists()).toBe(false);
+  });
+});
+
 describe('MediaPlayer: accesibilidad', () => {
   it('el reproductor es un grupo enfocable que nombra el archivo y sus atajos', () => {
     mountPlayer();

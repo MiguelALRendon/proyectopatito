@@ -188,5 +188,21 @@ mod tests {
         let debug = format!("{:?}", options());
         assert!(debug.contains(&MAX_RAR_MEMBER_BYTES.to_string()), "{debug}");
         assert!(debug.contains(&MAX_RAR_HEADER_BYTES.to_string()), "{debug}");
+        assert!(debug.contains(&MAX_ARCHIVE_ENTRIES.to_string()), "{debug}");
+    }
+
+    #[test]
+    fn a_cancelled_library_run_is_a_cancellation() {
+        let cancelled = rars::Error::Cancelled;
+        assert!(matches!(map_error(&cancelled), ArchiveError::Cancelled));
+    }
+
+    #[test]
+    fn the_librarys_resource_limits_are_limit_errors() {
+        let over = rars::Error::MemberOutputLimitExceeded {
+            limit: 1,
+            required: 2,
+        };
+        assert!(matches!(map_error(&over), ArchiveError::Limit(_)));
     }
 }

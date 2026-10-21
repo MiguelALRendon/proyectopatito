@@ -584,3 +584,20 @@ fn a_nested_relative_path_is_served_without_its_leading_slash() {
     assert_eq!(response.status(), StatusCode::OK);
     assert_eq!(response.body().as_slice(), "dentro".as_bytes());
 }
+
+#[test]
+fn a_range_header_that_is_not_text_answers_400() {
+    let fx = fixture();
+    let mut request = request(Method::GET, "/digits.txt", &[]);
+    let unreadable = tauri::http::HeaderValue::from_bytes(&[0xFF, 0xFE]).unwrap();
+    request.headers_mut().insert(header::RANGE, unreadable);
+    let response = handle(Some(&fx.service), &request);
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+}
+
+#[test]
+fn an_invalid_range_is_refused_before_looking_for_the_file() {
+    let fx = fixture();
+    let response = fx.ranged("/no-existe.bin", "bytes=a-b");
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+}

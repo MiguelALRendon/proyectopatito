@@ -57,3 +57,10 @@ fn the_dev_server_is_allowed_only_when_asked() {
     assert!(!allowed(DEV_URL, false));
     assert!(allowed("http://localhost:1420/src/main.ts", true));
 }
+
+#[test]
+fn the_main_window_asks_for_the_dev_server_only_in_debug_builds() {
+    let source = include_str!("../src/commands/webview.rs");
+    assert!(source.contains("is_own_origin(url, cfg!(debug_assertions))"));
+    assert!(!allowed(DEV_URL, false));
+}

@@ -132,6 +132,26 @@ describe('parseHostMessage: mensajes válidos', () => {
     }
   });
 
+  it.each([
+    ['sin docId', { requested: true, bytes: new ArrayBuffer(1) }],
+    [
+      'con docId vacío',
+      { docId: '', requested: true, bytes: new ArrayBuffer(1) },
+    ],
+    [
+      'con requested no booleano',
+      { docId: 'a', requested: 'si', bytes: new ArrayBuffer(1) },
+    ],
+    ['sin requested', { docId: 'a', bytes: new ArrayBuffer(1) }],
+    [
+      'con bytes que no son ArrayBuffer',
+      { docId: 'a', requested: true, bytes: new Uint8Array(1) },
+    ],
+    ['sin bytes', { docId: 'a', requested: true }],
+  ])('rechaza un guardado %s', (_name, fields) => {
+    expect(parseHostMessage({ cmd: 'saved', ...fields })).toBeNull();
+  });
+
   it('acepta un guardado vacío (la longitud la decide quien escribe)', () => {
     expect(
       parseHostMessage({

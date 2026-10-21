@@ -439,3 +439,108 @@ fn a_seven_zip_with_a_valid_signature_and_a_hostile_header_is_an_error_not_a_cra
         );
     }
 }
+
+#[test]
+fn a_cloud_only_archive_is_not_a_local_file() {
+    let bench = bench();
+    let path = put(
+        bench.dir.path(),
+        "nube.zip",
+        &zip_stored(&[("a.txt", b"x")]),
+    );
+    let marked = std::process::Command::new("attrib")
+        .args(["+O", &path.to_string_lossy()])
+        .status()
+        .unwrap();
+    assert!(marked.success());
+    let outcome = bench.service.list(Path::new("nube.zip"), &running());
+    assert!(
+        matches!(outcome, Err(ArchiveError::Unsupported(_))),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn a_seven_zip_shorter_than_its_signature_header_is_corrupt() {
+    let bench = bench();
+    let outcome = list(&bench, "corto.7z", &[b'7', b'z', 0xBC, 0xAF, 0x27, 0x1C]);
+    assert!(
+        matches!(outcome, Err(ArchiveError::Corrupt(_))),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn seven_zip_anti_items_are_not_listed() {
+    let bench = bench();
+    let bytes = sevenz_with_anti_item("borrado.txt", ("queda.txt", b"hola"));
+    let listing = list(&bench, "a.7z", &bytes).unwrap();
+    assert_eq!(names(&listing), ["queda.txt"]);
+}
+
+#[test]
+fn listing_a_seven_zip_reads_metadata_and_never_decodes_the_data() {
+    let bench = bench();
+    let noise: Vec<u8> = (0..4096u32)
+        .map(|index| (index.wrapping_mul(2_654_435_761) >> 13) as u8)
+        .collect();
+    let mut bytes = sevenz(&[("a.txt", &noise)]);
+    for byte in &mut bytes[100..140] {
+        *byte ^= 0xFF;
+    }
+    let listing = list(&bench, "dañado.7z", &bytes).unwrap();
+    assert_eq!(names(&listing), ["a.txt"]);
+}
+
+#[test]
+fn an_xz_stream_asking_for_more_than_256_mib_of_memory_is_a_limit_error() {
+    let bench = bench();
+    let outcome = list(&bench, "voraz.tar.xz", &xz_asking_for_dictionary(0x22));
+    assert!(
+        matches!(outcome, Err(ArchiveError::Limit(_))),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn an_xz_stream_within_the_memory_budget_is_not_a_limit_error() {
+    let bench = bench();
+    let outcome = list(&bench, "modesto.tar.xz", &xz_asking_for_dictionary(0x18));
+    assert!(
+        !matches!(outcome, Err(ArchiveError::Limit(_))),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn a_seven_zip_block_declaring_more_than_256_mib_is_refused_for_its_size() {
+    let bench = bench();
+    let bomb = std::fs::read(fixture("bomba.7z")).unwrap();
+    let outcome = list(&bench, "bomba.7z", &bomb);
+    assert!(
+        matches!(&outcome, Err(ArchiveError::Limit(why)) if why.contains("bloque")),
+        "{outcome:?}"
+    );
+}
+
+#[test]
+fn a_rar_redirection_entry_is_listed_as_a_link() {
+    let bench = bench();
+    let listing = list(&bench, "enlace.rar", &rar_with_symlink("atajo", "../fuera")).unwrap();
+    assert_eq!(listing.entries[0].kind, EntryKind::Link);
+}
+
+#[test]
+fn listing_a_rar_reads_metadata_and_never_decodes_the_data() {
+    let bench = bench();
+    let mut bytes = rar_with_file("a.txt", &[b'x'; 4096]);
+    let at = bytes
+        .windows(8)
+        .position(|window| window == [b'x'; 8])
+        .unwrap();
+    for byte in &mut bytes[at + 10..at + 40] {
+        *byte = 0x55;
+    }
+    let listing = list(&bench, "dañado.rar", &bytes).unwrap();
+    assert_eq!(names(&listing), ["a.txt"]);
+}

@@ -764,3 +764,18 @@ fn recorded_seven_zip_bomb_is_refused_before_decoding() {
     );
     assert!(!bench.exists("b"));
 }
+
+#[test]
+fn nine_hundred_ninety_nine_taken_folder_names_end_in_a_limit_error() {
+    let bench = bench();
+    put(bench.dir.path(), "a.zip", &zip_stored(&[("x.txt", b"x")]));
+    fs::create_dir(bench.dir.path().join("a")).unwrap();
+    for attempt in 2..=999 {
+        fs::create_dir(bench.dir.path().join(format!("a-{attempt}"))).unwrap();
+    }
+    let outcome = bench.extract_existing("a.zip", ExtractOptions::default(), &running());
+    assert!(
+        matches!(outcome, Err(ArchiveError::Limit(_))),
+        "{outcome:?}"
+    );
+}

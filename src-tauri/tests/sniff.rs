@@ -362,3 +362,20 @@ fn plain_text_in_utf8_and_utf16_is_text() {
     assert_eq!(kind_of(&big_endian), ProbeKind::Text);
     assert_eq!(classify_complete(b"texto").mime, MIME_TEXT);
 }
+
+#[test]
+fn both_gif_signatures_are_accepted_and_others_are_not() {
+    let valid = kind_of(&gif());
+    assert_ne!(valid, ProbeKind::Binary);
+    assert_eq!(kind_of(&patched(gif(), 0, b"GIF87a")), valid);
+    assert_eq!(kind_of(&patched(gif(), 0, b"GIF88a")), ProbeKind::Binary);
+}
+
+#[test]
+fn a_name_ending_in_a_dot_or_starting_with_one_has_no_extension() {
+    use dakedaduck_svn_lib::app::inspect::extension_of;
+    assert_eq!(extension_of("archivo."), None);
+    assert_eq!(extension_of(".bashrc"), None);
+    assert_eq!(extension_of("sin"), None);
+    assert_eq!(extension_of("a.txt"), Some("txt"));
+}

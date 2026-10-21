@@ -275,6 +275,16 @@ fn a_write_keeps_the_hidden_and_system_attributes_of_the_original() {
 }
 
 #[test]
+fn a_write_does_not_hide_a_file_that_was_visible() {
+    let fx = fixture();
+    let path = fx.put(REPORT, &docx(&[]));
+    let version = fx.version(REPORT);
+    fx.write(REPORT, &version, b"nuevo").unwrap();
+    let attributes = fs::metadata(&path).unwrap().file_attributes();
+    assert_eq!(attributes & HIDDEN_AND_SYSTEM, 0);
+}
+
+#[test]
 fn a_failed_write_never_leaves_a_temporary_file_behind() {
     let fx = fixture();
     fx.put(REPORT, &docx(&[]));
@@ -314,4 +324,55 @@ fn the_probe_version_changes_when_the_content_changes_at_the_same_length() {
     let before = fx.version(REPORT);
     fs::write(&path, docx(&[("word/a.bin", b"bbbb")])).unwrap();
     assert_ne!(fx.version(REPORT), before);
+}
+
+#[test]
+fn a_temporary_name_too_long_to_create_is_an_io_error() {
+    let fx = fixture();
+    let name = format!("{}.docx", "a".repeat(245));
+    fx.put(&name, &docx(&[]));
+    let version = fx.version(&name);
+    let outcome = fx.write(&name, &version, b"nuevo");
+    assert!(matches!(outcome, Err(FileError::Io(_))), "{outcome:?}");
+    assert_eq!(fx.names_in("").len(), 1);
+}
+
+#[test]
+fn a_successful_write_invalidates_the_status_cache_and_a_refused_one_does_not() {
+    use dakedaduck_svn_lib::app::wc_status::StatusCache;
+    let fx = fixture();
+    let cache = Arc::new(StatusCache::default());
+    let workspace = Workspace::new(&fx.root).unwrap();
+    let service = FileService::new(workspace, fx.manager.clone()).with_statuses(cache.clone());
+    fx.put(REPORT, &docx(&[]));
+    let version = fx.version(REPORT);
+    let file = service.scope(Path::new(REPORT)).unwrap();
+    let before = cache.generation();
+    assert!(service.write_bytes(&file, "0-0-0", b"x").is_err());
+    assert_eq!(cache.generation(), before);
+    service.write_bytes(&file, &version, b"nuevo").unwrap();
+    assert_eq!(cache.generation(), before + 1);
+}
+
+#[test]
+fn a_path_outside_the_workspace_is_refused_before_anything_is_written() {
+    let fx = fixture();
+    let outcome = fx.write(r"..\fuera.docx", "0-0-0", b"x");
+    assert!(outcome.is_err());
+    assert!(!fx.root.parent().unwrap().join("fuera.docx").exists());
+}
+
+#[test]
+fn file_errors_reach_the_frontend_as_their_snake_case_kinds() {
+    use dakedaduck_svn_lib::app::error::CommandError;
+    let cases = [
+        (FileError::FileChanged, "file_changed"),
+        (FileError::FileLocked, "file_locked"),
+        (FileError::OfficeTooLarge, "office_too_large"),
+        (FileError::ReadOnly, "read_only"),
+    ];
+    for (error, kind) in cases {
+        let wire = serde_json::to_value(CommandError::from(error).kind).unwrap();
+        assert_eq!(wire, kind);
+    }
 }

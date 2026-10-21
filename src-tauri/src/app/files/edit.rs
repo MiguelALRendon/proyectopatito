@@ -195,6 +195,18 @@ mod tests {
     }
 
     #[test]
+    fn a_rename_blocked_by_another_process_is_a_locked_file() {
+        let blocked = io::Error::from_raw_os_error(ERROR_SHARING_VIOLATION);
+        assert!(matches!(rename_error(blocked), FileError::FileLocked));
+    }
+
+    #[test]
+    fn any_other_rename_failure_is_an_io_error() {
+        let missing = io::Error::from_raw_os_error(3);
+        assert!(matches!(rename_error(missing), FileError::Io(_)));
+    }
+
+    #[test]
     fn a_taken_temp_name_is_skipped_and_the_search_is_bounded() {
         let dir = tempfile::tempdir().unwrap();
         let target = dir.path().join("notas.txt");
