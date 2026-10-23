@@ -1,6 +1,7 @@
 import { reactive, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { askLineEnding } from '../documents/dialogs';
+import { createSaveFlight } from '../documents/saveFlight';
 import {
   fsReadText,
   fsWriteText,
@@ -27,7 +28,6 @@ export type SaveOutcome =
   | 'conflict'
   | 'read-only'
   | 'failed'
-  | 'busy'
   | 'unavailable';
 
 export interface DocumentSession {
@@ -114,7 +114,6 @@ function isOpen(session: DocumentSession): boolean {
 }
 
 export function refusalOf(session: DocumentSession): SaveOutcome | null {
-  if (session.phase === 'saving') return 'busy';
   if (session.phase !== 'ready') return 'unavailable';
   if (!session.isDirty) return 'unchanged';
   return session.eolMixed ? 'needs-eol' : null;
@@ -125,6 +124,7 @@ export const useDocumentsStore = defineStore('documents', () => {
   const explorer = useExplorerStore();
   const sessions = reactive<Record<string, DocumentSession>>({});
   const tickets = new Map<string, number>();
+  const flight = createSaveFlight<SaveOutcome>();
 
   const sessionOf = (tabId: string): DocumentSession | null =>
     sessions[tabId] ?? null;
@@ -255,8 +255,24 @@ export const useDocumentsStore = defineStore('documents', () => {
   async function save(tabId: string): Promise<SaveOutcome> {
     const session = sessions[tabId];
     if (!session) return 'unavailable';
+    const running = flight.current(tabId);
+    if (running) return saveEditsMadeMeanwhile(tabId, await running);
     const refusal = refusalOf(session);
     if (refusal) return refusal;
+    const tracked = flight.track(tabId, writeToDisk(tabId, session));
+    tabs.trackSave(tabId, tracked);
+    return tracked;
+  }
+
+  function saveEditsMadeMeanwhile(tabId: string, outcome: SaveOutcome) {
+    const hasNewEdits = outcome === 'saved' && sessions[tabId]?.isDirty;
+    return hasNewEdits ? save(tabId) : outcome;
+  }
+
+  async function writeToDisk(
+    tabId: string,
+    session: DocumentSession,
+  ): Promise<SaveOutcome> {
     const content = session.current;
     Object.assign(session, { phase: 'saving', error: null });
     nextTicket(tabId);

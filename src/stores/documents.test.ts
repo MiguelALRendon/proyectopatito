@@ -25,6 +25,7 @@ import {
   type WriteTextRequest,
 } from '../services/filesApi';
 import type { CommandError, ErrorKind } from '../services/tauri';
+import { SAVE_SETTLE_TIMEOUT_MS } from '../documents/limits';
 import { isSettled, refusalOf, useDocumentsStore } from './documents';
 import { useTabsStore } from './tabs';
 
@@ -303,7 +304,7 @@ describe('documents: final de línea mixto', () => {
 });
 
 describe('documents: respuestas atrasadas y estados imposibles', () => {
-  it('un segundo guardado mientras se guarda responde busy y escribe una sola vez', async () => {
+  it('un segundo guardado mientras se guarda espera al primero y escribe una sola vez', async () => {
     const { documents, tabId } = await openDocument();
     documents.edit(tabId, EDITED);
     let finish: (value: { version: string }) => void = () => undefined;
@@ -313,11 +314,50 @@ describe('documents: respuestas atrasadas y estados imposibles', () => {
 
     const first = documents.save(tabId);
     expect(documents.sessionOf(tabId)?.phase).toBe('saving');
-    expect(await documents.save(tabId)).toBe('busy');
+    const second = documents.save(tabId);
     finish({ version: 'v2' });
 
     expect(await first).toBe('saved');
+    expect(await second).toBe('saved');
     expect(fsWriteText).toHaveBeenCalledTimes(1);
+  });
+
+  it('lo editado durante un guardado se guarda al pedir otro y no se pierde', async () => {
+    const { documents, tabId } = await openDocument();
+    documents.edit(tabId, EDITED);
+    let finish: (value: { version: string }) => void = () => undefined;
+    vi.mocked(fsWriteText)
+      .mockReturnValueOnce(new Promise((done) => (finish = done)))
+      .mockResolvedValueOnce({ version: 'v3' });
+
+    const first = documents.save(tabId);
+    documents.edit(tabId, `${EDITED} y más`);
+    const second = documents.save(tabId);
+    finish({ version: 'v2' });
+
+    expect(await first).toBe('saved');
+    expect(await second).toBe('saved');
+    expect(fsWriteText).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(fsWriteText).mock.calls[1]?.[0].content).toBe(
+      `${EDITED} y más`,
+    );
+    expect(documents.sessionOf(tabId)?.isDirty).toBe(false);
+  });
+
+  it('un guardado de texto en curso se registra para que cerrar lo espere', async () => {
+    const { documents, tabs, tabId } = await openDocument();
+    documents.edit(tabId, EDITED);
+    let finish: (value: { version: string }) => void = () => undefined;
+    vi.mocked(fsWriteText).mockReturnValue(
+      new Promise((done) => (finish = done)),
+    );
+
+    const saving = documents.save(tabId);
+    expect(tabs.hasPendingSave([tabId])).toBe(true);
+    finish({ version: 'v2' });
+    await saving;
+
+    expect(tabs.hasPendingSave([tabId])).toBe(false);
   });
 
   it('lo escrito mientras se guarda sigue sucio y conserva lo guardado como original', async () => {
@@ -349,13 +389,20 @@ describe('documents: respuestas atrasadas y estados imposibles', () => {
     );
 
     vi.mocked(confirm).mockResolvedValue(true);
-    const saving = documents.save(tabId);
-    await tabs.close(tabId);
-    await nextTick();
-    finish({ version: 'v2' });
+    vi.useFakeTimers();
+    try {
+      const saving = documents.save(tabId);
+      const closing = tabs.close(tabId);
+      await vi.advanceTimersByTimeAsync(SAVE_SETTLE_TIMEOUT_MS);
+      await closing;
+      await nextTick();
+      finish({ version: 'v2' });
 
-    await expect(saving).resolves.toBe('saved');
-    expect(documents.sessionOf(tabId)).toBeNull();
+      await expect(saving).resolves.toBe('saved');
+      expect(documents.sessionOf(tabId)).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('la respuesta atrasada de una carga anterior no pisa la sesión nueva', async () => {
@@ -630,7 +677,7 @@ describe('documents: reglas puras', () => {
     const { documents, tabId } = await openDocument();
     const session = documents.sessionOf(tabId);
     if (!session) throw new Error('falta la sesión');
-    expect(refusalOf({ ...session, phase: 'saving' })).toBe('busy');
+    expect(refusalOf({ ...session, phase: 'saving' })).toBe('unavailable');
     expect(refusalOf({ ...session, phase: 'loading' })).toBe('unavailable');
     expect(refusalOf({ ...session, phase: 'failed' })).toBe('unavailable');
     expect(refusalOf(session)).toBe('unchanged');
@@ -644,7 +691,6 @@ describe('documents: reglas puras', () => {
     expect(isSettled('saved')).toBe(true);
     expect(isSettled('unchanged')).toBe(true);
     expect(isSettled('conflict')).toBe(false);
-    expect(isSettled('busy')).toBe(false);
   });
 });
 

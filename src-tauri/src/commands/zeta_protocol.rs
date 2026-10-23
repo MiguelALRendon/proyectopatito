@@ -2,13 +2,15 @@ use tauri::http::header::{self, HeaderName, HeaderValue};
 use tauri::http::{Method, Request, Response, StatusCode};
 use tauri::{Manager, Runtime, UriSchemeContext, UriSchemeResponder};
 
-use super::protocol::{requested_range, served_response, status_only, without_body};
+use super::protocol::{
+    add_cors, preflight, requested_range, served_response, status_only, without_body,
+};
 use crate::app::zeta_assets::{AssetError, ZetaAssets};
 
 pub const SCHEME: &str = "zeta-assets";
 
 const RESOURCE_FOLDER: &str = "zetaoffice";
-const ALLOWED_METHODS: &str = "GET, HEAD";
+const ALLOWED_METHODS: &str = "GET, HEAD, OPTIONS";
 const DOCUMENT_POLICY: &str = "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; frame-src 'none'; base-uri 'none'";
 
 const CROSS_ORIGIN_RESOURCE_POLICY: HeaderName =
@@ -60,11 +62,14 @@ pub fn handle(assets: Option<&ZetaAssets>, request: &Request<Vec<u8>>) -> Respon
     for (name, value) in &FIXED_HEADERS {
         headers.insert(name.clone(), value.clone());
     }
+    headers.append(header::VARY, HeaderValue::from_static("Origin"));
+    add_cors(headers, request.headers());
     response
 }
 
 fn route(assets: Option<&ZetaAssets>, request: &Request<Vec<u8>>) -> Response<Vec<u8>> {
     match *request.method() {
+        Method::OPTIONS => preflight(),
         Method::GET => serve(assets, request),
         Method::HEAD => without_body(serve(assets, request)),
         _ => not_allowed(),

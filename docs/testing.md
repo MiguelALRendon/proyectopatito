@@ -4,7 +4,7 @@ title: Pruebas
 type: reference
 status: current
 source: both
-last_verified: 2026-10-16
+last_verified: 2026-10-21
 symbols: [TestRepo, TestServer, FakeSvn, launchApp, seedFixtures, installIpcGate]
 related: [ref-architecture, human-entorno-desarrollo, adr-0005, adr-0008]
 ---
@@ -117,7 +117,7 @@ Instalador (Increment 9): `scripts/build-release.ps1` genera el instalador en `s
 
 `npm run test:e2e` corre `vitest run --config vitest.e2e.config.ts`: archivos `tests/e2e/real-app/**/*.e2e.ts`, tiempo máximo de 120 s por prueba y un archivo a la vez (`fileParallelism: false`, porque comparten el puerto 9333). Cubren el arranque y la CSP (`smoke`), el protocolo (`protocol`), el cierre y el shell (`shell`, `editor-close`), pestañas (`tabs`), explorador y estado SVN (`explorer`, `status`), lectura y edición (`editor-read`, `editor`), visores (`viewers`), la clasificación por contenido (`classify`), el aislamiento (`isolation`) y la tarjeta de binario (`binary`).
 
-El ejecutable de **release** se compila con `--features e2e-config-dir` solo para la prueba de humo; el instalador distribuido se compila sin esa característica.
+El ejecutable de **release** se compila con `--features e2e-config-dir` para correr toda la suite sobre él (`E2E_APP_MODE=release`); el instalador distribuido se compila sin esa característica y su ejecutable no contiene el gancho `__officeTest` (comprobado el 2026-10-21).
 
 ### Lo que los E2E no cubren
 
@@ -127,7 +127,7 @@ El ejecutable de **release** se compila con `--features e2e-config-dir` solo par
 - PDF: JBIG2 con codificación aritmética, símbolos y texto (solo se probó MMR), JPEG 2000 con datos codificados reales (el fixture decodifica un paquete vacío), JPEG progresivo o CMYK y fuentes CFF/Type1 incrustadas (ver [entorno de desarrollo](human-explanations/entorno-desarrollo.md)).
 - Capturas y dibujo de ZetaOffice: el lienzo tarda 2 a 5 s en dibujarse después de `opened`; una captura inmediata sale en blanco (la prueba espera `DRAW_SETTLE_MS` antes de pulsar teclas). No se leen píxeles del lienzo (WebGL).
 - Playwright por CDP fuerza el comportamiento de descargas y enmascara el manejador de Rust: las descargas se prueban con `rawCdp.ts`.
-- **Diferido (2B):** instalar y probar en una máquina limpia, el instalador NSIS con `tauri build` completo (puerta del QA Increment, CA-23 de la 2A), edición y guardado de Office, audio, vídeo y comprimidos. Ver [roadmap](roadmap.md).
+- **Diferido:** instalar y probar en una máquina limpia (CA-14 de la 2B, aplazada por el usuario el 2026-10-21 a una fase de distribución). El instalador NSIS con `tauri build` completo, la edición y el guardado de Office, el audio, el vídeo y los comprimidos ya se prueban en la ventana real (ver la tabla anterior). Ver [roadmap](roadmap.md).
 
 ### Trampas conocidas del entorno
 

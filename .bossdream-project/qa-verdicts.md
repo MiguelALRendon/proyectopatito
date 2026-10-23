@@ -80,3 +80,13 @@ Detalle de lo que sí se cerró (99 de 103 casos, 139 pruebas nuevas y tres defe
 | Flow-breaker (`bossdream-flow-breaker`) | blocked | `guardando->cerrado` no determinista (T-38); rollback de extracción que ignora borrados parciales (T-39); cierre durante la carga de Office (T-40); búsqueda sin duración y `release()` al cambiar de ruta (T-41). Descartado: 413 en `host.js` (los scripts pesan menos de 1 MB) |
 
 El QA Manager responde expresamente que, aun resueltas las listas, el veredicto no puede ser ACCEPTED sin la prueba en máquina limpia.
+
+## Cierre de la Fase 2B (2026-10-23)
+
+| Agente | Veredicto | Nota |
+|---|---|---|
+| Test Checks (`test-checks-2b-12.json`) | code, contract y flow_correctness `passed` | `regression_safety` skipped por la herramienta; mutación corrida aparte |
+| Flow-breaker, 4.ª pasada | **pass** | Solo un menor cosmético (T-46); T-43 a T-45 aceptadas como riesgo |
+| QA Manager (`bossdream-qa-planner`) | **ACCEPTED** | Respuesta sin razones: el agente devolvió solo el veredicto |
+
+Riesgos aceptados por el usuario: aserciones débiles (9), mocks restantes (24), T-43, y CA-14 diferido. La novena aserción débil y T-43 se aceptaron por delegación del usuario en la recomendación del asistente. Salvedades de criterios en `plans/fase-2b-documentos/spec.md` (CA-1, CA-6, CA-9, CA-13, CA-16).

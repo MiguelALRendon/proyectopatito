@@ -30,7 +30,8 @@ import {
   askLegacyFidelity,
   askSwitchOffice,
 } from '../documents/dialogs';
-import { MAX_OFFICE_BYTES } from '../documents/limits';
+import { SAVING_NOTE } from '../documents/labels';
+import { MAX_OFFICE_BYTES, SAVE_SETTLE_TIMEOUT_MS } from '../documents/limits';
 import { OfficeError } from '../documents/office/officeHost';
 import { fsProbe, fsWriteBytes, type FileProbe } from '../services/filesApi';
 import type { CommandError, ErrorKind } from '../services/tauri';
@@ -107,17 +108,36 @@ describe('office: lo que no se puede guardar', () => {
     expect(fsWriteBytes).not.toHaveBeenCalled();
   });
 
-  it('dos guardados a la vez: el segundo está ocupado y solo se escribe una vez', async () => {
+  it('dos guardados a la vez: el segundo espera al primero y solo se escribe una vez', async () => {
     const { office, tabId } = setup();
     dirty(office);
     let release: (bytes: ArrayBuffer) => void = () => undefined;
     hostSave.mockReturnValue(new Promise((resolve) => (release = resolve)));
     const first = office.save(tabId);
     await nextTick();
-    expect(await office.save(tabId)).toBe('busy');
+    const second = office.save(tabId);
     release(BYTES);
     expect(await first).toBe('saved');
+    expect(await second).toBe('saved');
     expect(fsWriteBytes).toHaveBeenCalledTimes(1);
+  });
+
+  it('lo editado durante un guardado se guarda al pedir otro y no se pierde', async () => {
+    const { office, tabId } = setup();
+    dirty(office);
+    let release: (bytes: ArrayBuffer) => void = () => undefined;
+    hostSave
+      .mockReturnValueOnce(new Promise((resolve) => (release = resolve)))
+      .mockResolvedValueOnce(BYTES);
+    const first = office.save(tabId);
+    await nextTick();
+    dirty(office);
+    const second = office.save(tabId);
+    release(BYTES);
+    expect(await first).toBe('saved');
+    expect(await second).toBe('saved');
+    expect(fsWriteBytes).toHaveBeenCalledTimes(2);
+    expect(office.sessionOf(tabId)?.isDirty).toBe(false);
   });
 
   it('un aviso de modificación de un documento desconocido no hace nada', () => {
@@ -519,6 +539,63 @@ describe('office: sesiones, pestañas y cierre', () => {
     expect(await closing).toBe(true);
     expect(confirm).not.toHaveBeenCalled();
     expect(tabs.tabs.some((tab) => tab.id === tabId)).toBe(false);
+  });
+
+  it('si el guardado no termina, cerrar deja de esperar pasado el tiempo máximo y pregunta', async () => {
+    vi.useFakeTimers();
+    try {
+      const { office, tabs, tabId } = setup();
+      dirty(office);
+      vi.mocked(fsWriteBytes).mockReturnValue(new Promise(() => undefined));
+      vi.mocked(confirm).mockResolvedValue(false);
+      void office.save(tabId);
+      await vi.advanceTimersByTimeAsync(0);
+      const closing = tabs.close(tabId);
+      await vi.advanceTimersByTimeAsync(SAVE_SETTLE_TIMEOUT_MS);
+      expect(await closing).toBe(false);
+      expect(confirm).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(confirm).mock.calls[0]?.[0]).toContain(SAVING_NOTE);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('editar durante un guardado no solicitado colgado marca la pestaña sucia y cerrar pregunta', async () => {
+    vi.useFakeTimers();
+    try {
+      const { office, tabs, tabId } = setup();
+      vi.mocked(fsWriteBytes).mockReturnValue(new Promise(() => undefined));
+      vi.mocked(confirm).mockResolvedValue(false);
+      void office.persistUnrequestedSave('doc-1', BYTES);
+      office.markModified('doc-1');
+      expect(tabs.isDirty(tabId)).toBe(true);
+      const closing = tabs.close(tabId);
+      await vi.advanceTimersByTimeAsync(SAVE_SETTLE_TIMEOUT_MS);
+      expect(await closing).toBe(false);
+      expect(confirm).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cerrar mientras espera la respuesta del diálogo de fidelidad también espera al guardado', async () => {
+    const { office, tabs, tabId } = setup({ ext: 'doc' });
+    dirty(office);
+    let answer!: (accepted: boolean) => void;
+    vi.mocked(askLegacyFidelity).mockReturnValue(
+      new Promise((resolve) => {
+        answer = resolve;
+      }),
+    );
+    const saving = office.save(tabId);
+    let isClosed = false;
+    const closing = tabs.close(tabId).then((closed) => (isClosed = closed));
+    await Promise.resolve();
+    expect(isClosed).toBe(false);
+    answer(true);
+    await saving;
+    expect(await closing).toBe(true);
+    expect(confirm).not.toHaveBeenCalled();
   });
 
   it('si el guardado falla, cerrar pregunta si se descartan los cambios', async () => {

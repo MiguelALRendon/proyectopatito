@@ -1,105 +1,39 @@
 {
- "ejecutado_en": "2026-10-20T13:02:21-06:00",
+ "ejecutado_en": "2026-10-23",
  "fase": "2B",
  "test_pipeline_result": {
-  "code_correctness": {
-   "status": "passed"
-  },
-  "contract_correctness": {
-   "status": "passed"
-  },
-  "flow_correctness": {
-   "status": "failed",
-   "severidad": "hard",
-   "condicion_de_bloqueo": "Missing validation coverage: La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria; Missing validation coverage: write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado; Missing validation coverage: El temporal se sincroniza a disco (sync_all) antes del renombrado; Missing flow transition: instalado->maquina-limpia-verificada",
-   "escape_hatch": null,
-   "transiciones_no_cubiertas": [
-    "instalado->maquina-limpia-verificada"
-   ],
-   "metodos_incompletos": []
-  },
-  "regression_safety": {
-   "status": "skipped",
-   "nota": "no se encontro herramienta de mutation testing para el stack de 'src-tauri/tests' (ver src-tauri/tests/README.md)",
-   "consumidores_externos_detectados": []
-  },
-  "quality_approval": {
-   "status": "failed",
-   "severidad": "hard",
-   "condicion_de_bloqueo": "una o mas etapas previas fallaron",
-   "escape_hatch": null
-  }
+  "archivo": ".bossdream-project/test-checks-2b-12.json",
+  "code_correctness": "passed",
+  "contract_correctness": "passed",
+  "flow_correctness": "passed",
+  "regression_safety": "skipped (el script no detecta mutación para Rust; cargo-mutants y Stryker corridos aparte, ver docs/testing.md)"
  },
  "qa_manager_veredicto": {
-  "status": "REJECTED",
-  "razones": [
-   "Missing flow transition: instalado->maquina-limpia-verificada (CA-14; la prueba en Windows 11 limpio no está hecha)",
-   "Evidence insufficient: mocks_riesgosos[] del inventario tiene 27 entradas sin cerrar ni exentar",
-   "Evidence insufficient: assertions_debiles[] del inventario tiene 45 entradas sin cerrar ni reconciliar"
-  ]
- },
- "remediacion_aplicada": true,
- "bloqueado": true,
- "motivo_bloqueo": "QA VERDICT: REJECTED: máquina limpia (CA-14) pendiente; mocks_riesgosos y assertions_debiles sin reconciliar; flow-breaker blocked",
- "inventario": {
-  "reglas": 616,
-  "flujos": 22,
-  "casos_obligatorios_iniciales": 103,
-  "casos_cerrados_con_prueba": 99,
-  "casos_abiertos": 4
- },
- "pruebas_nuevas": {
-  "rust": 52,
-  "vitest": 75,
-  "pester": 12
- },
- "puertas": {
-  "cargo_test": 823,
-  "vitest": 2115,
-  "pester": 12,
-  "stryker_frontend": "90,60 % (umbral 85)",
-  "cargo_mutants": "ver docs/testing.md"
- },
- "afirmaciones": [
-  {
-   "texto": "Missing validation coverage: La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria",
-   "evidencia_adjunta": ".bossdream-project/qa-costly-findings.md"
-  },
-  {
-   "texto": "Missing validation coverage: write_bytes vuelve a comprobar que el destino es escribible después de tomar el candado",
-   "evidencia_adjunta": ".bossdream-project/qa-costly-findings.md"
-  },
-  {
-   "texto": "Missing validation coverage: El temporal se sincroniza a disco (sync_all) antes del renombrado",
-   "evidencia_adjunta": ".bossdream-project/qa-costly-findings.md"
-  },
-  {
-   "texto": "Missing flow transition: instalado->maquina-limpia-verificada",
-   "evidencia_adjunta": "scripts/e2e/clean-machine-checklist.md"
-  }
- ],
- "auditoria_de_evidencia": {
-  "agente": "bossdream-evidence-auditor",
-  "veredicto": "pass",
-  "nota": "Las 4 afirmaciones tienen evidencia real; la evidencia no desbloquea el gate flow_correctness."
+  "status": "ACCEPTED"
  },
  "flow_breaker": {
-  "veredicto": "blocked",
-  "hallazgos": [
-   "guardando->cerrado: cerrar y descartar durante un guardado no es determinista (T-38)",
-   "running->cancelled/failed: discard ignora un borrado parcial y la interfaz afirma que no quedó nada (T-39)",
-   "cargando->sin-visor: cerrar durante la carga deja el host sin destruir (T-40)",
-   "cargando->buscando: las flechas buscan sin duración conocida; release() no se llama al cambiar de ruta (T-41)"
-  ],
-  "descartado": "413 en host.js: los scripts pesan menos de 1 MB y los archivos grandes ya usan Range"
- },
- "auditor_de_pruebas": {
   "veredicto": "pass",
-  "hallazgos": 20,
-  "detalle": ".bossdream-project/agent-outputs/test-auditor-2b.md",
-  "deuda": "T-42"
+  "pasada": 4,
+  "hallazgo_menor": "T-46 (aviso de guardado en curso desactualizado si el guardado termina con el diálogo abierto; sin pérdida de datos)"
  },
- "exentas_aceptadas_por_el_usuario": [
-  "reglas 24, 25 y 27 (2026-10-20)"
- ]
+ "puertas": {
+  "vitest": "2145 pasadas en 108 archivos (2026-10-23)",
+  "e2e_release": "242 pasadas, 9 saltadas (instalador, sin INSTALLER_PATH), 0 fallos (2026-10-23)",
+  "stryker_frontend": "90,60 % (umbral 85)"
+ },
+ "riesgos_aceptados_por_el_usuario": [
+  "reglas 24, 25 y 27 exentas (2026-10-20)",
+  "8 aserciones débiles y 24 mocks restantes (2026-10-21)",
+  "novena aserción débil expectStillOnTheApp (2026-10-23, por delegación en la recomendación del asistente)",
+  "dead end de guardando por escritura nativa sin tope, T-43 (2026-10-23, igual)",
+  "CA-14 máquina limpia diferida a una fase de distribución (2026-10-21)"
+ ],
+ "salvedades_de_criterios": [
+  "CA-1: sin URL inmutable de ZetaOffice; fijado por SHA-256",
+  "CA-6: reciclado por OFFICE_RECYCLE_BYTES no implementado (T-32)",
+  "CA-9: tabla plana de entradas sin fecha",
+  "CA-13: verificado en esta máquina con perfil aislado, no en máquina limpia",
+  "CA-16: ADR 0013 sigue proposed hasta la prueba en máquina limpia"
+ ],
+ "inventario": "ver .bossdream-project/test-inventory.json (campo evidence)"
 }

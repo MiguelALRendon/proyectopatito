@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
@@ -106,5 +107,47 @@ describe('THIRD_PARTY_LICENSES.md frente a las dependencias reales', () => {
       Number(/(\d+) (?:paquetes|crates)\)/.exec(section(title, next))?.[1]);
     expect(announced(NPM_TITLE, CRATES_TITLE)).toBe(npmRows.length);
     expect(announced(CRATES_TITLE)).toBe(crateRows.length);
+  });
+});
+
+describe('avisos de licencia de ZetaOffice en el instalador', () => {
+  const folder = 'third_party/licenses/zetaoffice';
+  const files = [
+    'license.xml',
+    'qt-LICENSE.LGPL3.txt',
+    'qt-LICENSE.GPL3.txt',
+    'zetajs-LICENSE.txt',
+  ];
+
+  it('cada aviso existe, no está vacío y su SHA-256 coincide con el del README', () => {
+    const readme = readFileSync(`${folder}/README.md`, 'utf-8');
+    for (const name of files) {
+      const bytes = readFileSync(`${folder}/${name}`);
+      expect(bytes.length, name).toBeGreaterThan(1000);
+      const hash = createHash('sha256').update(bytes).digest('hex');
+      expect(readme, name).toContain(hash);
+    }
+  });
+
+  it('los textos son los que se dice: MPL en license.xml, LGPL 3, GPL 3 y MIT', () => {
+    const text = (name: string) => readFileSync(`${folder}/${name}`, 'utf-8');
+    expect(text('license.xml')).toContain('Mozilla Public License');
+    expect(text('qt-LICENSE.LGPL3.txt')).toContain(
+      'GNU LESSER GENERAL PUBLIC LICENSE',
+    );
+    expect(text('qt-LICENSE.GPL3.txt')).toContain('GNU GENERAL PUBLIC LICENSE');
+    expect(text('zetajs-LICENSE.txt')).toContain('MIT');
+  });
+
+  it('el instalador los lleva en zetaoffice-licenses y el aviso de terceros lo dice', () => {
+    const config = JSON.parse(
+      readFileSync('src-tauri/tauri.conf.json', 'utf-8'),
+    ) as {
+      bundle: { resources: Record<string, string> };
+    };
+    expect(config.bundle.resources['../third_party/licenses/zetaoffice']).toBe(
+      'zetaoffice-licenses',
+    );
+    expect(DOCUMENT).toContain('zetaoffice-licenses');
   });
 });

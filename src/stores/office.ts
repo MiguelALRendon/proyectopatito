@@ -6,6 +6,7 @@ import {
   askSwitchOffice,
 } from '../documents/dialogs';
 import { MAX_OFFICE_BYTES } from '../documents/limits';
+import { createSaveFlight } from '../documents/saveFlight';
 import { OfficeError, officeHost } from '../documents/office/officeHost';
 import type {
   OfficeFormat,
@@ -83,6 +84,7 @@ function failureOf(error: unknown): CommandError {
 
 export const useOfficeStore = defineStore('office', () => {
   const tabs = useTabsStore();
+  const flight = createSaveFlight<SaveOutcome>();
   const explorer = useExplorerStore();
   const sessions = reactive<Record<string, OfficeSession>>({});
   const liveTabId = ref<string | null>(null);
@@ -117,7 +119,7 @@ export const useOfficeStore = defineStore('office', () => {
     );
     if (!session) return;
     if (session.isSaving) session.hasEditsWhileSaving = true;
-    else setDirty(session, true);
+    setDirty(session, true);
   }
 
   function markSaved(session: OfficeSession, version: string): SaveOutcome {
@@ -168,19 +170,35 @@ export const useOfficeStore = defineStore('office', () => {
   async function save(tabId: string): Promise<SaveOutcome> {
     const session = sessions[tabId];
     if (!session) return 'unavailable';
-    if (session.isSaving) return 'busy';
+    const running = flight.current(tabId);
+    if (running) return saveEditsMadeMeanwhile(tabId, await running);
     if (!session.isDirty) return 'unchanged';
+    return trackSave(tabId, runSave(session));
+  }
+
+  function saveEditsMadeMeanwhile(tabId: string, outcome: SaveOutcome) {
+    const hasNewEdits = outcome === 'saved' && sessions[tabId]?.isDirty;
+    return hasNewEdits ? save(tabId) : outcome;
+  }
+
+  function trackSave(tabId: string, attempt: Promise<SaveOutcome>) {
+    const tracked = flight.track(tabId, attempt);
+    tabs.trackSave(tabId, tracked);
+    return tracked;
+  }
+
+  async function runSave(session: OfficeSession): Promise<SaveOutcome> {
     if (!(await acceptsFidelityLoss(session))) return 'failed';
     Object.assign(session, {
       isSaving: true,
       error: null,
       hasEditsWhileSaving: false,
     });
-    const attempt = writeToDisk(session).catch((error: unknown) =>
-      failSave(session, error),
-    );
-    tabs.trackSave(tabId, attempt);
-    return attempt;
+    try {
+      return await writeToDisk(session);
+    } catch (error) {
+      return failSave(session, error);
+    }
   }
 
   async function persistUnrequestedSave(
@@ -190,8 +208,8 @@ export const useOfficeStore = defineStore('office', () => {
     const session = Object.values(sessions).find(
       (candidate) => candidate.docId === docId,
     );
-    if (!session || session.isSaving) return 'unavailable';
-    session.isSaving = true;
+    if (!session || flight.current(session.tabId)) return 'unavailable';
+    Object.assign(session, { isSaving: true, hasEditsWhileSaving: false });
     const attempt = fsWriteBytes(
       session.path,
       session.version,
@@ -203,8 +221,7 @@ export const useOfficeStore = defineStore('office', () => {
         return failSave(session, error);
       },
     );
-    tabs.trackSave(session.tabId, attempt);
-    return attempt;
+    return trackSave(session.tabId, attempt);
   }
 
   function reload(tabId: string) {

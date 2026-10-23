@@ -1,6 +1,8 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { confirm } from '../composables/useConfirm';
+import { SAVING_NOTE } from '../documents/labels';
+import { SAVE_SETTLE_TIMEOUT_MS } from '../documents/limits';
 import {
   uiStateGet,
   uiStateSet,
@@ -58,12 +60,13 @@ export function omittedNotice(count: number): string {
   );
 }
 
-export function discardMessage(dirty: Tab[]): string {
-  return byCount(
+export function discardMessage(dirty: Tab[], isSaving = false): string {
+  const message = byCount(
     dirty.length,
     `La pestaña «${dirty[0]?.title}» tiene cambios sin guardar. Si la cierras, se perderán.`,
     `${dirty.length} pestañas tienen cambios sin guardar. Si las cierras, se perderán.`,
   );
+  return isSaving ? message + SAVING_NOTE : message;
 }
 
 function withoutExists<T extends { exists: boolean }>(
@@ -291,18 +294,39 @@ export const useTabsStore = defineStore('tabs', () => {
     pendingSaves.set(id, tracked);
   }
 
-  async function settleSaves(ids: string[] = [...pendingSaves.keys()]) {
-    await Promise.all(ids.map((id) => pendingSaves.get(id)));
+  async function waitAtMostSettleTimeout(work: Promise<unknown>) {
+    let giveUp: ReturnType<typeof setTimeout> | undefined;
+    const patience = new Promise<void>((resolve) => {
+      giveUp = setTimeout(resolve, SAVE_SETTLE_TIMEOUT_MS);
+    });
+    try {
+      await Promise.race([work, patience]);
+    } finally {
+      clearTimeout(giveUp);
+    }
+  }
+
+  const settleSaves = (ids: string[] = [...pendingSaves.keys()]) =>
+    waitAtMostSettleTimeout(Promise.all(ids.map((id) => pendingSaves.get(id))));
+
+  const flushWithinLimit = () => waitAtMostSettleTimeout(flush());
+
+  function hasPendingSave(ids: string[] = [...pendingSaves.keys()]): boolean {
+    return ids.some((id) => pendingSaves.has(id));
   }
 
   async function confirmDiscard(doomed: Tab[]): Promise<boolean> {
     const dirty = doomed.filter((tab) => isDirty(tab.id));
     if (dirty.length === 0) return true;
-    return confirm(discardMessage(dirty), DISCARD_LABEL, DISCARD_TITLE);
+    const message = discardMessage(
+      dirty,
+      hasPendingSave(dirty.map((t) => t.id)),
+    );
+    return confirm(message, DISCARD_LABEL, DISCARD_TITLE);
   }
 
   async function closeIds(ids: string[], anchorId?: string): Promise<boolean> {
-    if (ids.some((id) => pendingSaves.has(id))) await settleSaves(ids);
+    if (hasPendingSave(ids)) await settleSaves(ids);
     const doomed = tabs.value.filter((tab) => ids.includes(tab.id));
     if (doomed.length === 0 || !(await confirmDiscard(doomed))) return false;
     removeTabs(
@@ -377,6 +401,8 @@ export const useTabsStore = defineStore('tabs', () => {
     setDirty,
     trackSave,
     settleSaves,
+    flushWithinLimit,
+    hasPendingSave,
     open,
     activate,
     duplicate,

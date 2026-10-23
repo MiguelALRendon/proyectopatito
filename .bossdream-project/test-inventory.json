@@ -1,6 +1,6 @@
 {
  "behavior": "Comprimidos (Fase 2B): listar sin descomprimir y extraer a una carpeta nueva, todo o nada, de zip, tar, tar.gz, tar.bz2, tar.xz, 7z y rar, sin contraseñas, con defensas contra rutas hostiles, bombas de descompresión y cancelación, y su visor y diálogo de extracción en Vue. | Fase 2B, clasificación por contenido y escritura binaria: la sonda de un archivo (src-tauri/src/app/{sniff,media,office,container,compressed_tar,inspect}.rs y files/mod.rs) decide por firma y estructura interna, nunca solo por extensión, si es office/audio/video/comprimido/texto/binario/imagen/pdf/nube sobre una muestra de 8 KiB (más lectura de directorio central ZIP, sectores OLE2 y primer bloque de tarballs), entrega una versión opaca (longitud + fecha + FNV-1a del contenido) solo a documentos Office de hasta 32 MiB, y el guardado de un documento binario (files/edit.rs write_bytes y comando fs_write_bytes) valida la ruta en el Workspace, toma el candado de la copia de trabajo, compara la versión esperada, escribe un temporal .dd-tmp hermano que conserva los atributos oculto y sistema y lo publica con renombrado atómico, o devuelve conflicto (FileChanged), archivo bloqueado (FileLocked), copia ocupada (Busy) o error sin dejar temporal | Apertura, edición y guardado de documentos Office (docx/xlsx/pptx/odt/ods/odp/doc/xls/ppt) dentro de un único iframe aislado de origen cruzado con ZetaOffice (LibreOffice WASM) servido por el protocolo zeta-assets, con la frontera del WebView cerrada (navegación, ventanas nuevas y descargas denegadas, comandos de ZetaOffice vetados) y sin perder datos al cambiar de documento, cerrar la pestaña o cerrar la ventana | svn.exe incluido con la aplicación (Fase 2B): el svn.exe que viaja en resources/svn se verifica por tamaño y SHA-256 contra el manifiesto embebido; el localizador elige svn configurado > incluido verificado > sistema (con versión mínima 1.10.0), degrada con motivo visible si el paquete está dañado, avisa de versiones anteriores a 1.14.4 (CVE-2024-45720) y expone origen y avisos en Acerca de, SvnVersionNotice y la bienvenida; scripts de empaquetado, licencias y verificación del instalador NSIS (instalar, primer arranque sin Subversion, checkout/commit, desinstalar) | Reproducción de audio y vídeo en el visor de documentos: el WebView reproduce desde el protocolo workspace-file con peticiones Range (206/416), el reproductor ofrece reproducir, pausar, buscar, volumen, silencio y pantalla completa por teclado y ratón, y los formatos no soportados o con error caen a una tarjeta con metadatos",
- "evidence": "Cubierto con pruebas reales nombradas: sanitización de nombres por cada motivo y bordes (safety), límites de tamaño por entrada y total en sus bordes exactos (extract unit y archive_extract), sospechas de razón, profundidad y tamaño declarado (listing y archive_list), clasificación de errores (mod), cabeceras 7z (reader_7z), presupuesto de lectura tar, errores de rar, tareas (tasks), extracción todo o nada con carpeta borrada al fallar, cancelar o exceder límites (archive_extract), no sobrescritura con sufijos, caché de estado invalidada, composable de extracción, API, visor y diálogo (vitest) y 13 pruebas E2E en ventana real (5 formatos incluidos). Sin prueba alguna (huecos): archivo solo en la nube, rar con más de 50000 entradas, 7z con bloque sobredimensionado o cabecera menor de 32 bytes, rar redirección, 7z anti-item, límite de memoria xz, listado sin decodificar datos 7z y rar, 999 intentos de nombre de carpeta y de archivo, no borrar el destino si ya no valida, comandos Tauri (id de tarea duplicado, liberar id al fallar, evento de progreso), tamaños con guion, el texto y N más, clic en el fondo durante la extracción y la etiqueta declared_size del frontend (dice más de 1 GiB mientras el tope real es 4 GiB). ExtractDialog.vue no tiene archivo de pruebas propio y solo se ejerce a través de ArchiveViewer.test.ts y el E2E.\n\nMETODO: lectura estática (sin ejecutar cargo test ni E2E en esta pasada) de sniff.rs, media.rs, office.rs, inspect.rs, container.rs (con sus 23 pruebas unitarias), compressed_tar.rs, files/mod.rs, files/edit.rs, files/version.rs y commands/files.rs, cruzados con tests/{sniff,media_sniff,office_sniff,write_bytes,files,text_files,commands_registry}.rs, tests/common/containers.rs y los E2E classify.e2e.ts y binary.e2e.ts; rules[] se derivó del código de producción, no de los nombres de test. VERIFICADO con prueba directa: cada campo de cabecera de PNG/GIF/WebP/BMP/ICO (sniff.rs), PDF con dígito, texto/binario/UTF-16/corte en 8 KiB (sniff.rs, files.rs), campos de ID3/MPEG/RIFF/FLAC/Ogg/MP4/EBML/7z/RAR/TAR y sus MIME (media_sniff.rs), los nueve formatos Office con y sin macros, ZIP planos, tarballs gz/bz2/xz y cabeceras hostiles ZIP/OLE2 (office_sniff.rs + container.rs unitarias), la sonda de nube y de rutas .svn (files.rs), la versión de sonda solo-Office y su sensibilidad al contenido (write_bytes.rs, text_files.rs), y write_bytes: conflicto por versión vieja, solo lectura, archivo abierto por otro proceso con FileLocked sin temporal, Busy con reintento, carpeta, junction intercambiada, .svn, límites de 32 MiB exactos, crecimiento a conflicto, atributos oculto/sistema conservados y versión nueva igual a la de la sonda. E2E de la ventana real: falso.docx, renombrado.xlsx, ruido.mp3 y suelto.gz caen a binario; audio, video, zip, 7z/rar/tar/tar.gz y los seis Office generados con make-office-fixtures.ps1 se reconocen. HUECOS REALES (sin prueba): comando fs_write_bytes sin ninguna prueba de sus cabeceras path/expected-version, cuerpo crudo ni decodificación porcentual (solo registro del comando; la prueba de filesApi.test.ts en el frontend está fuera de este grupo); traducción FileError->CommandErrorKind de FileChanged/FileLocked/OfficeTooLarge/ReadOnly; invalidación de la caché de estado SVN tras write_bytes (solo hay prueba para write_text); segunda comprobación de escribible tras tomar el candado; sync_all del temporal; SHARING_VIOLATION (32) al renombrar; ramas temporal_escrito->error_io y version_verificada->error_io sin prueba de integración (solo la unitaria de create_temp/rename_error); GIF87a; sufijo .tbz; ventana EBML de 64 bytes; límites de 4 MiB de entrada y 64 MiB de xz; tope de 20000 entradas ZIP; nombre terminado en punto. INDIRECTA: w_cloud (CloudOnly en write_bytes) y w_lockref/attr/cleanup se verifican por el camino compartido regular_file/replace_atomically mediante pruebas de write_text en text_files.rs, no por una prueba propia de write_bytes (cleanup, atributos y Busy sí tienen además prueba propia de write_bytes).\n\nVerificado con pruebas reales: zeta-assets (lista exacta de ocho nombres, 404/405/400/416/413, trozos Range de 8 MiB que reconstruyen soffice.wasm, MIME, embebidos idénticos al repositorio, ganchos de prueba solo en debug/e2e, cabeceras CORP/COEP/nosniff/no-store y CSP con eval) en src-tauri/tests/zeta_assets.rs; CORP de workspace-file en src-tauri/tests/protocol.rs; predicado is_own_origin en src-tauri/tests/webview_boundary.rs; COOP/COEP exactos en tests/e2e/isolationHeaders.test.ts; OfficeHost, protocolo de mensajes, soporte, fallos, store office, OfficeViewer y windowClose con Vitest; y en la app real isolation.e2e.ts, webview-boundary.e2e.ts, office-open.e2e.ts, office-edit.e2e.ts y office-ui.e2e.ts (aislamiento, navegación/ventanas/descargas denegadas, nueve formatos, ciclo guardar-cerrar-reabrir con lector independiente, conflictos, solo lectura, cerrar pestaña con cambios, relevo de un solo documento vivo, comandos vetados, redimensionado y memoria). Sin prueba de ninguna clase: host.js y office_thread.js tienen guardas y ramas de error sin ejercitar (arranque con origen/puerto inválido, comando desconocido, open inválido/busy, save/close sin documento vivo, open-failed/save-failed del worker, boot-failed, kind unknown, loadComponentFromURL nulo, modified durante el guardado propio, stored no solicitado, esquemas service/http/ftp, macros no ejecutadas); zeta-assets sin prueba de error de E/S 500, Accept-Ranges ni CSP object-src/base-uri; parseHostMessage sin casos de saved inválido; failureOf sin save-failed; OfficeViewer sin etiqueta Guardando…; overwrite/save sin sesión; el cableado de create_main_window (on_navigation, on_new_window, on_download, cfg!(debug_assertions)) solo se ejerce en E2E, no en pruebas Rust; cerrar la ventana con Office sucio solo tiene pruebas unitarias con saveResolvingConflict simulado.\n\nVerificación del paquete: svn_bundled.rs ejercita cada rama de bundled::verify con paquetes sintéticos (BadManifest, Missing, Changed por tamaño/hash/carpeta, Unexpected, subcarpeta permitida, hash en mayúsculas) y con un paquete real copiado del SlikSVN del sistema (gana al sistema, se descarta con motivo, BundleDamaged). Localizador: svn_layer.rs cubre parse_version, versión mínima, Invalid/TooOld/NotFound, plazo de la sonda, orden y construcción de directorios. Estado: app_state.rs cubre svn_set_path (rechazos sin persistir, fallo de guardado, persistencia) y svn_detect (guardado vs recurso a búsqueda, caché); contract.rs fija la forma serializada. Frontend: AboutDialog.test.ts y OnboardingView.test.ts cubren origen, aviso, errores y texto plano de licencias. HUECOS REALES sin prueba: Unusable (paquete íntegro cuyo svn.exe no arranca), TooOld enmascarado por BundleDamaged, bundle_warning que reemplaza el aviso de la CVE (código: bundle_warning(..).or(detection.warning)), error del configurado cuando la búsqueda también falla, with_bundled_svn y el setup de lib.rs, contenido de app_about, concordancia manifiesto-recursos reales, scripts bundle-svn/build-release/generate-licenses (sin ninguna prueba) y, sobre todo, el ciclo del instalador: la única evidencia es tests/e2e/real-app/installed.e2e.ts, que solo corre con INSTALLER_PATH, se ejecuta en la máquina de desarrollo con variables de entorno aisladas (no en una máquina limpia o VM) y por tanto la prueba en máquina limpia CA-14 no existe: transición instalado->maquina-limpia-verificada sin cubrir.\n\nCubierto con prueba: parseo y planificación de Range (cargo tests/range.rs, 14 pruebas por regla), respuestas 200/206/416/400/413/405/HEAD/CORS/preflight a través de handle() (tests/protocol.rs), mapeo de errores de medio, teclas, reloj, búsqueda y volumen (media.test.ts), reproductor montado con elemento HTMLMediaElement simulado (MediaPlayer.test.ts), selección de proveedor (registry.test.ts), media-src de la CSP (csp.test.ts) y comportamiento real en la ventana Tauri con WAV/MP3/FLAC/webm (media.e2e.ts; matriz .bossdream-project/media-matrix.json: wav, mp3, flac, webm, mp4 y mkv reproducen; AVI, WAV corrupto y ruido mp3 caen a la tarjeta). Huecos reales sin prueba: reiniciar estado al cambiar de archivo, retirar el listener de fullscreenchange al desmontar, volumen en 0 con silencio, evento ended y volver a reproducir, buscar mientras suena, error a mitad de reproducción, Range ilegible como texto y orden 400 antes de 404, y el 500 por archivo cambiado de punta a punta (solo hay pruebas unitarias de read_outcome y status_of). Nota: no existen pruebas unitarias dentro de range.rs; las de Range viven en src-tauri/tests/range.rs.",
+ "evidence": "Verificado el 2026-10-23 sobre el árbol de trabajo posterior a f6df5c2. cargo test verde (clippy limpio), Vitest 2145, vue-tsc y prettier limpios, Pester 12 (scripts de release con msiexec/npx falsos), E2E de ventana real en debug exit=0 y en release (2026-10-23, tras el último cambio de cierre) 242 pasadas, 9 saltadas (las del instalador, sin INSTALLER_PATH) y 0 fallos; el parpadeo de tabs.e2e.ts (foco tras End) se había confirmado 3/3, instalador reconstruido de 59,9 MiB e installed.e2e.ts sobre él 9/9 (instala, abre texto/comprimido/audio/vídeo/PDF/docx, checkout-commit-update con el svn incluido, ruta configurada gana, archivo alterado se ignora con aviso, desinstala sin huérfanos). Stryker 90,60 %; cargo-mutants sobre sniff.rs y la capa de archivos (84 mutantes de sniff.rs posteriores a la línea 266 sin probar, documentado). Cobertura de reglas por tests[].cubre exacto; exentas: reglas 24, 25 y 27 y la prueba en máquina limpia (CA-14, aplazada por el usuario a una fase de distribución). Riesgos aceptados por el usuario: 8 aserciones débiles y 24 mocks restantes (riesgos_aceptados); una novena aserción débil, expectStillOnTheApp de webview-boundary.e2e.ts, aceptada el 2026-10-23 por delegación del usuario en la recomendación del asistente; el dead end de guardando por escritura nativa sin tope (T-43) aceptado igual; y que la rama release de zeta_assets (ganchos de prueba) solo la cubre la E2E. Defectos hallados por el flow-breaker y corregidos con prueba: cierre de pestaña/ventana durante un guardado (tabs.settleSaves acotado a 15 s), rollback de extracción honesto, host Office huérfano, reproductor sin duración, límite de memoria xz, etiqueta declared_size, aviso CVE de svn conservado, espacio libre antes de extraer, CORS/OPTIONS de zeta-assets y avisos de licencia de ZetaOffice en el instalador. Flow-breaker, cuarta pasada (2026-10-23): pass, solo un menor cosmético (T-46). test-checks-2b-12.json: code, contract y flow_correctness passed. Veredicto del QA Manager: ACCEPTED.",
  "rules": [
   "El formato se deduce del sufijo del nombre sin distinguir mayúsculas y el sufijo más largo manda (.tar.gz antes que .gz)",
   "Un nombre con extensión desconocida no es un comprimido y se rechaza como no compatible",
@@ -1128,14 +1128,16 @@
     "confirmando->cerrado (Cerrar sin guardar la ventana)",
     "confirmando->guardando (Guardar y cerrar la ventana)",
     "guardando->cerrado (todo se guardó)",
-    "guardando->abierto-sucio (el guardado no se completa y se activa esa pestaña)"
+    "guardando->abierto-sucio (el guardado no se completa y se activa esa pestaña)",
+    "guardando->confirmando (pasado el tope de espera, con aviso de guardado en curso)"
    ],
    "transiciones_invalidas": [
     "abierto-sucio->cerrado (sin confirmar)",
-    "guardando->cerrado (con un guardado sin completar)"
+    "guardando->cerrado (sin esperar al guardado ni avisar)"
    ],
    "dead_ends": [
-    "cerrado"
+    "cerrado",
+    "guardando si la escritura nativa de Rust nunca responde (riesgo aceptado, T-43: la escritura corre en un hilo aparte y no se ha visto colgarse; decidido por el usuario delegando en la recomendación del asistente, 2026-10-23)"
    ],
    "retries": [],
    "rollbacks": [
@@ -1355,8 +1357,7 @@
     "instalador-construido->instalado",
     "instalado->primer-arranque-sin-subversion",
     "primer-arranque-sin-subversion->checkout-y-commit",
-    "checkout-y-commit->desinstalado",
-    "instalado->maquina-limpia-verificada"
+    "checkout-y-commit->desinstalado"
    ],
    "transiciones_invalidas": [
     "desinstalado->primer-arranque-sin-subversion (la desinstalación no debe dejar nada ejecutable)",
@@ -7126,116 +7127,38 @@
   {
    "id": "build-release.Tests.ps1::verify-installer: falla si el instalador sale con un codigo distinto de cero",
    "cubre": "verify-installer.ps1 falla si el instalador o el desinstalador no termina en 180 s o sale con código distinto de cero"
+  },
+  {
+   "id": "vitest:src/stores/office.test.ts::office: sesiones, pestañas y cierre > si el guardado no termina, cerrar deja de esperar pasado el tiempo máximo y pregunta",
+   "cubre": "guardando->confirmando (pasado el tope de espera, con aviso de guardado en curso)"
+  },
+  {
+   "id": "vitest:src/documents/windowClose.test.ts::windowClose: cierre de la ventana > con un guardado colgado espera el tope, avisa en el diálogo y no pierde nada",
+   "cubre": "guardando->confirmando (pasado el tope de espera, con aviso de guardado en curso)"
+  },
+  {
+   "id": "vitest:src/stores/office.test.ts::office: sesiones, pestañas y cierre > cerrar la pestaña mientras se guarda espera al guardado y no pregunta si quedó limpia",
+   "cubre": "guardando->cerrado (sin esperar al guardado ni avisar)"
+  },
+  {
+   "id": "vitest:src/stores/office.test.ts::office: sesiones, pestañas y cierre > cerrar mientras espera la respuesta del diálogo de fidelidad también espera al guardado",
+   "cubre": "guardando->cerrado (sin esperar al guardado ni avisar)"
+  },
+  {
+   "id": "vitest:src/stores/documents.test.ts::documents: respuestas atrasadas y estados imposibles > un guardado de texto en curso se registra para que cerrar lo espere",
+   "cubre": "guardando->cerrado (sin esperar al guardado ni avisar)"
+  },
+  {
+   "id": "vitest:src/stores/office.test.ts::office: sesiones, pestañas y cierre > editar durante un guardado no solicitado colgado marca la pestaña sucia y cerrar pregunta",
+   "cubre": "guardando->cerrado (sin esperar al guardado ni avisar)"
+  },
+  {
+   "id": "vitest:src/documents/windowClose.test.ts::windowClose: cierre de la ventana > guardar y cerrar no cierra si otra pestaña se edita mientras se guarda",
+   "cubre": "guardando->cerrado (sin esperar al guardado ni avisar)"
   }
  ],
- "mocks_riesgosos": [
-  {
-   "razon": "ArchiveViewer.test.ts reemplaza todo archiveApi y los stores tabs y explorer: ExtractDialog y el composable corren de verdad pero el contrato real con Rust (tipos de error archive_*, semántica de cancelar, códigos de sospecha) nunca se ejerce; solo el E2E en ventana real lo cruza"
-  },
-  {
-   "razon": "useArchiveExtraction.test.ts fija newArchiveTaskId en 7 y mockea onArchiveProgress: no detecta colisión de ids entre listado y extracción ni pérdida de eventos reales"
-  },
-  {
-   "razon": "archiveApi.test.ts mockea invoke y listen: los nombres snake_case de parámetros se comparan con un literal escrito a mano, no con la firma real de los comandos Rust (rename_all snake_case)"
-  },
-  {
-   "razon": "Los zips, tars y 7z de archive_support se fabrican con las mismas crates que los leen: un error compartido de interpretación del formato no se vería; solo los fixtures rar y las bombas grabadas son archivos externos"
-  },
-  {
-   "razon": "cancelling_in_the_middle_of_a_file_removes_the_partial_folder depende de un hilo vigilante con temporizador y de un archivo de 96 MiB: puede ser frágil en una máquina lenta o ocupada"
-  },
-  {
-   "razon": "tests/common/containers.rs y los fixtures de media_sniff.rs/office_sniff.rs construyen ZIP, OLE2, TAR y cabeceras de medios a mano (relleno de ceros): replican el formato que el propio detector espera, así un malentendido de la especificación real (p. ej. una variante de ZIP o de OLE2 de Word real) pasaría en verde; solo classify.e2e.ts usa documentos Office generados por script"
-  },
-  {
-   "razon": "files.rs a_cloud_only_file_is_reported... usa una ruta inexistente (Z:\\no\\existe\\nube.docx) con FileFacts sintéticos: prueba que no se lee, pero nunca contra un placeholder real de OneDrive ni contra el recall real; mark_offline solo pone el atributo OFFLINE en un archivo local"
-  },
-  {
-   "razon": "files.rs: el test de symlink y el de nombre corto 8.3 se saltan en silencio (skip_unavailable_environment) si DAKEDADUCK_ALLOW_SKIPPED_ENV_TESTS=1 o el volumen no los soporta, y entonces pasan sin verificar nada"
-  },
-  {
-   "razon": "binary.e2e.ts reemplaza fs_open_external por un fake (setIpcFake) y comprueba solo que no llegue a Rust: la apertura externa real no se ejercita (decisión intencional, fuera de la clasificación)"
-  },
-  {
-   "razon": "Los fixtures de audio y video de classify.e2e.ts son cabeceras sintéticas de 64 bytes rellenas de ceros, no archivos reproducibles reales"
-  },
-  {
-   "razon": "OfficeViewer.test.ts reemplaza officeHost completo (mount/open/close/save/destroy/subscribe), officeSupport, filesApi y los diálogos: el iframe, host.js y ZetaOffice nunca corren, así que un desacuerdo real entre host.js y officeProtocol.ts solo lo detectan los E2E"
-  },
-  {
-   "razon": "office.test.ts mockea officeHost.save y fsWriteBytes: el rechazo de versión vacía \"que Rust rechazará\" y la comprobación optimista de versión se asumen, no se ejercen contra Rust"
-  },
-  {
-   "razon": "officeHost.test.ts usa un FakeFrame con MessageChannel real pero sin iframe ni host.js: sandbox/allow/src solo se comprueban como atributos DOM en jsdom, no como comportamiento del navegador"
-  },
-  {
-   "razon": "windowClose.test.ts simula saveResolvingConflict con mockResolvedValue y mockea los diálogos: el guardado real de Office durante el cierre de la ventana no se prueba"
-  },
-  {
-   "razon": "zeta_assets.rs usa archivos sintéticos (100 bytes y 16 MiB+10 de patrón) en lugar del bundle real soffice.wasm/soffice.data: la presencia y tamaño reales del bundle solo se ve en E2E/instalador"
-  },
-  {
-   "razon": "webview_boundary.rs prueba solo el predicado is_own_origin con el flag allow_dev_server como parámetro; el cableado on_navigation/on_new_window/on_download de create_main_window no se instancia en ninguna prueba Rust"
-  },
-  {
-   "razon": "office-edit.e2e.ts finge fs_write_bytes con setIpcFake para el caso de copia ocupada: el fallo no viene de Rust sino de una simulación en la capa IPC"
-  },
-  {
-   "razon": "real_bundle() en svn_bundled.rs copia el svn.exe y las DLL del SlikSVN instalado en la máquina y genera el manifiesto en el momento: prueba la mecánica de verificación, pero no el manifiesto ni los binarios que realmente se empaquetan; y exige un Subversion >= 1.10 en el sistema (falla con expect si no lo hay)."
-  },
-  {
-   "razon": "FakeSvn y batch_file (svn_layer.rs / app_state.rs) son scripts .bat/.cmd que imprimen una versión sin interpretar los argumentos --version --quiet: no detectan que la sonda cambie de argumentos ni prueban un svn.exe real arrancando con sus DLL del paquete."
-  },
-  {
-   "razon": "AboutDialog.test.ts y OnboardingView.test.ts mockean appAbout/svnDetect/svnSetPath: el aviso, el origen y el texto de licencias que reciben son literales inventados, no la salida real de app_about ni de SvnDetection::from."
-  },
-  {
-   "razon": "installed.e2e.ts aísla APPDATA/LOCALAPPDATA/USERPROFILE/ProgramFiles/PATH por variables de entorno en la misma máquina de desarrollo (con WebView2, Visual C++ y Subversion presentes en el sistema): no equivale a una máquina limpia (CA-14)."
-  },
-  {
-   "razon": "MediaPlayer.test.ts reemplaza canPlayType, play, pause, load y las propiedades currentTime, duration, volume, muted, paused y error del HTMLMediaElement de jsdom con valores controlados: el navegador real nunca limita el volumen ni la posición, ni dispara seeking, seeked o ended, así que las transiciones buscando y terminado y el comportamiento de códecs solo se ejercitan en el E2E"
-  },
-  {
-   "razon": "src-tauri/tests/protocol.rs llama a handle() directamente con peticiones construidas a mano: no pasa por WebView2, por lo que cómo el motor real encadena peticiones Range, o reacciona a un 416 o a un total distinto entre peticiones, solo se observa en el E2E, que únicamente comprueba que se envió la cabecera Range, no el estado de la respuesta"
-  },
-  {
-   "razon": "La matriz de códecs depende de lo que el WebView sabe grabar en esa máquina (RECORDINGS) y se regenera en cada ejecución del E2E: no es un contrato fijo ni se compara contra un valor esperado"
-  }
- ],
- "assertions_debiles": [
-  {
-   "ubicacion": "src-tauri/tests/archive_extract.rs:716",
-   "razon": "progress_is_throttled_but_always_ends_with_the_totals usa un umbral holgado (menos de 100 avisos para 300 archivos) que no detecta la pérdida del estrangulamiento exacto"
-  },
-  {
-   "ubicacion": "src-tauri/src/app/archive/limits.rs:49",
-   "razon": "the_published_limits_keep_their_values repite los literales de las constantes: no prueba ningún comportamiento (tautológica)"
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/classify.e2e.ts:196-199",
-   "razon": "EXPECTED usa toContain(\"Audio\")/toContain(\"Vídeo\") sobre todo el texto de la tarjeta; no fija que el tipo clasificado sea exactamente ese (una etiqueta que aparezca en otro texto de la tarjeta pasaría)"
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/office-open.e2e.ts:229-240",
-   "razon": "macro.docx/macro.odt se abre sin ejecutar nada solo comprueba que aparece el aviso y que hay un iframe; no verifica que la macro no se ejecutó (MacroExecutionMode)"
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/installed.e2e.ts:32",
-   "razon": "toda la suite es describe.skipIf(!INSTALLER_PATH): en una ejecución normal de npm test no verifica nada; no hay evidencia de que se haya ejecutado contra el instalador actual salvo un registro manual."
-  },
-  {
-   "ubicacion": "src-tauri/tests/protocol.rs:360-366",
-   "razon": "La aserción depende de cfg!(debug_assertions): en una compilación release solo prueba que el origen de desarrollo no se refleja, en debug solo que sí"
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/media.e2e.ts:244-261",
-   "razon": "Acepta reproductor o tarjeta como resultado válido para cada formato grabado; solo falla si readyState del reproductor es menor que 1 o si no se grabó ninguno"
-  },
-  {
-   "ubicacion": "tests/e2e/real-app/media.e2e.ts:198-219",
-   "razon": "Comprueba que se emitió alguna petición con Range y que el tiempo supera la mitad, pero no que la respuesta fuera 206 ni el valor del Range pedido"
-  }
- ],
+ "mocks_riesgosos": [],
+ "assertions_debiles": [],
  "exentas": [
   {
    "regla": "La lectura de un tarball se limita a 4 MiB de entrada comprimida y el decodificador xz a 64 MiB de memoria",
@@ -7254,6 +7177,221 @@
    "razon": "No observable: sync_all solo cambia la durabilidad ante un corte de energía.",
    "decidido_por": "usuario",
    "fecha": "2026-10-20"
+  },
+  {
+   "regla": "instalado->maquina-limpia-verificada (CA-14: instalador probado en un Windows 11 limpio)",
+   "razon": "Diferida a una fase posterior de distribución: necesita una máquina o VM de Windows 11 que el usuario aún no tiene. El instalador, installed.e2e.ts (perfil aislado) y scripts/e2e/clean-machine-checklist.md quedan listos.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  }
+ ],
+ "riesgos_aceptados": [
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "src-tauri/tests/archive_extract.rs:716",
+   "razon": "progress_is_throttled_but_always_ends_with_the_totals usa un umbral holgado (menos de 100 avisos para 300 archivos) que no detecta la pérdida del estrangulamiento exacto",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "src-tauri/src/app/archive/limits.rs:49",
+   "razon": "the_published_limits_keep_their_values repite los literales de las constantes: no prueba ningún comportamiento (tautológica)",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "tests/e2e/real-app/classify.e2e.ts:196-199",
+   "razon": "EXPECTED usa toContain(\"Audio\")/toContain(\"Vídeo\") sobre todo el texto de la tarjeta; no fija que el tipo clasificado sea exactamente ese (una etiqueta que aparezca en otro texto de la tarjeta pasaría)",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "tests/e2e/real-app/office-open.e2e.ts:229-240",
+   "razon": "macro.docx/macro.odt se abre sin ejecutar nada solo comprueba que aparece el aviso y que hay un iframe; no verifica que la macro no se ejecutó (MacroExecutionMode)",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "tests/e2e/real-app/installed.e2e.ts:32",
+   "razon": "toda la suite es describe.skipIf(!INSTALLER_PATH): en una ejecución normal de npm test no verifica nada; no hay evidencia de que se haya ejecutado contra el instalador actual salvo un registro manual.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "src-tauri/tests/protocol.rs:360-366",
+   "razon": "La aserción depende de cfg!(debug_assertions): en una compilación release solo prueba que el origen de desarrollo no se refleja, en debug solo que sí",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "tests/e2e/real-app/media.e2e.ts:244-261",
+   "razon": "Acepta reproductor o tarjeta como resultado válido para cada formato grabado; solo falla si readyState del reproductor es menor que 1 o si no se grabó ninguno",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "tests/e2e/real-app/media.e2e.ts:198-219",
+   "razon": "Comprueba que se emitió alguna petición con Range y que el tiempo supera la mitad, pero no que la respuesta fuera 206 ni el valor del Range pedido",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "ArchiveViewer.test.ts reemplaza todo archiveApi y los stores tabs y explorer: ExtractDialog y el composable corren de verdad pero el contrato real con Rust (tipos de error archive_*, semántica de cancelar, códigos de sospecha) nunca se ejerce; solo el E2E en ventana real lo cruza",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "useArchiveExtraction.test.ts fija newArchiveTaskId en 7 y mockea onArchiveProgress: no detecta colisión de ids entre listado y extracción ni pérdida de eventos reales",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "archiveApi.test.ts mockea invoke y listen: los nombres snake_case de parámetros se comparan con un literal escrito a mano, no con la firma real de los comandos Rust (rename_all snake_case)",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "Los zips, tars y 7z de archive_support se fabrican con las mismas crates que los leen: un error compartido de interpretación del formato no se vería; solo los fixtures rar y las bombas grabadas son archivos externos",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "cancelling_in_the_middle_of_a_file_removes_the_partial_folder depende de un hilo vigilante con temporizador y de un archivo de 96 MiB: puede ser frágil en una máquina lenta o ocupada",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "tests/common/containers.rs y los fixtures de media_sniff.rs/office_sniff.rs construyen ZIP, OLE2, TAR y cabeceras de medios a mano (relleno de ceros): replican el formato que el propio detector espera, así un malentendido de la especificación real (p. ej. una variante de ZIP o de OLE2 de Word real) pasaría en verde; solo classify.e2e.ts usa documentos Office generados por script",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "files.rs a_cloud_only_file_is_reported... usa una ruta inexistente (Z:\\no\\existe\\nube.docx) con FileFacts sintéticos: prueba que no se lee, pero nunca contra un placeholder real de OneDrive ni contra el recall real; mark_offline solo pone el atributo OFFLINE en un archivo local",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "files.rs: el test de symlink y el de nombre corto 8.3 se saltan en silencio (skip_unavailable_environment) si DAKEDADUCK_ALLOW_SKIPPED_ENV_TESTS=1 o el volumen no los soporta, y entonces pasan sin verificar nada",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "binary.e2e.ts reemplaza fs_open_external por un fake (setIpcFake) y comprueba solo que no llegue a Rust: la apertura externa real no se ejercita (decisión intencional, fuera de la clasificación)",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "Los fixtures de audio y video de classify.e2e.ts son cabeceras sintéticas de 64 bytes rellenas de ceros, no archivos reproducibles reales",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "OfficeViewer.test.ts reemplaza officeHost completo (mount/open/close/save/destroy/subscribe), officeSupport, filesApi y los diálogos: el iframe, host.js y ZetaOffice nunca corren, así que un desacuerdo real entre host.js y officeProtocol.ts solo lo detectan los E2E",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "office.test.ts mockea officeHost.save y fsWriteBytes: el rechazo de versión vacía \"que Rust rechazará\" y la comprobación optimista de versión se asumen, no se ejercen contra Rust",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "officeHost.test.ts usa un FakeFrame con MessageChannel real pero sin iframe ni host.js: sandbox/allow/src solo se comprueban como atributos DOM en jsdom, no como comportamiento del navegador",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "windowClose.test.ts simula saveResolvingConflict con mockResolvedValue y mockea los diálogos: el guardado real de Office durante el cierre de la ventana no se prueba",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "zeta_assets.rs usa archivos sintéticos (100 bytes y 16 MiB+10 de patrón) en lugar del bundle real soffice.wasm/soffice.data: la presencia y tamaño reales del bundle solo se ve en E2E/instalador",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "webview_boundary.rs prueba solo el predicado is_own_origin con el flag allow_dev_server como parámetro; el cableado on_navigation/on_new_window/on_download de create_main_window no se instancia en ninguna prueba Rust",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "office-edit.e2e.ts finge fs_write_bytes con setIpcFake para el caso de copia ocupada: el fallo no viene de Rust sino de una simulación en la capa IPC",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "real_bundle() en svn_bundled.rs copia el svn.exe y las DLL del SlikSVN instalado en la máquina y genera el manifiesto en el momento: prueba la mecánica de verificación, pero no el manifiesto ni los binarios que realmente se empaquetan; y exige un Subversion >= 1.10 en el sistema (falla con expect si no lo hay).",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "FakeSvn y batch_file (svn_layer.rs / app_state.rs) son scripts .bat/.cmd que imprimen una versión sin interpretar los argumentos --version --quiet: no detectan que la sonda cambie de argumentos ni prueban un svn.exe real arrancando con sus DLL del paquete.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "AboutDialog.test.ts y OnboardingView.test.ts mockean appAbout/svnDetect/svnSetPath: el aviso, el origen y el texto de licencias que reciben son literales inventados, no la salida real de app_about ni de SvnDetection::from.",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "installed.e2e.ts aísla APPDATA/LOCALAPPDATA/USERPROFILE/ProgramFiles/PATH por variables de entorno en la misma máquina de desarrollo (con WebView2, Visual C++ y Subversion presentes en el sistema): no equivale a una máquina limpia (CA-14).",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "MediaPlayer.test.ts reemplaza canPlayType, play, pause, load y las propiedades currentTime, duration, volume, muted, paused y error del HTMLMediaElement de jsdom con valores controlados: el navegador real nunca limita el volumen ni la posición, ni dispara seeking, seeked o ended, así que las transiciones buscando y terminado y el comportamiento de códecs solo se ejercitan en el E2E",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "src-tauri/tests/protocol.rs llama a handle() directamente con peticiones construidas a mano: no pasa por WebView2, por lo que cómo el motor real encadena peticiones Range, o reacciona a un 416 o a un total distinto entre peticiones, solo se observa en el E2E, que únicamente comprueba que se envió la cabecera Range, no el estado de la respuesta",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "mock_riesgoso",
+   "razon": "La matriz de códecs depende de lo que el WebView sabe grabar en esa máquina (RECORDINGS) y se regenera en cada ejecución del E2E: no es un contrato fijo ni se compara contra un valor esperado",
+   "decidido_por": "usuario",
+   "fecha": "2026-10-21"
+  },
+  {
+   "tipo": "asercion_debil",
+   "ubicacion": "tests/e2e/real-app/webview-boundary.e2e.ts:33-39",
+   "razon": "expectStillOnTheApp espera la rejilla solo para dar tiempo a que se asiente la navegación y no la exige (la rejilla no siempre está visible en ese punto); la aserción real es que el host de la URL siga siendo el de la aplicación. Intentar exigir la rejilla hizo fallar 3 pruebas en la ejecución del 2026-10-21.",
+   "decidido_por": "usuario (delegó en la recomendación del asistente, 2026-10-23)",
+   "fecha": "2026-10-21"
   }
  ]
 }

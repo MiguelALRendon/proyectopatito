@@ -104,7 +104,7 @@ describe('useTabsSession', () => {
     const { appCancelClose, appConfirmClose } =
       await import('../services/tauri');
     await handleCloseRequested();
-    expect(askWindowClose).toHaveBeenCalledWith(1);
+    expect(askWindowClose).toHaveBeenCalledWith(1, false);
     expect(appCancelClose).toHaveBeenCalledTimes(1);
     expect(appConfirmClose).not.toHaveBeenCalled();
     scope.stop();

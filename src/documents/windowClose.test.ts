@@ -27,6 +27,7 @@ import {
 } from '../services/filesApi';
 import type { CommandError, ErrorKind } from '../services/tauri';
 import { askLineEnding, askWindowClose } from './dialogs';
+import { SAVE_SETTLE_TIMEOUT_MS } from './limits';
 import { confirmWindowClose, saveAll } from './windowClose';
 
 const PATH = 'wc\\notas.txt';
@@ -72,7 +73,7 @@ beforeEach(() => {
 describe('windowClose: cierre de la ventana', () => {
   it('sin cambios vacía lo pendiente y deja cerrar sin preguntar', async () => {
     const { tabs } = await openDocument();
-    const flush = vi.spyOn(tabs, 'flush');
+    const flush = vi.spyOn(tabs, 'flushWithinLimit');
 
     expect(await confirmWindowClose()).toBe(true);
     expect(flush).toHaveBeenCalledTimes(1);
@@ -113,10 +114,31 @@ describe('windowClose: cierre de la ventana', () => {
 
     expect(await confirmWindowClose()).toBe(false);
 
-    expect(askWindowClose).toHaveBeenCalledWith(1);
+    expect(askWindowClose).toHaveBeenCalledWith(1, false);
     expect(fsWriteText).not.toHaveBeenCalled();
     expect(documents.sessionOf(tabId)?.current).toBe(EDITED);
     expect(tabs.isDirty(tabId)).toBe(true);
+  });
+
+  it('con un guardado colgado espera el tope, avisa en el diálogo y no pierde nada', async () => {
+    vi.useFakeTimers();
+    try {
+      const { documents, tabId } = await openDocument();
+      documents.edit(tabId, EDITED);
+      vi.mocked(fsWriteText).mockReturnValue(new Promise(() => undefined));
+      vi.mocked(askWindowClose).mockResolvedValue(null);
+      void documents.save(tabId);
+      await vi.advanceTimersByTimeAsync(0);
+
+      const closing = confirmWindowClose();
+      await vi.advanceTimersByTimeAsync(SAVE_SETTLE_TIMEOUT_MS);
+
+      expect(await closing).toBe(false);
+      expect(askWindowClose).toHaveBeenCalledWith(1, true);
+      expect(documents.sessionOf(tabId)?.current).toBe(EDITED);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('descartar deja cerrar sin escribir', async () => {
@@ -138,6 +160,23 @@ describe('windowClose: cierre de la ventana', () => {
 
     expect(lastWrite().content).toBe(EDITED);
     expect(tabs.hasDirtyTabs).toBe(false);
+  });
+
+  it('guardar y cerrar no cierra si otra pestaña se edita mientras se guarda', async () => {
+    const { tabs, documents, tabId } = await openDocument();
+    const other = tabs.open('wc\b.txt', 'document') as string;
+    vi.mocked(fsReadText).mockResolvedValueOnce(textDocument());
+    await documents.open(other, 'wc\b.txt');
+    documents.edit(tabId, EDITED);
+    vi.mocked(askWindowClose).mockResolvedValue('save');
+    vi.mocked(fsWriteText).mockImplementation(async () => {
+      documents.edit(other, `${ORIGINAL} editado a mitad del guardado`);
+      return { version: 'v2' };
+    });
+
+    expect(await confirmWindowClose()).toBe(false);
+
+    expect(documents.sessionOf(other)?.isDirty).toBe(true);
   });
 
   it('si al guardar falla una pestaña no cierra, la activa y conserva sus cambios', async () => {
@@ -232,7 +271,7 @@ describe('windowClose con documentos de Office', () => {
     withOffice();
     vi.mocked(askWindowClose).mockResolvedValue('discard');
     expect(await confirmWindowClose()).toBe(true);
-    expect(askWindowClose).toHaveBeenCalledWith(1);
+    expect(askWindowClose).toHaveBeenCalledWith(1, false);
   });
 
   it('cancelar el diálogo conserva la ventana abierta', async () => {

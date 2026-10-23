@@ -140,22 +140,19 @@ fn unlisted_and_hostile_paths_are_404_with_the_hardening_headers() {
 }
 
 #[test]
-fn only_get_and_head_are_allowed() {
+fn only_get_head_and_options_are_allowed() {
     let fx = fixture();
-    for method in [
-        Method::POST,
-        Method::PUT,
-        Method::DELETE,
-        Method::OPTIONS,
-        Method::PATCH,
-    ] {
+    for method in [Method::POST, Method::PUT, Method::DELETE, Method::PATCH] {
         let response = handle(Some(&fx.assets), &request(method.clone(), "/host.js", None));
         assert_eq!(
             response.status(),
             StatusCode::METHOD_NOT_ALLOWED,
             "{method}"
         );
-        assert_eq!(text(response.headers(), header::ALLOW), "GET, HEAD");
+        assert_eq!(
+            text(response.headers(), header::ALLOW),
+            "GET, HEAD, OPTIONS"
+        );
         assert_hardened(&response);
     }
 }
@@ -410,4 +407,69 @@ fn the_page_scripts_come_only_from_the_app_itself() {
             .collect();
         assert_eq!(scripts, ["script-src 'self'"], "{key}");
     }
+}
+
+const APP_ORIGIN: &str = "http://tauri.localhost";
+
+fn with_origin(method: Method, path: &str, origin: &str) -> Request<Vec<u8>> {
+    let mut request = request(method, path, None);
+    request
+        .headers_mut()
+        .insert(header::ORIGIN, origin.parse().unwrap());
+    request
+}
+
+#[test]
+fn only_the_exact_app_origin_gets_cors_headers() {
+    let fx = fixture();
+    let allowed = handle(
+        Some(&fx.assets),
+        &with_origin(Method::GET, "/host.js", APP_ORIGIN),
+    );
+    assert_eq!(
+        text(allowed.headers(), header::ACCESS_CONTROL_ALLOW_ORIGIN),
+        APP_ORIGIN
+    );
+    assert_eq!(text(allowed.headers(), header::VARY), "Origin");
+    for foreign in [
+        "http://evil.example",
+        "http://tauri.localhost.evil.example",
+        "https://tauri.localhost",
+        "null",
+    ] {
+        let denied = handle(
+            Some(&fx.assets),
+            &with_origin(Method::GET, "/host.js", foreign),
+        );
+        assert!(
+            !denied
+                .headers()
+                .contains_key(header::ACCESS_CONTROL_ALLOW_ORIGIN),
+            "{foreign}"
+        );
+    }
+}
+
+#[test]
+fn the_preflight_answers_204_with_methods_and_headers_and_no_body() {
+    let fx = fixture();
+    let response = handle(
+        Some(&fx.assets),
+        &with_origin(Method::OPTIONS, "/soffice.wasm", APP_ORIGIN),
+    );
+    assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    assert!(response.body().is_empty());
+    assert_eq!(
+        text(response.headers(), header::ACCESS_CONTROL_ALLOW_METHODS),
+        "GET, HEAD, OPTIONS"
+    );
+    assert_eq!(
+        text(response.headers(), header::ACCESS_CONTROL_ALLOW_HEADERS),
+        "Range"
+    );
+    assert_eq!(
+        text(response.headers(), header::ACCESS_CONTROL_ALLOW_ORIGIN),
+        APP_ORIGIN
+    );
+    assert_hardened(&response);
 }

@@ -34,7 +34,8 @@
     "targets": ["nsis"],
     "resources": {
       "resources/zetaoffice": "zetaoffice",
-      "resources/svn": "svn"
+      "resources/svn": "svn",
+      "../third_party/licenses/zetaoffice": "zetaoffice-licenses"
     },
     "icon": [
       "icons/32x32.png",

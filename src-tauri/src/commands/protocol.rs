@@ -74,7 +74,7 @@ fn route(service: Option<&FileService>, request: &Request<Vec<u8>>) -> Response<
     }
 }
 
-fn preflight() -> Response<Vec<u8>> {
+pub(super) fn preflight() -> Response<Vec<u8>> {
     let mut response = status_only(StatusCode::NO_CONTENT);
     let headers = response.headers_mut();
     headers.insert(
@@ -101,7 +101,7 @@ pub(super) fn without_body(mut response: Response<Vec<u8>>) -> Response<Vec<u8>>
     response
 }
 
-fn add_cors(headers: &mut HeaderMap, request_headers: &HeaderMap) {
+pub(super) fn add_cors(headers: &mut HeaderMap, request_headers: &HeaderMap) {
     let Some(origin) = request_headers
         .get(header::ORIGIN)
         .filter(|origin| is_allowed_origin(origin))

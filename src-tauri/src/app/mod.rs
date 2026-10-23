@@ -3,6 +3,7 @@ pub mod args;
 pub mod closing;
 pub mod compressed_tar;
 pub mod container;
+pub mod disk;
 pub mod error;
 pub mod files;
 pub mod inspect;

@@ -8,12 +8,14 @@ use super::extract::{self, ExtractReport, Job, ProgressSink};
 use super::limits::{Limits, MAX_SUFFIX_ATTEMPTS};
 use super::listing::{self, ArchiveListing, exceeds};
 use super::{ArchiveError, ArchiveFormat, Cancel, folder_stem};
+use crate::app::disk;
 use crate::app::files::{is_cloud_only, is_forbidden_name};
 use crate::app::operations::OperationManager;
 use crate::app::wc_status::StatusCache;
 use crate::app::workspace::{ScopedPath, Workspace, WorkspaceError, component_keys};
 
 const FALLBACK_FOLDER: &str = "extraido";
+const MIB: u64 = 1024 * 1024;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ExtractOptions {
@@ -68,6 +70,7 @@ impl ArchiveService {
         let listing = listing::list(source.file.as_path(), source.format, cancel, &self.limits)?;
         preflight(&listing, options, &self.limits)?;
         let destination = self.free_destination(&source)?;
+        self.ensure_space(&destination, listing.declared_bytes)?;
         let _lease = self.manager.try_lock_for_write(destination.as_path())?;
         fs::create_dir(destination.as_path())?;
         let relative = self.workspace.relative_path(destination.as_path());
@@ -84,6 +87,16 @@ impl ArchiveService {
         }
     }
 
+    fn ensure_space(&self, dir: &ScopedPath, needed: u64) -> Result<(), ArchiveError> {
+        let Some(parent) = dir.as_path().parent() else {
+            return Ok(());
+        };
+        match disk::available_bytes(parent) {
+            Ok(free) => check_space(free, needed),
+            Err(_) => Ok(()),
+        }
+    }
+
     fn finished(&self, report: ExtractReport, dir: &ScopedPath, relative: &Path) -> ExtractReport {
         self.statuses.invalidate(dir.as_path());
         ExtractReport {
@@ -93,8 +106,9 @@ impl ArchiveService {
     }
 
     fn rolled_back(&self, error: ArchiveError, dir: &ScopedPath, relative: &Path) -> ArchiveError {
+        let discarded = self.discard(dir);
         self.statuses.invalidate(dir.as_path());
-        match self.discard(dir) {
+        match discarded {
             Ok(()) => error,
             Err(left) => ArchiveError::Io(io::Error::other(format!(
                 "{error}; además no se pudo borrar lo extraído en «{}»: {left}",
@@ -153,6 +167,17 @@ impl ArchiveService {
             "demasiadas carpetas de destino repetidas".to_owned(),
         ))
     }
+}
+
+fn check_space(free: u64, needed: u64) -> Result<(), ArchiveError> {
+    if free >= needed {
+        return Ok(());
+    }
+    Err(ArchiveError::Limit(format!(
+        "no hay espacio libre suficiente en el disco: hacen falta {} MiB y hay {} MiB",
+        needed.div_ceil(MIB),
+        free / MIB
+    )))
 }
 
 fn file_name_of(path: &Path) -> String {
@@ -230,6 +255,16 @@ mod tests {
         assert!(why.to_string().contains("operación cancelada"));
         assert!(why.to_string().contains("«d»"));
         assert!(held.exists());
+    }
+
+    #[test]
+    fn enough_free_space_passes_and_a_shortage_names_both_figures() {
+        assert!(check_space(10 * MIB, 10 * MIB).is_ok());
+        let short = check_space(5 * MIB + 1, 10 * MIB);
+        let Err(ArchiveError::Limit(why)) = short else {
+            panic!("debía rechazar: {short:?}");
+        };
+        assert!(why.contains("hacen falta 10 MiB") && why.contains("hay 5 MiB"));
     }
 
     #[test]

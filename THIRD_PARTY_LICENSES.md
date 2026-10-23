@@ -39,6 +39,8 @@ Los binarios `soffice.js`, `soffice.wasm`, `soffice.data` y `soffice.data.js.met
 
 El `license.xml` de la rama `distro/allotropia/zeta-24-2` es el aviso completo y superconjunto de los anteriores.
 
+Los textos completos de estas licencias (el `license.xml` de la rama de LibreOffice, la LGPL 3 y la GPL 3 de Qt y la LICENSE de zetajs) se instalan sin modificar en la carpeta `zetaoffice-licenses` de la aplicación, con su origen y su SHA-256 en el `README.md` de esa carpeta.
+
 **Oferta de código fuente (MPL y LGPL).** El código de lo que se distribuye está disponible públicamente, sin coste: LibreOffice, rama `distro/allotropia/zeta-24-2`; Qt, repositorios `allotropia/qtbase` y `allotropia/qt5` (rama `5.15.2+wasm`) de GitHub; Emscripten, repositorio `allotropia/emscripten` (rama `fixed-3.1.65`); y las instrucciones de compilación, en el README de <https://github.com/allotropia/zetajs>. Como `soffice.wasm` se distribuye sin cambios, el usuario puede sustituirlo por una compilación propia: basta reemplazar los archivos de la carpeta `zetaoffice` de la instalación (el instalador se declara por usuario, así que la carpeta es escribible).
 
 Limitación conocida: no existe una URL con versión inmutable de estos binarios, así que se identifican por su SHA-256 y no por el commit exacto de compilación, que allotropia no publica.

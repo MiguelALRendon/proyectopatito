@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import {
   copyFileSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -242,7 +243,7 @@ describe.skipIf(!INSTALLER)(
     );
 
     it(
-      'hace checkout y commit con el svn incluido',
+      'hace checkout, commit y update con el svn incluido',
       async () => {
         const { page } = app;
         await showFolder(page, WC);
@@ -294,6 +295,20 @@ describe.skipIf(!INSTALLER)(
             timeout: VISIBLE_TIMEOUT_MS,
           })
           .toContain(COMMIT_MESSAGE);
+        runSvn([
+          'mkdir',
+          '-m',
+          'carpeta externa',
+          `${manifest.repo_file_url}/externa`,
+        ]);
+        await page
+          .locator('button.btn--primary', { hasText: 'Actualizar' })
+          .click();
+        await expect
+          .poll(() => existsSync(join(checkout, 'externa')), {
+            timeout: VISIBLE_TIMEOUT_MS,
+          })
+          .toBe(true);
       },
       SUITE_TIMEOUT_MS,
     );

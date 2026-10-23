@@ -27,11 +27,12 @@ export async function saveAll(): Promise<boolean> {
 }
 
 export async function confirmWindowClose(): Promise<boolean> {
-  await useTabsStore().flush();
+  await useTabsStore().flushWithinLimit();
   await useTabsStore().settleSaves();
+  const isSaving = useTabsStore().hasPendingSave();
   const dirtyCount = dirtyTabIds().length;
   if (dirtyCount === 0) return true;
-  const choice = await askWindowClose(dirtyCount);
-  if (choice === 'save') return saveAll();
+  const choice = await askWindowClose(dirtyCount, isSaving);
+  if (choice === 'save') return (await saveAll()) && dirtyTabIds().length === 0;
   return choice === 'discard';
 }

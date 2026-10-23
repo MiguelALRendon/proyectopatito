@@ -105,7 +105,7 @@ Proveedor `office` (`VIEWER_SCORE`, por `kind: office`). Abre los nueve formatos
 - **Errores al guardar**: cambio externo → diálogo de conflicto de la 2A (Cancelar / Recargar / Sobrescribir; sobrescribir relee la versión del disco), solo lectura → aviso con «Reintentar guardado», `FileLocked`, `WorkingCopyBusy` y demás → aviso con «Reintentar»; en todos los casos los cambios se conservan. En doc, xls y ppt se avisa de la posible pérdida de formato antes de la primera escritura de la sesión. Más de 32 MiB no se escribe.
 - **Un documento vivo, que sobrevive a otras pestañas**: `TabContent` renderiza un panel por pestaña (la activa más la del documento Office vivo, en orden estable y con `v-show`), de modo que ir al explorador y volver no recrea el iframe ni pierde los cambios. Solo hay un iframe: al abrir otro Office, si el vivo tiene cambios se pregunta (Cancelar vuelve a esa pestaña, Descartar, Guardar y continuar); si está limpio se suelta sin preguntar y su pestaña se reabre desde el disco al volver. Cerrar la pestaña o la ventana con cambios usa las confirmaciones de la 2A (`windowClose.ts` incluye las sesiones de Office).
 - **Recarga**: «Recargar» tras un conflicto cierra el documento, relee versión y bytes y lo vuelve a abrir.
-- **Gancho de pruebas**: `window.__officeTest` (insertar, leer, tamaño de la ventana interna, despachar un comando) dentro del iframe, servido por `office_test.js` y `office_test_thread.js`, que **solo existen en compilaciones de depuración o con `e2e-config-dir`** (404 en el instalador; comprobar con `tauri build` en el QA Increment).
+- **Gancho de pruebas**: `window.__officeTest` (insertar, leer, tamaño de la ventana interna, despachar un comando) dentro del iframe, servido por `office_test.js` y `office_test_thread.js`, que **solo existen en compilaciones de depuración o con `e2e-config-dir`** (404 en el instalador; comprobado el 2026-10-21 sobre el ejecutable de `tauri build`, que no contiene `__officeTest`).
 
 ### Audio y vídeo (`MediaPlayer`, `MediaCard`)
 
@@ -174,7 +174,7 @@ Reglas de la extracción: todo o nada (ante cualquier error o cancelación se bo
 - **La memoria de WebAssembly no se devuelve** mientras el iframe vive (medido en el spike S1e: se libera al quitarlo) y los documentos grandes suben el consumo. No hay reciclado automático de la página (T-32).
 - **doc, xls, ppt (y rtf y csv) sin apertura externa.** Quedan fuera de la lista permitida de la 2A: si ZetaOffice no los abre, solo se ve la tarjeta binaria.
 - **Fixtures heredados circulares.** Los tres OLE2 (`doc`, `xls`, `ppt`) de `tests/fixtures/office/legacy/` los produjo ZetaOffice, el mismo motor que luego los abre: validan estructura, no que Word o Excel los abran.
-- **Comprimidos:** extracción todo o nada y sin comprobar el espacio libre antes de escribir (T-29, T-30); los RAR cifrados no se extraen.
+- **Comprimidos:** extracción todo o nada (T-30) que comprueba el espacio libre del disco antes de escribir y rechaza si no alcanza; los RAR cifrados no se extraen.
 - **Instalador sin firmar:** SmartScreen avisará (T-33).
 
 Fuera de la 2A y la 2B por decisión del usuario: PDF editable. Roadmap completo en [roadmap](roadmap.md).

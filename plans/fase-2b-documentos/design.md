@@ -92,6 +92,8 @@ Efectos que hay que cubrir (trabajo del Increment 2 y su regresión E2E):
 - **Instancia única.** Hay un `OfficeHost` y un documento activo (CA-6). Al cambiar a otra pestaña Office se pide guardar o descartar, se cierra el documento y se carga el otro. Reabrir un documento descartado lo relee del disco.
 - **Límites** (medidos en S1e): `MAX_OFFICE_BYTES` = 32 MiB, `OFFICE_LOAD_TIMEOUT` = 60 s, `OFFICE_RECYCLE_BYTES` = 2,5 GiB de memoria privada sumada del WebView.
 
+> Actualización (2026-10-21): el reciclado por `OFFICE_RECYCLE_BYTES` no se implementó (T-32). El código espera a que la memoria baje de `OFFICE_RELEASED_BYTES` (1 GiB) al destruir el iframe y no recarga la página por su cuenta; la memoria de WebAssembly solo se devuelve al quitar el iframe.
+
 ## 5. Flujo de un documento Office (CA-4, CA-5, CA-7)
 
 1. `fs_probe` (2A, ampliado) devuelve `kind: office` solo si la extensión es una de las nueve **y** el contenido coincide: ZIP cuyo **directorio central completo** contiene `[Content_Types].xml` (OOXML) o `mimetype` (ODF) —un solo directorio, sin descomprimir—, u OLE2 (`D0 CF 11 E0`) cuyo directorio de flujos contiene `WordDocument` (doc), `Workbook` o `Book` (xls) o `PowerPoint Document` (ppt) **y** concuerda con la extensión (OLE2 también es el contenedor de `.msi` y `.msg`; un `.xls` renombrado `.doc` abriría Calc y se guardaría con el filtro equivocado). Devuelve además `has_macros` (`vbaProject.bin`, `Basic/` o `Scripts/` en ODF, almacenamiento `Macros` o `_VBA_PROJECT_CUR` en OLE2).

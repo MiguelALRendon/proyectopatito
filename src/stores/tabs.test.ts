@@ -17,6 +17,7 @@ import {
   type UiStateView,
 } from '../services/filesApi';
 import { MAX_FAVORITES } from '../utils/favoriteList';
+import { SAVE_SETTLE_TIMEOUT_MS } from '../documents/limits';
 import { normalizedPath, pathKey } from '../utils/folderPaths';
 import {
   FAVORITES_LIMIT_NOTICE,
@@ -559,6 +560,18 @@ describe('persistence', () => {
     await restoredStore({ tabs: [savedTab('a'), savedTab('gone', false)] });
     await vi.advanceTimersByTimeAsync(PERSIST_DELAY_MS * 2);
     expect(uiStateSet).not.toHaveBeenCalled();
+  });
+
+  it('flushWithinLimit stops waiting for a write that never answers', async () => {
+    vi.mocked(uiStateSet).mockReturnValue(new Promise(() => undefined));
+    const store = await restoredStore({ tabs: [savedTab('a')] });
+    store.open('b');
+    let isDone = false;
+    void store.flushWithinLimit().then(() => (isDone = true));
+    await vi.advanceTimersByTimeAsync(SAVE_SETTLE_TIMEOUT_MS - 1);
+    expect(isDone).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(isDone).toBe(true);
   });
 
   it('coalesces a burst of changes into one delayed write', async () => {

@@ -4,7 +4,7 @@ title: Roadmap
 type: reference
 status: current
 source: both
-last_verified: 2026-10-16
+last_verified: 2026-10-21
 symbols: []
 related: [ref-architecture, ref-editors, ref-security]
 ---
@@ -16,8 +16,8 @@ Las fases salen de `propuesta.md` §127. La Fase 2 se dividió en dos planes (2A
 | Fase | Contenido (propuesta §127) | Estado | Plan |
 |---|---|---|---|
 | 1. Fundación | Tauri, Rust, frontend, workspace, filesystem, detección de `svn`, `info`, `status`, `checkout`, `update`, `commit` | **Hecha** (QA aceptado el 2026-10-14) | `plans/fase-1-fundacion` |
-| 2A. Explorador | Explorador, favoritos, pestañas, vistas, apertura de documentos, editores | **Hecha**: Increments 1 a 14. Pendientes el Increment 15 (esta documentación) y el 16 (QA Increment) | `plans/fase-2a-explorador` |
-| 2B. Documentos | Office, audio, vídeo, comprimidos, `svn.exe` empaquetado, instalador y máquina limpia | **Implementada** (Increments 1 a 11); faltan el QA Increment y la máquina limpia del usuario (CA-13, CA-14) | [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/plan.md) |
+| 2A. Explorador | Explorador, favoritos, pestañas, vistas, apertura de documentos, editores | **Hecha** (QA aceptado el 2026-10-17) | `plans/fase-2a-explorador` |
+| 2B. Documentos | Office, audio, vídeo, comprimidos, `svn.exe` empaquetado, instalador y máquina limpia | **Aceptada** (QA Increment ACCEPTED el 2026-10-23); queda diferida la prueba en máquina limpia (CA-14), por decisión del usuario | [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/plan.md) |
 | 3. Marketplace | Repositorios, navegador de repositorio, metadatos remotos, descarga, checkout, export, detección de estado local | **Diferida**, sin plan | n/a |
 | 4. SVN avanzado | Log, diff, blame, revert, cleanup, propiedades, locks | **Diferida**, sin plan (cleanup ya existe desde la Fase 1) | n/a |
 | 5. Branching | Branch, tag, switch, merge, mergeinfo, gráfico de revisiones | **Diferida**, sin plan | n/a |
@@ -61,9 +61,9 @@ Según la spec de la 2A (`plans/fase-2a-explorador/spec.md`, «Fuera de alcance�
 - Diff, historial, conflictos y propiedades como pestañas (el modelo de pestañas hoy solo tiene los tipos `folder` y `document`).
 - Marketplace: la pestaña existe deshabilitada con un aviso (Fase 3).
 
-## Fase 2B: Documentos (implementada, falta el QA Increment)
+## Fase 2B: Documentos (aceptada el 2026-10-23)
 
-Planeada en [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/spec.md) con 12 increments. Hechos hasta ahora: el Increment 1 (spikes), el 2 (aislamiento de origen cruzado, ya activo en el código), el 3 (clasificación de Office, audio, vídeo y comprimidos por contenido, y `fs_write_bytes`), el 4 (hospedaje de ZetaOffice: protocolo `zeta-assets`, visor de Office en su pestaña, frontera del WebView desde Rust), el 5 (edición y guardado de Office con conflictos, un documento vivo que sobrevive a otras pestañas y el veto de comandos; el 5.7 queda parcial: las entradas vetadas siguen dibujadas activas) el 6 (reproductor de audio y vídeo con `media-src`) el 7 (listado y extracción segura de comprimidos en Rust) el 8 (visor de comprimidos y diálogo de extracción) el 9 (instalador NSIS medido y verificado en un perfil aislado; falta la máquina limpia), el 10 (SlikSVN 1.14.5 incluido y verificado por hash, aviso de CVE-2024-45720, «Acerca de» y licencias) y el 11 (documentación y `LICENSE`). Falta el 12 (QA Increment) y la evidencia de una máquina limpia, que es acción del usuario. Los ADR 0010 a 0012 están `accepted`; el 0013 sigue `proposed` hasta tener esa evidencia.
+Planeada en [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/spec.md) con 12 increments. Hechos hasta ahora: el Increment 1 (spikes), el 2 (aislamiento de origen cruzado, ya activo en el código), el 3 (clasificación de Office, audio, vídeo y comprimidos por contenido, y `fs_write_bytes`), el 4 (hospedaje de ZetaOffice: protocolo `zeta-assets`, visor de Office en su pestaña, frontera del WebView desde Rust), el 5 (edición y guardado de Office con conflictos, un documento vivo que sobrevive a otras pestañas y el veto de comandos; el 5.7 queda parcial: las entradas vetadas siguen dibujadas activas) el 6 (reproductor de audio y vídeo con `media-src`) el 7 (listado y extracción segura de comprimidos en Rust) el 8 (visor de comprimidos y diálogo de extracción) el 9 (instalador NSIS medido y verificado en un perfil aislado; falta la máquina limpia), el 10 (SlikSVN 1.14.5 incluido y verificado por hash, aviso de CVE-2024-45720, «Acerca de» y licencias) y el 11 (documentación y `LICENSE`). El 12 (QA Increment) cerró con veredicto ACCEPTED el 2026-10-23, con salvedades en CA-1, CA-6, CA-9, CA-13 y CA-16 (ver el spec); falta la evidencia de una máquina limpia (CA-14), diferida a la distribución. Los ADR 0010 a 0012 están `accepted`; el 0013 sigue `proposed` hasta tener esa evidencia.
 
 | Increment | Contenido |
 |---|---|
@@ -89,12 +89,17 @@ Contenido tal cual lo lista `propuesta.md` §127; nada de esto está implementad
 | 5. Branching | Branch, tag, switch, merge, mergeinfo, revision graph |
 | 6. Conflictos | File conflicts, tree conflicts, property conflicts, 3-way editor, resolve |
 
+## Diferido de la 2B: distribución
+
+- **Prueba del instalador en una máquina o VM de Windows 11 limpia** (CA-14 de la 2B): arranque, abrir un fixture de cada tipo, checkout con commit y desinstalación limpia, con capturas y registro (pasos en `scripts/e2e/clean-machine-checklist.md`). Con esa evidencia se decide `webviewInstallMode` (`downloadBootstrapper` u `offlineInstaller`) y el [ADR 0013](adr/0013-instalador-nsis-por-usuario-y-runtime-estatico.md) pasa a `accepted`. Aplazado por el usuario el 2026-10-21; el instalador sí se genera, se mide (59,8 MiB) y se verificó en un perfil aislado.
+- Firma del instalador (hoy SmartScreen avisará; ver T-33).
+
 ## Fase 7: Ecosistema documental (parcial)
 
 Lista de la propuesta: Markdown, PDF, Office, imágenes, código, editores externos y arquitectura de proveedores.
 
 - **Existe desde la 2A**: Markdown, PDF, imágenes, código y el registro de proveedores (ver [editores](editors.md)).
-- **Planeado en la 2B**: Office.
+- **Existe desde la 2B**: Office (ZetaOffice), audio, vídeo y comprimidos.
 - **Sin plan ni implementación**: «External editors».
 
 ## Documentos de la propuesta (§126)

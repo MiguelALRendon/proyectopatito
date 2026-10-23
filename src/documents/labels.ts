@@ -113,3 +113,6 @@ export const ARCHIVE_ONEDRIVE_NOTICE =
   'La carpeta está dentro de OneDrive: una extracción grande puede disparar una sincronización masiva. Considera extraer fuera de OneDrive.';
 export const ARCHIVE_SKIP_NOTICE =
   'Se omitirán las entradas marcadas: enlaces, archivos especiales y nombres no seguros.';
+
+export const SAVING_NOTE =
+  ' Un guardado sigue en curso y puede no completarse.';

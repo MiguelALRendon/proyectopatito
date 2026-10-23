@@ -1,6 +1,6 @@
 import { choose } from '../composables/useChoice';
 import type { LineEnding } from '../services/filesApi';
-import { EOL_LABELS } from './labels';
+import { EOL_LABELS, SAVING_NOTE } from './labels';
 
 export type ConflictChoice = 'reload' | 'overwrite';
 export type CloseChoice = 'save' | 'discard';
@@ -61,10 +61,11 @@ export async function askLineEnding(
 
 export async function askWindowClose(
   dirtyCount: number,
+  isSaving = false,
 ): Promise<CloseChoice | null> {
   const answer = await choose<CloseChoice | typeof CANCEL>({
     title: 'Cambios sin guardar',
-    message: `${pluralTabs(dirtyCount)} cambios sin guardar. Si cierras la ventana sin guardarlos, se perderán.`,
+    message: `${pluralTabs(dirtyCount)} cambios sin guardar. Si cierras la ventana sin guardarlos, se perderán.${isSaving ? SAVING_NOTE : ''}`,
     options: [
       { value: CANCEL, label: 'Cancelar' },
       { value: 'discard', label: 'Cerrar sin guardar', tone: 'danger' },
