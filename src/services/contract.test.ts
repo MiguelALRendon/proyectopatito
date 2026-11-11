@@ -17,6 +17,17 @@ import { invoke } from '@tauri-apps/api/core';
 import * as gateway from './tauri';
 import * as archiveApi from './archiveApi';
 import * as filesApi from './filesApi';
+import * as marketplaceApi from './marketplaceApi';
+import {
+  TRUST_FAILURES,
+  type CertPrompt,
+  type MarketplaceView,
+  type RepoDraft,
+  type RepoTestArgs,
+  type RepoTestResult,
+  type TrustedCert,
+  type TrustRequest,
+} from './marketplaceApi';
 import {
   CHECKOUT_DEPTHS,
   CLOSE_REQUESTED_EVENT,
@@ -83,6 +94,18 @@ interface Contract {
     text_written: TextWritten;
   };
   status_map: WcStatusMap;
+  marketplace_view: MarketplaceView;
+  marketplace_repo_test: RepoTestResult;
+  trust_failures: string[];
+  marketplace_cert_prompt: CertPrompt;
+  marketplace_trusted: TrustedCert[];
+  marketplace_requests: {
+    save_new: RepoDraft;
+    save_edit: RepoDraft;
+    test: RepoTestArgs;
+    test_minimal: RepoTestArgs;
+    cert_trust: TrustRequest;
+  };
   item_actions: string[];
   depths: string[];
   events: Record<
@@ -107,6 +130,7 @@ const HELPERS = [
   'normalizeError',
   'runOperation',
   'pickDirectory',
+  'pickFile',
   'onCloseRequested',
   'onEvent',
   'onArchiveProgress',
@@ -264,6 +288,87 @@ describe('contract with the Rust backend', () => {
     ]);
   });
 
+  it('lists exactly the marketplace fields the backend serializes and accepts', () => {
+    const { marketplace_view: view, marketplace_requests: requests } = contract;
+    expect(Object.keys(view).sort()).toEqual(['recovered', 'repos']);
+    const repoFields = [
+      'client_cert',
+      'favorite',
+      'id',
+      'last_path',
+      'name',
+      'root',
+      'url',
+      'username',
+      'uuid',
+    ];
+    for (const repo of view.repos) {
+      expect(Object.keys(repo).sort()).toEqual(repoFields);
+    }
+    expect(Object.keys(contract.marketplace_repo_test).sort()).toEqual([
+      'revision',
+      'root',
+      'url',
+      'uuid',
+    ]);
+    for (const draft of [requests.save_new, requests.save_edit]) {
+      expect(Object.keys(draft).sort()).toEqual([
+        'client_cert',
+        'id',
+        'name',
+        'url',
+        'username',
+      ]);
+    }
+    for (const args of [requests.test, requests.test_minimal]) {
+      expect(Object.keys(args).sort()).toEqual([
+        'client_cert',
+        'client_cert_passphrase',
+        'no_auth_cache',
+        'password',
+        'repo_id',
+        'url',
+        'username',
+      ]);
+    }
+    expect(view.repos[0].client_cert).toMatch(/\.p12$/);
+    expect(requests.test.client_cert_passphrase).toBe('frase');
+  });
+
+  it('lists exactly the certificate fields the backend serializes and accepts', () => {
+    expect([...TRUST_FAILURES]).toEqual(contract.trust_failures);
+    const prompt = contract.marketplace_cert_prompt;
+    expect(Object.keys(prompt).sort()).toEqual(['info', 'reasons']);
+    expect(Object.keys(prompt.info).sort()).toEqual([
+      'host',
+      'issuer',
+      'not_after',
+      'not_before',
+      'port',
+      'sha256',
+      'subject',
+    ]);
+    for (const cert of contract.marketplace_trusted) {
+      expect(Object.keys(cert).sort()).toEqual([
+        'added_at',
+        'allowed',
+        'issuer',
+        'kind',
+        'not_after',
+        'scope',
+        'sha256',
+        'subject',
+      ]);
+    }
+    expect(contract.marketplace_trusted.map((cert) => cert.kind)).toEqual([
+      'pinned',
+      'authority',
+    ]);
+    expect(
+      Object.keys(contract.marketplace_requests.cert_trust).sort(),
+    ).toEqual(['allowed', 'sha256', 'url']);
+  });
+
   it('lists exactly the ui state enums and fields the backend uses', () => {
     expect([...VIEW_MODES]).toEqual(contract.view_modes);
     expect([...VIEW_COLUMNS]).toEqual(contract.view_columns);
@@ -360,6 +465,7 @@ describe('contract with the Rust backend', () => {
       ...gateway,
       ...filesApi,
       ...archiveApi,
+      ...marketplaceApi,
     }).filter(
       ([name, value]) => typeof value === 'function' && !HELPERS.includes(name),
     );

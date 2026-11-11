@@ -5,7 +5,6 @@ import AppShell from './AppShell.vue';
 
 const SIDEBAR_KEY = `${LAYOUT_STORAGE_PREFIX}sidebar`;
 const BOTTOM_KEY = `${LAYOUT_STORAGE_PREFIX}bottom`;
-const NOTICE = 'Disponible en una fase posterior';
 
 let wrapper: VueWrapper;
 
@@ -14,9 +13,12 @@ function mountShell(slots = {}) {
   return wrapper;
 }
 
-function marketplace() {
-  return wrapper.findAll('button').find((b) => b.text() === 'Marketplace')!;
+function sectionButton(label: string) {
+  return wrapper.findAll('button').find((b) => b.text() === label)!;
 }
+
+const files = () => sectionButton('Mis archivos');
+const marketplace = () => sectionButton('Marketplace');
 
 function separator(label: string) {
   return wrapper.get(`[role="separator"][aria-label="${label}"]`);
@@ -25,24 +27,70 @@ function separator(label: string) {
 beforeEach(() => localStorage.clear());
 afterEach(() => wrapper.unmount());
 
-describe('AppShell marketplace', () => {
-  it('does not fake functionality: aria-disabled and click does nothing', async () => {
+describe('AppShell sections', () => {
+  it('starts on Mis archivos with aria-current on that button only', () => {
+    mountShell();
+    expect(files().attributes('aria-current')).toBe('page');
+    expect(marketplace().attributes('aria-current')).toBeUndefined();
+  });
+
+  it('switches to Marketplace on click and emits update:section', async () => {
     mountShell();
     await marketplace().trigger('click');
-    expect(marketplace().attributes('aria-disabled')).toBe('true');
-    expect(wrapper.find('[aria-current="page"]').text()).toBe('Mis archivos');
+    expect(wrapper.emitted('update:section')).toEqual([['marketplace']]);
+    expect(marketplace().attributes('aria-current')).toBe('page');
+    expect(files().attributes('aria-current')).toBeUndefined();
   });
 
-  it('keeps the marketplace button focusable so its notice is announced', () => {
+  it('goes back to Mis archivos from Marketplace', async () => {
     mountShell();
-    expect(marketplace().attributes('disabled')).toBeUndefined();
-    expect(marketplace().attributes('tabindex')).toBeUndefined();
+    await marketplace().trigger('click');
+    await files().trigger('click');
+    expect(wrapper.emitted('update:section')).toEqual([
+      ['marketplace'],
+      ['files'],
+    ]);
+    expect(files().attributes('aria-current')).toBe('page');
   });
 
-  it('shows a visible notice linked by aria-describedby', () => {
+  it('follows the section given by its parent', async () => {
     mountShell();
-    const noticeId = marketplace().attributes('aria-describedby')!;
-    expect(wrapper.get(`#${noticeId}`).text()).toBe(NOTICE);
+    await wrapper.setProps({ section: 'marketplace' });
+    expect(marketplace().attributes('aria-current')).toBe('page');
+  });
+
+  it('keeps both buttons enabled and in the tab order', () => {
+    mountShell();
+    [files(), marketplace()].forEach((button) => {
+      expect(button.attributes('disabled')).toBeUndefined();
+      expect(button.attributes('aria-disabled')).toBeUndefined();
+      expect(button.attributes('tabindex')).toBeUndefined();
+    });
+  });
+
+  it('switches section by activating the focused native button', async () => {
+    mountShell();
+    const button = marketplace();
+    (button.element as HTMLButtonElement).focus();
+    expect(document.activeElement).toBe(button.element);
+    (document.activeElement as HTMLButtonElement).click();
+    await wrapper.vm.$nextTick();
+    expect(marketplace().attributes('aria-current')).toBe('page');
+  });
+
+  it('no longer shows the "later phase" notice', () => {
+    mountShell();
+    expect(wrapper.text()).not.toContain('Disponible en una fase posterior');
+  });
+
+  it('hides the tab strip but keeps it mounted on Marketplace', async () => {
+    mountShell({ tabs: '<p id="t">pestanas</p>' });
+    await marketplace().trigger('click');
+    const strip = wrapper.get('.shell__tabs');
+    expect(strip.isVisible()).toBe(false);
+    expect(strip.find('#t').exists()).toBe(true);
+    await files().trigger('click');
+    expect(wrapper.get('.shell__tabs').isVisible()).toBe(true);
   });
 });
 

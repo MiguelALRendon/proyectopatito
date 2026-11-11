@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     environmentMatchGlobs: [
+      ['src/App.test.ts', 'happy-dom'],
       ['src/views/**/*.test.ts', 'happy-dom'],
       [
         'src/composables/{useArchiveExtraction,useFocusTrap,useModalIsolation,useResizablePanel,useSelection,useWindowClose}.test.ts',

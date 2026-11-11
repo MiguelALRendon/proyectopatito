@@ -38,7 +38,9 @@ const KEYBOARD_STEP_PX = 16;
 const IPC_ORIGIN = 'http://ipc.localhost';
 const CONFIRM_COMMAND = 'app_confirm_close';
 const HOLD_COMMAND = 'app_hold_close';
-const MARKETPLACE_NOTICE = 'Disponible en una fase posterior';
+const REMOVED_NOTICE = 'Disponible en una fase posterior';
+const EMPTY_MARKETPLACE =
+  'Agrega tu primer repositorio con el botón «Agregar repositorio».';
 
 interface TauriInternals {
   invoke: (cmd: string, args?: unknown) => Promise<unknown>;
@@ -204,18 +206,28 @@ async function waitForCloseEvents(page: Page, expected: number): Promise<void> {
 }
 
 describe('shell sobre la ventana real', () => {
-  it('Marketplace aparece deshabilitado con su aviso visible', async () => {
+  it('el selector de sección cambia a Marketplace y vuelve, sin aviso ni peticiones externas', async () => {
     const app = await launchSeededApp();
-    const marketplace = app.page.getByRole('button', { name: 'Marketplace' });
+    const nav = app.page.getByRole('navigation', {
+      name: 'Secciones principales',
+    });
+    const marketplace = nav.getByRole('button', { name: 'Marketplace' });
+    const files = nav.getByRole('button', { name: 'Mis archivos' });
 
-    expect(await marketplace.getAttribute('aria-disabled')).toBe('true');
-    expect(await marketplace.getAttribute('aria-describedby')).not.toBeNull();
-    await app.page.getByText(MARKETPLACE_NOTICE).waitFor({ state: 'visible' });
-    await app.page
-      .getByRole('navigation', { name: 'Secciones principales' })
-      .getByText('Mis archivos')
-      .waitFor({ state: 'visible' });
-    await app.capture('i7-shell-completo');
+    expect(await files.getAttribute('aria-current')).toBe('page');
+    expect(await marketplace.getAttribute('aria-current')).toBeNull();
+    expect(await marketplace.getAttribute('aria-disabled')).toBeNull();
+
+    await marketplace.click();
+    await app.page.getByText(EMPTY_MARKETPLACE).waitFor({ state: 'visible' });
+    expect(await marketplace.getAttribute('aria-current')).toBe('page');
+    expect(await files.getAttribute('aria-current')).toBeNull();
+    expect(await app.page.getByText(REMOVED_NOTICE).count()).toBe(0);
+    await app.capture('fase3-shell-marketplace');
+
+    await files.click();
+    await app.page.locator(PANEL).waitFor({ state: 'visible' });
+    expect(await files.getAttribute('aria-current')).toBe('page');
     expect(app.externalRequests).toEqual([]);
     expect(await app.cspViolations()).toEqual([]);
   });

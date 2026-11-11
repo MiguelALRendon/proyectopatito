@@ -4,7 +4,7 @@ import {
   type InvokeOptions,
 } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open, type DialogFilter } from '@tauri-apps/plugin-dialog';
 
 export const PROGRESS_EVENT = 'svn://progress';
 export const DONE_EVENT = 'svn://done';
@@ -42,6 +42,12 @@ export const ERROR_KINDS = [
   'archive_unsupported',
   'unsafe_entry',
   'archive_needs_confirmation',
+  'network',
+  'not_found',
+  'permission_denied',
+  'client_certificate',
+  'svn_crashed',
+  'conflict',
 ] as const;
 
 export type ErrorKind = (typeof ERROR_KINDS)[number];
@@ -264,6 +270,16 @@ export const onCloseRequested = (handler: () => void): Promise<() => void> =>
 export async function pickDirectory(): Promise<string | null> {
   try {
     return await open({ directory: true, multiple: false });
+  } catch (raw) {
+    throw normalizeError(raw);
+  }
+}
+
+export type FileFilter = DialogFilter;
+
+export async function pickFile(filters: FileFilter[]): Promise<string | null> {
+  try {
+    return await open({ directory: false, multiple: false, filters });
   } catch (raw) {
     throw normalizeError(raw);
   }

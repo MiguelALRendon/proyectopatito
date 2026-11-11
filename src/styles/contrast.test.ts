@@ -130,6 +130,16 @@ describe.each(Object.entries(THEMES))(
       ).toBeGreaterThanOrEqual(TEXT_MINIMUM);
     });
 
+    it('keeps the error text readable on both surfaces', () => {
+      const error = color('--color-error');
+      expect(contrast(error, color('--color-bg'))).toBeGreaterThanOrEqual(
+        TEXT_MINIMUM,
+      );
+      expect(
+        contrast(error, color('--color-bg-elevated')),
+      ).toBeGreaterThanOrEqual(TEXT_MINIMUM);
+    });
+
     it('keeps the unavailable flag readable', () => {
       const background = color('--color-conflict-bg');
       expect(

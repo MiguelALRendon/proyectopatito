@@ -20,7 +20,7 @@ La aplicación es un programa de Windows autocontenido (Tauri 2 sobre WebView2):
 | Solo Rust lanza `svn.exe`; sin shell hacia el frontend ([ADR 0001](adr/0001-sin-tauri-plugin-shell.md)) | No hay `tauri-plugin-shell` en `Cargo.toml`, `Cargo.lock` ni `package-lock.json`. `src/services/boundary.test.ts` falla si cualquier archivo de `src` distinto de `src/services/tauri.ts` importa `@tauri-apps/`, `__TAURI` o llama a `invoke(` |
 | Toda ruta pasa por `Workspace::resolve` | Ver [workspace](workspace.md) |
 | Nunca se interpreta un binario como texto ni se ejecuta un archivo del usuario | `fs_probe` clasifica por contenido (`app/sniff.rs`, primeros 8 KiB); la apertura externa es de lista permitida (más abajo) |
-| No se finge funcionalidad | Marketplace aparece deshabilitado con aviso (`tests/e2e/real-app/shell.e2e.ts`); lo diferido se declara en [roadmap](roadmap.md) |
+| No se finge funcionalidad | Marketplace es un selector de sección operativo (`aria-current`, sin aviso de «fase posterior») y su contenido declara en pantalla lo que aún no existe, sin acciones falsas (`tests/e2e/real-app/shell.e2e.ts`); lo diferido se declara en [roadmap](roadmap.md) |
 | Nada bloquea la interfaz | Los `fs_*` son `async` con `spawn_blocking` (`commands/files.rs`, `blocking` en `app/state.rs`) |
 
 ## Capabilities mínimas

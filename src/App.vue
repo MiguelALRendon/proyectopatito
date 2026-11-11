@@ -4,10 +4,16 @@ import AboutDialog from './components/AboutDialog.vue';
 import ChoiceDialog from './components/ChoiceDialog.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import ExplorerSidebar from './components/explorer/ExplorerSidebar.vue';
+import MarketplaceHome from './components/marketplace/MarketplaceHome.vue';
+import RepoList from './components/marketplace/RepoList.vue';
 import AppShell from './components/shell/AppShell.vue';
 import InfoPanel from './components/shell/InfoPanel.vue';
 import TabBar from './components/shell/TabBar.vue';
 import TabContent from './components/shell/TabContent.vue';
+import {
+  DEFAULT_SECTION,
+  type ShellSection,
+} from './components/shell/shellSections';
 import { useTheme } from './composables/useTheme';
 import { useTabsSession } from './composables/useTabsSession';
 import { useWindowClose } from './composables/useWindowClose';
@@ -16,6 +22,8 @@ import OnboardingView from './views/OnboardingView.vue';
 
 const workspace = useWorkspaceStore();
 const isAboutOpen = ref(false);
+const section = ref<ShellSection>(DEFAULT_SECTION);
+const isFilesSection = computed(() => section.value === 'files');
 const { resolvedTheme, toggleTheme } = useTheme();
 useWindowClose();
 const isShellVisible = computed(
@@ -39,11 +47,28 @@ onMounted(() => workspace.load());
         </button>
       </div>
     </header>
-    <AppShell v-if="isShellVisible">
-      <template #sidebar><ExplorerSidebar /></template>
+    <AppShell v-if="isShellVisible" v-model:section="section">
+      <template #sidebar>
+        <div v-show="isFilesSection" class="shell__section">
+          <ExplorerSidebar />
+        </div>
+        <RepoList v-if="!isFilesSection" />
+      </template>
       <template #tabs><TabBar /></template>
-      <template #content><TabContent /></template>
-      <template #bottom><InfoPanel /></template>
+      <template #content>
+        <div v-show="isFilesSection" class="shell__section">
+          <TabContent />
+        </div>
+        <MarketplaceHome v-if="!isFilesSection" />
+      </template>
+      <template #bottom>
+        <div v-show="isFilesSection" class="shell__section">
+          <InfoPanel />
+        </div>
+        <p v-if="!isFilesSection" class="shell__placeholder" role="status">
+          Sin descargas.
+        </p>
+      </template>
     </AppShell>
     <main v-else class="app__main" tabindex="-1">
       <p v-if="!workspace.isLoaded" role="status">Cargando…</p>

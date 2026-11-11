@@ -152,7 +152,9 @@ describe('entryStates', () => {
 
 describe('errorGuidance', () => {
   it('guides the kinds that need a user decision', () => {
-    expect(errorGuidance('untrusted_certificate')).toContain('otro cliente');
+    const untrusted = errorGuidance('untrusted_certificate');
+    expect(untrusted).toContain('confía en él, o importa la autoridad');
+    expect(untrusted).not.toContain('otro cliente');
     expect(errorGuidance('working_copy_too_old')).toContain('svn upgrade');
     expect(errorGuidance('working_copy_locked')).toContain('Cleanup');
   });

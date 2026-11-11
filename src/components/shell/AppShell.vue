@@ -4,6 +4,11 @@ import {
   type ResizablePanelConfig,
 } from '../../composables/useResizablePanel';
 import ResizeHandle from './ResizeHandle.vue';
+import {
+  DEFAULT_SECTION,
+  SHELL_SECTIONS,
+  type ShellSection,
+} from './shellSections';
 
 const SIDEBAR_PANEL: ResizablePanelConfig = {
   min: 160,
@@ -17,8 +22,10 @@ const BOTTOM_PANEL: ResizablePanelConfig = {
   axis: 'y',
   direction: -1,
 };
-const MARKETPLACE_NOTICE_ID = 'shell-marketplace-notice';
 
+const section = defineModel<ShellSection>('section', {
+  default: DEFAULT_SECTION,
+});
 const sidebar = useResizablePanel('sidebar', SIDEBAR_PANEL);
 const bottom = useResizablePanel('bottom', BOTTOM_PANEL);
 const { size: sidebarSize, startDrag: dragSidebar } = sidebar;
@@ -29,21 +36,15 @@ const { size: bottomSize, startDrag: dragBottom } = bottom;
   <div class="shell">
     <nav class="shell__topbar" aria-label="Secciones principales">
       <ul class="shell__nav-list">
-        <li>
-          <span class="shell__nav-item" aria-current="page">Mis archivos</span>
-        </li>
-        <li class="shell__nav-entry">
+        <li v-for="item in SHELL_SECTIONS" :key="item.id">
           <button
             type="button"
             class="shell__nav-item"
-            aria-disabled="true"
-            :aria-describedby="MARKETPLACE_NOTICE_ID"
+            :aria-current="section === item.id ? 'page' : undefined"
+            @click="section = item.id"
           >
-            Marketplace
+            {{ item.label }}
           </button>
-          <span :id="MARKETPLACE_NOTICE_ID" class="shell__notice">
-            Disponible en una fase posterior
-          </span>
         </li>
       </ul>
     </nav>
@@ -68,7 +69,11 @@ const { size: bottomSize, startDrag: dragBottom } = bottom;
         @jump="sidebar.jumpTo"
       />
       <div class="shell__center">
-        <div v-if="$slots.tabs" class="shell__tabs">
+        <div
+          v-if="$slots.tabs"
+          v-show="section === 'files'"
+          class="shell__tabs"
+        >
           <slot name="tabs" />
         </div>
         <main class="shell__content" tabindex="-1">

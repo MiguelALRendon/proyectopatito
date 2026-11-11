@@ -18,11 +18,11 @@ Las fases salen de `propuesta.md` §127. La Fase 2 se dividió en dos planes (2A
 | 1. Fundación | Tauri, Rust, frontend, workspace, filesystem, detección de `svn`, `info`, `status`, `checkout`, `update`, `commit` | **Hecha** (QA aceptado el 2026-10-14) | `plans/fase-1-fundacion` |
 | 2A. Explorador | Explorador, favoritos, pestañas, vistas, apertura de documentos, editores | **Hecha** (QA aceptado el 2026-10-17) | `plans/fase-2a-explorador` |
 | 2B. Documentos | Office, audio, vídeo, comprimidos, `svn.exe` empaquetado, instalador y máquina limpia | **Aceptada** (QA Increment ACCEPTED el 2026-10-23); queda diferida la prueba en máquina limpia (CA-14), por decisión del usuario | [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/plan.md) |
-| 3. Marketplace | Repositorios, navegador de repositorio, metadatos remotos, descarga, checkout, export, detección de estado local | **Diferida**, sin plan | n/a |
-| 4. SVN avanzado | Log, diff, blame, revert, cleanup, propiedades, locks | **Diferida**, sin plan (cleanup ya existe desde la Fase 1) | n/a |
-| 5. Branching | Branch, tag, switch, merge, mergeinfo, gráfico de revisiones | **Diferida**, sin plan | n/a |
-| 6. Conflictos | Conflictos de archivo, de árbol y de propiedades, editor de 3 vías, resolve | **Diferida**, sin plan | n/a |
-| 7. Ecosistema documental | Markdown, PDF, Office, imágenes, código, editores externos, arquitectura de proveedores | **Parcial**: ver más abajo | n/a |
+| 3. Marketplace | Repositorios, navegador de repositorio, metadatos remotos, descarga, checkout, export, detección de estado local, certificados SSL | **Planeada** (plan escrito el 2026-10-23, sin implementar) | [`plans/fase-3-marketplace`](../plans/fase-3-marketplace/plan.md) |
+| 4. SVN avanzado | Log, diff, blame, revert, cleanup, propiedades, locks, operaciones de archivo SVN y commit selectivo (cleanup básico ya existe desde la Fase 1) | **Planeada** (borrador del 2026-10-23, sin implementar; depende de la 3) | [`plans/fase-4-svn-avanzado`](../plans/fase-4-svn-avanzado/plan.md) |
+| 5. Branching | Branch, tag, switch, merge, mergeinfo, gráfico de revisiones interactivo | **Planeada** (borrador del 2026-10-23, sin implementar; depende de la 3 y la 4) | [`plans/fase-5-branching`](../plans/fase-5-branching/plan.md) |
+| 6. Conflictos | Conflictos de archivo, de árbol y de propiedades, editor de 3 vías, resolve | **Planeada** (borrador del 2026-10-23, sin implementar; depende de la 4 y la 5) | [`plans/fase-6-conflictos`](../plans/fase-6-conflictos/plan.md) |
+| 7. Ecosistema documental | Markdown, PDF, Office, imágenes, código, arquitectura de proveedores | **Hecha** (2A y 2B); «editores externos» **descartado** por el usuario el 2026-10-23 | n/a |
 
 ## Fase 1: Fundación (hecha)
 
@@ -59,7 +59,7 @@ Según la spec de la 2A (`plans/fase-2a-explorador/spec.md`, «Fuera de alcance�
 - Abrir en nueva ventana y menú contextual del explorador (solo existe el de las pestañas).
 - Enlaces relativos entre Markdown, ir a un desplazamiento en el visor hexadecimal y codificaciones distintas de UTF-8 y UTF-16 (se ven como binario).
 - Diff, historial, conflictos y propiedades como pestañas (el modelo de pestañas hoy solo tiene los tipos `folder` y `document`).
-- Marketplace: la pestaña existe deshabilitada con un aviso (Fase 3).
+- Marketplace: la sección existe con la gestión de repositorios; el navegador remoto, el detalle y las descargas llegan en los siguientes increments de la Fase 3.
 
 ## Fase 2B: Documentos (aceptada el 2026-10-23)
 
@@ -78,9 +78,9 @@ Planeada en [`plans/fase-2b-documentos`](../plans/fase-2b-documentos/spec.md) co
 | 11 | Documentación |
 | 12 | QA Increment |
 
-## Fases 3 a 6 (diferidas, sin plan)
+## Fases 3 a 6 (planeadas, sin implementar)
 
-Contenido tal cual lo lista `propuesta.md` §127; nada de esto está implementado salvo lo indicado.
+Contenido tal cual lo lista `propuesta.md` §127; nada de esto está implementado salvo lo indicado. Cada fase tiene `design.md`, `spec.md` y `plan.md` en su carpeta de `plans/` (escritos el 2026-10-23). Orden de implementación: 3 → 4 → 5 → 6, porque cada una depende de la anterior. La 3 pasó por las revisiones de planeación; las 4 a 6 son borradores hasta cerrar sus revisiones y que el usuario lea sus diseños.
 
 | Fase | Lista de la propuesta |
 |---|---|
@@ -100,7 +100,7 @@ Lista de la propuesta: Markdown, PDF, Office, imágenes, código, editores exter
 
 - **Existe desde la 2A**: Markdown, PDF, imágenes, código y el registro de proveedores (ver [editores](editors.md)).
 - **Existe desde la 2B**: Office (ZetaOffice), audio, vídeo y comprimidos.
-- **Sin plan ni implementación**: «External editors».
+- **Descartado**: «External editors» (herramientas de diff o merge externas y apertura con otras aplicaciones). Decisión del usuario del 2026-10-23: tras incorporar ZetaOffice ya no significa nada para el producto. La apertura externa controlada de la 2A se mantiene como último recurso.
 
 ## Documentos de la propuesta (§126)
 

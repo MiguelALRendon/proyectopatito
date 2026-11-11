@@ -26,6 +26,7 @@ import {
   PROGRESS_EVENT,
   normalizeError,
   pickDirectory,
+  pickFile,
   runOperation,
   wcNeedsCleanup,
   wcStatus,
@@ -161,6 +162,27 @@ describe('command wrappers', () => {
     expect(openMock).toHaveBeenCalledWith({
       directory: true,
       multiple: false,
+    });
+  });
+
+  it('opens a single-file picker with the given filters', async () => {
+    const filters = [{ name: 'Certificados', extensions: ['pem'] }];
+    openMock.mockResolvedValueOnce('C:\\ca.pem');
+    await expect(pickFile(filters)).resolves.toBe('C:\\ca.pem');
+    expect(openMock).toHaveBeenCalledWith({
+      directory: false,
+      multiple: false,
+      filters,
+    });
+  });
+
+  it('returns null when the file picker is dismissed and normalizes failures', async () => {
+    openMock.mockResolvedValueOnce(null);
+    await expect(pickFile([])).resolves.toBeNull();
+    openMock.mockRejectedValueOnce('sin permiso');
+    await expect(pickFile([])).rejects.toMatchObject({
+      kind: 'io',
+      message: 'sin permiso',
     });
   });
 });

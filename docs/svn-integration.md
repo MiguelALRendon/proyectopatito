@@ -66,7 +66,8 @@ Pruebas: `tests/svn_layer.rs` (plazo, cancelación, contraseña por stdin y no p
 | `CleanupRequest` | `cleanup <ruta>@` |
 
 - `peg_safe` agrega `@` a cada ruta para que un `@` dentro del nombre no se lea como revisión pegada.
-- `is_safe_checkout_url` solo admite los esquemas `http`, `https`, `svn`, `svn+ssh` y `file`, y rechaza contraseñas incrustadas (`usuario:clave@`).
+- `is_safe_checkout_url` solo admite los esquemas `http`, `https`, `svn`, `svn+ssh` y `file`, y rechaza contraseñas incrustadas (`usuario:clave@`), un host que empiece por `-`, `file://` con un servidor distinto de vacío o `localhost` (UNC), espacios, caracteres de control, `\`, `?`, `#` y una revisión pegada final (`@12`, `@HEAD`). `is_marketplace_url` agrega la exclusión de `svn+ssh` (Fase 3).
+- `RemoteInfoRequest` (`info --xml [--username u] <url>@`) consulta una URL sin copia de trabajo; `RunOptions.no_auth_cache` agrega `--no-auth-cache` justo antes de `--non-interactive`, que sigue siendo el último argumento.
 - El mensaje de commit va en un archivo temporal `dakedaduck-commit-<pid>-<n>.txt` en el directorio temporal, con finales de línea normalizados a LF (svn rechaza finales mezclados, E135000), y se borra al soltar `MessageFile`. Si la aplicación muere a mitad de un commit el archivo queda (**T-6**).
 - Los nombres de subcomando y las banderas son constantes (`INFO_SUBCOMMAND`, `XML_FLAG`, ...); no se concatena texto del usuario a un argumento.
 
@@ -85,8 +86,13 @@ Pruebas: `tests/svn_layer.rs` (plazo, cancelación, contraseña por stdin y no p
 
 | Código | `SvnErrorKind` |
 |---|---|
-| `E170001`, `E215004`, `E215001` | `AuthRequired` |
+| `E170001` con «Authorization failed» | `PermissionDenied` (no pide credenciales) |
+| `E170001` (otro mensaje), `E215004`, `E215001` | `AuthRequired` |
 | `E230001` | `UntrustedCertificate` |
+| `E730061`, `E731001`, `E175012` | `Network` |
+| `W160013`, `E200009`, `E160013`, `E210005`, `E180001`, `E160006` | `NotFound` |
+| `E120171` | `ClientCertificate` |
+| código de salida NTSTATUS de error (`0xC0000000`+) | `Crashed` (tiene prioridad; `svn list` se cae con nombres que contienen `:`) |
 | `E155036` | `WorkingCopyTooOld` |
 | `E155004` | `WorkingCopyLocked` |
 | (sin código) | `Cancelled`, `TimedOut`; cualquier otro, `Other` |
@@ -123,6 +129,16 @@ Pruebas: `tests/svn_operations.rs` contra un repositorio real.
 ## Credenciales
 
 Decisión del usuario ([ADR 0003](adr/0003-credenciales-por-ui-y-stdin.md)): como todo corre con `--non-interactive`, cuando falta autenticación la interfaz pide usuario y contraseña (`CredentialsModal`) y reintenta. La aplicación no guarda la contraseña ni la pasa en argumentos; no usa `--no-auth-cache`, así que la credencial puede quedar en el auth cache de Subversion según su configuración. Detalle de seguridad en [seguridad](security.md).
+
+## Certificados y opciones de red (Fase 3, Increment 4)
+
+`RunOptions.network` (`svn/network.rs`, reexportado por `runner.rs`) agrega, **antes** de `--password-from-stdin`, `--no-auth-cache` y `--non-interactive` (que sigue siendo lo último): `--config-dir <dir>` (ruta de Windows; con rutas POSIX svn la ignora), un `--config-option archivo:sección:clave=valor` por opción (el valor se parte solo en el primer `=`) y `--trust-server-cert-failures=a,b` con los motivos ordenados y sin repetir (`unknown-ca`, `cn-mismatch`, `expired`, `not-yet-valid`, `other`), que exige `--non-interactive`. Ninguna lleva secretos. `svn::error::untrusted_reasons(stderr)` lee los motivos de `E230001`.
+
+Almacén propio (`app/marketplace/certs.rs`): `<carpeta de config>/certs/<sha256>.pem` más `MarketplaceConfig.trusted` en `config.json`. `CertService::network_for(url)` (solo `https`; bloqueante, se invoca en `spawn_blocking`) une como `servers:global:ssl-authority-files` todas las autoridades importadas y los certificados autofirmados anclados a ese `host:puerto`. Un anclado cuyo emisor difiere del sujeto no sirve de ancla en OpenSSL: se guarda con `unknown-ca` entre sus motivos y, antes de cada operación, `network_for` sondea el servidor y solo si la huella presentada es la guardada agrega `--trust-server-cert-failures` con sus motivos (si cambió o la sonda falla no concede nada). Los motivos de los anclados autofirmados también se agregan como `--trust-server-cert-failures`. «Probar conexión» lo aplica; la interfaz llama a `marketplace_cert_inspect` (sonda Schannel más un `svn info` sin confianza adicional para leer los motivos), `marketplace_cert_trust`, `marketplace_cert_import`, `marketplace_cert_list` y `marketplace_cert_revoke`. Detalle y límites en el [ADR 0014](adr/0014-marketplace-sobre-svn-list-info-export-e-indice-de-copias.md). Pruebas: `tests/marketplace_certs.rs` (servidores `openssl s_server` reales) y `tests/marketplace_trust_rules.rs`.
+
+### Certificado de cliente (PKCS#12)
+
+`RepoEntry.client_cert` guarda solo la ruta absoluta del `.p12`/`.pfx`; la frase llega por operación (`RepoTestArgs.client_cert_passphrase`) y no se guarda en ningún estado. Con un `https` y un certificado de cliente, `app/marketplace/client_cert.rs` crea un `TempConfig` (`svn/temp_config.rs`): `%TEMP%\dakedaduck-svnconf-<pid>-<n>` con copia del `config` del usuario, su `servers` más una sección `[global]` con `ssl-client-cert-file`, `ssl-client-cert-password` y `ssl-authority-files`, y una unión de directorio `auth` hacia `%APPDATA%\Subversion\auth` (creada con `cmd.exe /C mklink /J`). `NetworkOptions.config_dir` apunta a ese directorio; la frase nunca va en `argv`. `Drop` quita la unión sin seguirla, sobrescribe `servers` con ceros y borra el directorio; al arrancar un hilo purga los restos de más de 2 h sin seguir uniones. Pruebas: `tests/marketplace_client_cert.rs`.
 
 ## `svn.exe` empaquetado y CVE-2024-45720 (Increment 10)
 

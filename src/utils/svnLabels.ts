@@ -58,7 +58,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 const ERROR_GUIDANCE: Partial<Record<ErrorKind, string>> = {
   untrusted_certificate:
-    'El certificado del servidor no es de confianza. Acéptalo con otro cliente de Subversion y vuelve a intentarlo; esta aplicación nunca confía en certificados por su cuenta.',
+    'El certificado del servidor no es confiable. Revisa su huella y confía en él, o importa la autoridad certificadora de tu empresa.',
   working_copy_too_old:
     'La copia de trabajo usa un formato antiguo. Ejecuta svn upgrade con otro cliente de Subversion; esta aplicación no lo hace por ti.',
   working_copy_locked:
